@@ -1,17 +1,17 @@
 ## Alerts ##
-### Download Alerts to CSV ###
+### Download Alerts to CSV
 ```get_alerts_csv.py``` https://gist.github.com/danquixote/5ba09f3fcacd284c111f
 
 A sample script to programatically access the PD alerts csv-page behind the login, via a single-session.
 
-### Alert Volume/Pain for On-Call Users ### 
+### Alert Volume/Pain for On-Call Users
 ```alert_volume.py``` https://github.com/owenkim/pagerduty-alert-volume
 
 A quick command-line to get the incident volume assigned to an escalation policy broken down by week.
 
 ## Incidents ##
 
-### Get Incident Details ###
+### Get Incident Details
 
 ```get_incident_details_csv.py``` https://gist.github.com/danquixote/187fb09f64de3d294eda
 
