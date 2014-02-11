@@ -56,7 +56,7 @@ This gets log entries in the appropriate time zone.
 
 ```pd-get-schedule.rb``` https://gist.github.com/julianeon/7915335
 
-Ruby script to get all schedules.
+Ruby script to get an individual schedule.
 
 ## Users ##
 
