@@ -4,6 +4,11 @@
 
 A sample script to programatically access the PD alerts csv-page behind the login, via a single-session.
 
+### Alert Volume/Pain for On-Call Users ### 
+```alert_volume.py``` https://github.com/owenkim/pagerduty-alert-volume
+
+A quick command-line to get the incident volume assigned to an escalation policy broken down by week.
+
 ## Incidents ##
 
 ### Get Incident Details ###
@@ -58,6 +63,12 @@ This gets log entries in the appropriate time zone.
 
 Ruby script to get an individual schedule.
 
+### Create Vacation Overrides ###
+
+```create_vacation_overrides.py``` https://gist.github.com/danquixote/4ca69fafac89bdb24080
+
+Given a user going on vacation, create overrides for another user, only using the times the vacationing user is on-call.
+
 ## Users ##
 
 ### Get User Activity ###
@@ -79,13 +90,4 @@ Bob Dobbs,bd@example.com,admin,15555555554,sms
 ```
 
 Create each user, a default contact-method/immediate email notification-rule, as well as an additional immediate notification-rule.
-
-## Schedules ##
-
-### Create Vacation Overrides ###
-
-```create_vacation_overrides.py``` https://gist.github.com/danquixote/4ca69fafac89bdb24080
-
-Given a user going on vacation, create overrides for another user, only using the times the vacationing user is on-call.
-
 
