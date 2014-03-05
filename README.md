@@ -29,11 +29,15 @@ A Ruby script to pull all the incidents from a service within a given time range
 
 Get incidents from PagerDuty that have been queued up for several days.
 
-### Trigger Incidents ###
+### Incidents Functions ###
 
 ```pd-trigger-in-multiple-services.py``` https://gist.github.com/julianeon/7830174
 
 Trigger incidents in multiple PagerDuty services.
+
+```incidents.py``` https://github.com/ryanhoskin/pagerduty_incident_functions
+
+Trigger/acknowledge/resolve PagerDuty incidents.
 
 ## Incident Log Entries ##
 
