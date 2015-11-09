@@ -39,6 +39,10 @@ Trigger incidents in multiple PagerDuty services.
 
 Trigger/acknowledge/resolve PagerDuty incidents.
 
+### Snooze a PagerDuty incident ###
+
+http://jsfiddle.net/jorts/dckwt4nu/
+
 ## Incident Log Entries ##
 
 ```get_incident_log_entries.py``` https://gist.github.com/danquixote/8fa9a7f5d9d3b30be431
@@ -67,6 +71,19 @@ This gets log entries in the appropriate time zone.
 
 Ruby script to get an individual schedule.
 
+### List All PagerDuty Schedules by Name ###
+
+http://jsfiddle.net/jorts/yrm1qbg4/
+
+### List On-Call Shifts for a PagerDuty Schedule ###
+http://jsfiddle.net/jorts/wmnfkg0L/
+
+## Services ##
+
+### Update Settings on All PagerDuty Services ###
+Update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
+http://jsfiddle.net/jorts/e6y93y6r/
+
 ### Create Vacation Overrides ###
 
 ```create_vacation_overrides.py``` https://gist.github.com/danquixote/4ca69fafac89bdb24080
@@ -80,6 +97,13 @@ Given a user going on vacation, create overrides for another user, only using th
 ```get_user_activity.py``` https://gist.github.com/ryanhoskin/8048001
 
 Get the latest activity for all users within a PagerDuty account.
+
+### List PagerDuty Users who Don't Have a Minute 0 Phone Notification ###
+
+http://jsfiddle.net/jorts/vLhdL7ew/
+
+### List On-Call Users ###
+http://jsfiddle.net/jorts/uvgv57kw/
 
 ### Import Users from CSV ###
 
@@ -106,7 +130,11 @@ http://jsfiddle.net/jorts/ve1sbyfw/
 
 ## Webhooks ##
 
-###Replace Webhook URL on All PagerDuty Services ### 
+### Add webhooks to every PagerDuty service ###
+
+http://jsfiddle.net/jorts/2n6a0rvv/
+
+### Replace Webhook URL on All PagerDuty Services ### 
 
 http://jsfiddle.net/jorts/yssbpupm/
 
