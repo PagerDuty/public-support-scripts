@@ -101,6 +101,15 @@ If you are looking for an integration with ADFS, use this guide:  https://www.pa
 
 If you would like a one-time import of users via AD, you can use this:  https://gist.github.com/ryanhoskin/4544017
 
+### List PagerDuty Users with Contact Information ###
+http://jsfiddle.net/jorts/ve1sbyfw/
+
+## Webhooks ##
+
+###Replace Webhook URL on All PagerDuty Services ### 
+
+http://jsfiddle.net/jorts/yssbpupm/
+
 ##License and Copyright
 Copyright (c) 2014, PagerDuty
 All rights reserved.
