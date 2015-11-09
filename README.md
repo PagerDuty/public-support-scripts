@@ -95,6 +95,12 @@ Bob Dobbs,bd@example.com,admin,15555555554,sms
 
 Create each user, a default contact-method/immediate email notification-rule, as well as an additional immediate notification-rule.
 
+### Import Users from Active Directory ###
+
+If you are looking for an integration with ADFS, use this guide:  https://www.pagerduty.com/docs/guides/setup-adfs-sso-pagerduty/
+
+If you would like a one-time import of users via AD, you can use this:  https://gist.github.com/ryanhoskin/4544017
+
 ##License and Copyright
 Copyright (c) 2014, PagerDuty
 All rights reserved.
