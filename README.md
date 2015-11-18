@@ -102,6 +102,10 @@ Get the latest activity for all users within a PagerDuty account.
 
 http://jsfiddle.net/jorts/vLhdL7ew/
 
+### List users who have a small # of Notification Rules ###
+
+http://jsfiddle.net/jorts/5uw7bdkw/
+
 ### List On-Call Users ###
 http://jsfiddle.net/jorts/uvgv57kw/
 
