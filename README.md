@@ -90,6 +90,18 @@ http://jsfiddle.net/jorts/e6y93y6r/
 
 Given a user going on vacation, create overrides for another user, only using the times the vacationing user is on-call.
 
+### Schedule Recurring Maintenance Windows ###
+
+```recurring_maint_windows.py``` https://gist.github.com/mdcollins05/d9213561a058f92cbd0542c18248799d#file-recurring_maint_windows-py
+
+Schedule a recurring regular maintenance window for a service or services.
+
+### Remove All Future Maintenance Windows ###
+
+```remove_all_future_maint_windows.py``` https://gist.github.com/mdcollins05/d9213561a058f92cbd0542c18248799d#file-remove_all_future_maint_windows-py
+
+Removes all future maintenance windows for a service.
+
 ## Users ##
 
 ### Get User Activity ###
