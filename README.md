@@ -1,8 +1,10 @@
 ## Alerts ##
-### Download Alerts to CSV
-```get_alerts_csv.py``` https://gist.github.com/danquixote/5ba09f3fcacd284c111f
 
-A sample script to programatically access the PD alerts csv-page behind the login, via a single-session.
+### Download Alerts to CSV
+
+```get_alerts_csv.py``` https://gist.github.com/lfepp/69a2288d898248800752d38e593323c1
+
+A sample script to programatically acess and download the alerts for an incident as a CSV file.
 
 ### Alert Volume/Pain for On-Call Users
 ```alert_volume.py``` https://github.com/owenkim/pagerduty-alert-volume
