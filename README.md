@@ -150,12 +150,12 @@ http://jsfiddle.net/jorts/ve1sbyfw/
 
 http://jsfiddle.net/jorts/2n6a0rvv/
 
-### Replace Webhook URL on All PagerDuty Services ### 
+### Replace Webhook URL on All PagerDuty Services ###
 
 http://jsfiddle.net/jorts/yssbpupm/
 
 ##License and Copyright
-Copyright (c) 2014, PagerDuty
+Copyright (c) 2016, PagerDuty
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
