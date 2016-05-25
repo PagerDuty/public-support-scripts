@@ -12,15 +12,16 @@ A sample script to programatically acess and download the alerts for an incident
 
 A quick command-line to get the incident volume assigned to an escalation policy broken down by week.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ## Incidents ##
 
 ### Get Incident Details
 
-```get_incident_details_csv.py``` https://gist.github.com/danquixote/187fb09f64de3d294eda
+```get_incident_details_csv.py``` https://gist.github.com/lfepp/3678c96548a2bbc7707b5a781f17fdb0
 
-Given a valid date-range, output incident-details to CSV in the format:  IncidentID,Created-At,Type,Agent/User,NotificationType,ChannelType,Summary
+Sample script to output incident details to a CSV in the format:
+incident_id,created_at,type,user_or_agent_id,user_or_agent_summary,notification_type,channel_type,summary
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ```pd-daily-incidents.py``` https://gist.github.com/julianeon/8327716
 
