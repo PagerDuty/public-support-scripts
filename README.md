@@ -21,11 +21,11 @@ A quick command-line to get the incident volume assigned to an escalation policy
 Sample script to output incident details to a CSV in the format:
 incident_id,created_at,type,user_or_agent_id,user_or_agent_summary,notification_type,channel_type,summary
 
+```get_incidents_csv.py``` https://gist.github.com/lfepp/89c960ca0f3dc1ab8e5569de9882fa90
+
+Sample script to output all PagerDuty incidents for a given time period to a CSV file (defaults to previous 24 hours)
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-```pd-daily-incidents.py``` https://gist.github.com/julianeon/8327716
-
-All the incidents in the given time range; here, one day.
 
 ```pd-service-incidents-print-file.rb``` https://gist.github.com/julianeon/7922342
 
