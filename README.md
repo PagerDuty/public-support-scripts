@@ -4,7 +4,7 @@
 
 ```get_alerts_csv.py``` https://gist.github.com/lfepp/69a2288d898248800752d38e593323c1
 
-A sample script to programatically acess and download the alerts for an incident as a CSV file.
+A sample script to programatically access and download the alerts for an incident as a CSV file.
 
 ### Alert Volume/Pain for On-Call Users
 
@@ -29,11 +29,11 @@ Sample script to output all PagerDuty incidents for a given time period to a CSV
 
 Sample script to pull all the incidents from a service within a given time range and print the output to the file incidents_in_service.txt
 
+```get_recent_incidents.sh``` https://gist.github.com/lfepp/19cdc3ca469b4d353308c84a32853fe4
+
+Pull incidents that were triggerd within the given time period and are in currently queue
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-```Get Recent Incidents``` https://gist.github.com/ryanhoskin/7777921
-
-Get incidents from PagerDuty that have been queued up for several days.
 
 ### Incidents Functions ###
 
