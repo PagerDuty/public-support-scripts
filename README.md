@@ -25,11 +25,11 @@ incident_id,created_at,type,user_or_agent_id,user_or_agent_summary,notification_
 
 Sample script to output all PagerDuty incidents for a given time period to a CSV file (defaults to previous 24 hours)
 
+```incidents_in_service.rb``` https://gist.github.com/lfepp/8cb74ae2a779b1088b5a69127d4f6e61
+
+Sample script to pull all the incidents from a service within a given time range and print the output to the file incidents_in_service.txt
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-```pd-service-incidents-print-file.rb``` https://gist.github.com/julianeon/7922342
-
-A Ruby script to pull all the incidents from a service within a given time range and print the output to the file IncidentsInService.txt.
 
 ```Get Recent Incidents``` https://gist.github.com/ryanhoskin/7777921
 
