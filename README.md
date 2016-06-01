@@ -23,23 +23,23 @@ incident_id,created_at,type,user_or_agent_id,user_or_agent_summary,notification_
 
 ```get_incidents_csv.py``` https://gist.github.com/lfepp/89c960ca0f3dc1ab8e5569de9882fa90
 
-Sample script to output all PagerDuty incidents for a given time period to a CSV file (defaults to previous 24 hours)
+Output all PagerDuty incidents for a given time period to a CSV file (defaults to previous 24 hours)
 
 ```incidents_in_service.rb``` https://gist.github.com/lfepp/8cb74ae2a779b1088b5a69127d4f6e61
 
-Sample script to pull all the incidents from a service within a given time range and print the output to the file incidents_in_service.txt
+Pull all the incidents from a service within a given time range and print the output to the file incidents_in_service.txt
 
 ```get_recent_incidents.sh``` https://gist.github.com/lfepp/19cdc3ca469b4d353308c84a32853fe4
 
 Pull incidents that were triggerd within the given time period and are in currently queue
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ### Incidents Functions ###
 
-```pd-trigger-in-multiple-services.py``` https://gist.github.com/julianeon/7830174
+``` trigger_incident_multiple_services.py``` https://gist.github.com/lfepp/a6441d1c5be7f30257a0cf0206c924c6
 
-Trigger incidents in multiple PagerDuty services.
+Trigger an incident within multiple PagerDuty services.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ```incidents.py``` https://github.com/ryanhoskin/pagerduty_incident_functions
 
