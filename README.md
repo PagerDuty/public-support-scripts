@@ -39,8 +39,6 @@ Pull incidents that were triggerd within the given time period and are in curren
 
 Trigger an incident within multiple PagerDuty services.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ```incidents.py``` https://github.com/ryanhoskin/pagerduty_incident_functions
 
 Trigger/acknowledge/resolve PagerDuty incidents.
@@ -49,11 +47,9 @@ Trigger/acknowledge/resolve PagerDuty incidents.
 
 http://jsfiddle.net/jorts/dckwt4nu/
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Incident Log Entries ##
-
-```get_incident_log_entries.py``` https://gist.github.com/danquixote/8fa9a7f5d9d3b30be431
-
-Given a valid date-range, get the ILE 'lifecycle' for the following log-entry types: Trigger, Assign, Escalate, Notify, Repeat\_Escalation\_Path, Acknowledge, Unacknowledge, Resolve, Annotate. Output will be in CSV in the format:  IncidentID,Created-At,Type,Agent/User,NotificationType,ChannelType,Notes
 
 ```pd-log-entry-detail.rb``` https://gist.github.com/julianeon/8564187
 
