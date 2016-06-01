@@ -37,23 +37,25 @@ Pull incidents that were triggerd within the given time period and are in curren
 
 ``` trigger_incident_multiple_services.py``` https://gist.github.com/lfepp/a6441d1c5be7f30257a0cf0206c924c6
 
-Trigger an incident within multiple PagerDuty services.
+Trigger an incident within multiple PagerDuty services
 
 ```incidents.py``` https://github.com/ryanhoskin/pagerduty_incident_functions
 
-Trigger/acknowledge/resolve PagerDuty incidents.
+Trigger/acknowledge/resolve PagerDuty incidents
 
 ### Snooze a PagerDuty incident ###
 
 http://jsfiddle.net/jorts/dckwt4nu/
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+JSFiddle to snooze an incident within your account
 
 ## Incident Log Entries ##
 
-```pd-log-entry-detail.rb``` https://gist.github.com/julianeon/8564187
+```get_log_entry_details.rb``` https://gist.github.com/lfepp/76efb994c8460e5940f1ef8d26a36964
 
-This retrieves the in-depth information about a specific log entry (for example, the body of an email).
+Script to retrieve detailed information about a specific log entry
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ```pd-log-entries.rb``` https://gist.github.com/julianeon/8563939
 
