@@ -63,13 +63,13 @@ Get a summary of all log entries for an incident
 
 Script to retrieve detailed information about a specific PagerDuty log entry in a plain text file
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ## Schedules ##
 
-```pd-get-schedule.rb``` https://gist.github.com/julianeon/7915335
+```get_schedule.rb``` https://gist.github.com/lfepp/280893d1a1007f871022a0c6a5f77dc1
 
-Ruby script to get an individual schedule.
+Retrieve information about a specific schedule
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### List All PagerDuty Schedules by Name ###
 
