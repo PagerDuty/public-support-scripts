@@ -69,20 +69,27 @@ Script to retrieve detailed information about a specific PagerDuty log entry in 
 
 Retrieve information about a specific schedule
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ### List All PagerDuty Schedules by Name ###
 
 http://jsfiddle.net/jorts/yrm1qbg4/
 
+JSFiddle to list all PagerDuty schedules by name
+
 ### List On-Call Shifts for a PagerDuty Schedule ###
+
 http://jsfiddle.net/jorts/wmnfkg0L/
+
+JSFiddle to list on-call shifts for a particular schedule
 
 ## Services ##
 
 ### Update Settings on All PagerDuty Services ###
-Update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
+
 http://jsfiddle.net/jorts/e6y93y6r/
+
+JSFiddle to update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Create Vacation Overrides ###
 
