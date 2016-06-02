@@ -55,11 +55,11 @@ JSFiddle to snooze an incident within your account
 
 Script to retrieve detailed information about a specific log entry
 
+```get_incident_log_entries.rb``` https://gist.github.com/lfepp/698f87fbb7dec5872276be058e05804a
+
+Get a summary of all log entries for an incident
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-```pd-log-entries.rb``` https://gist.github.com/julianeon/8563939
-
-Get a summary of all log entries for an incident.
 
 ```pd-log-entry-print-file.rb``` https://gist.github.com/julianeon/8365468
 
