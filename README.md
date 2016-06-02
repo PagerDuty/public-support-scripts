@@ -65,10 +65,6 @@ Script to retrieve detailed information about a specific PagerDuty log entry in 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-```pd-log-entries-with-timezone.rb``` https://gist.github.com/julianeon/7951622
-
-This gets log entries in the appropriate time zone.
-
 ## Schedules ##
 
 ```pd-get-schedule.rb``` https://gist.github.com/julianeon/7915335
