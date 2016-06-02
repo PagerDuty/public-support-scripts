@@ -59,11 +59,11 @@ Script to retrieve detailed information about a specific log entry
 
 Get a summary of all log entries for an incident
 
+```get_log_entry_details_file.rb``` https://gist.github.com/lfepp/6ccf3369e34bf5bc50a63578c103b807
+
+Script to retrieve detailed information about a specific PagerDuty log entry in a plain text file
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-```pd-log-entry-print-file.rb``` https://gist.github.com/julianeon/8365468
-
-Get the information about a specified log entry.
 
 ```pd-log-entries-with-timezone.rb``` https://gist.github.com/julianeon/7951622
 
