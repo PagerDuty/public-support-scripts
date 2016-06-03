@@ -89,7 +89,7 @@ http://jsfiddle.net/jorts/e6y93y6r/
 
 JSFiddle to update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TODO: Fix this script, they removed /schedules/_id/entries and I'm not sure of the best way to determine time frames for each time the vacationing user is on-call. Perhaps /oncalls could be helpful but I believe that endpoint is only the people currently on-call.
 
 ### Create Vacation Overrides ###
 
@@ -99,9 +99,11 @@ Given a user going on vacation, create overrides for another user, only using th
 
 ### Schedule Recurring Maintenance Windows ###
 
-```recurring_maint_windows.py``` https://gist.github.com/mdcollins05/d9213561a058f92cbd0542c18248799d#file-recurring_maint_windows-py
+```recurring_maintenance_windows.py``` https://gist.github.com/lfepp/32afebc59aa4b88a733bcc1b4f7236f9
 
 Schedule a recurring regular maintenance window for a service or services.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Remove All Future Maintenance Windows ###
 
