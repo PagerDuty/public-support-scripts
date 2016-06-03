@@ -103,13 +103,13 @@ Given a user going on vacation, create overrides for another user, only using th
 
 Schedule a recurring regular maintenance window for a service or services.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ### Remove All Future Maintenance Windows ###
 
-```remove_all_future_maint_windows.py``` https://gist.github.com/mdcollins05/d9213561a058f92cbd0542c18248799d#file-remove_all_future_maint_windows-py
+```remove_future_maintenance_windows.py``` https://gist.github.com/lfepp/047a363d504d6aa3945f42a4b6d08886
 
-Removes all future maintenance windows for a service.
+Removes all future maintenance windows for a service or from your entire account.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Users ##
 
