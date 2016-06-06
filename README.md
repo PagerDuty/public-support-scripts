@@ -128,21 +128,24 @@ http://jsfiddle.net/jorts/5uw7bdkw/
 ### List On-Call Users ###
 http://jsfiddle.net/jorts/uvgv57kw/
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ### Import Users from CSV ###
 
-```process_users.py``` https://gist.github.com/danquixote/1de25bfd12ec27fa36ac
+```create_users.py``` https://gist.github.com/lfepp/7180035950984ed5937ceec6f2566c92
 
-Given a CSV-file called 'users.csv', in the format:
+Given a CSV named "users.csv" in the format:
 
 ```
 name,email,role,address,type
-Joe User,ju@example.com,user,15555555555,phone
-Bob Dobbs,bd@example.com,admin,15555555554,sms
+John Doe,john.doe@example.com,admin,5555555555,phone
+Jane Doe,jane.doe@example.com,user,5555555554,sms
 ```
 
-Create each user, a default contact-method/immediate email notification-rule, as well as an additional immediate notification-rule.
+Creates each user, creates a default contact method and immediate notification rule for email, and creates a contact method and immediate notification rule for SMS or phone.
+
+**Note:** Phone address must be a valide 10-digit phone number
+**Note:** Address type must be one of `sms` or `phone`
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Import Users from Active Directory ###
 
