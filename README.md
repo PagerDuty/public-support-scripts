@@ -109,13 +109,11 @@ Schedule a recurring regular maintenance window for a service or services.
 
 Removes all future maintenance windows for a service or from your entire account.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ## Users ##
 
 ### Get User Activity ###
 
-```get_user_activity.py``` https://gist.github.com/ryanhoskin/8048001
+```get_user_activity.py``` https://gist.github.com/lfepp/c77421fb909f2a03114585cd19d35ad8
 
 Get the latest activity for all users within a PagerDuty account.
 
@@ -129,6 +127,8 @@ http://jsfiddle.net/jorts/5uw7bdkw/
 
 ### List On-Call Users ###
 http://jsfiddle.net/jorts/uvgv57kw/
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Import Users from CSV ###
 
