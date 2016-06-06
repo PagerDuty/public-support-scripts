@@ -143,15 +143,19 @@ Jane Doe,jane.doe@example.com,user,5555555554,sms
 Creates each user, creates a default contact method and immediate notification rule for email, and creates a contact method and immediate notification rule for SMS or phone.
 
 **Note:** Phone address must be a valide 10-digit phone number
-**Note:** Address type must be one of `sms` or `phone`
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Note:** Address type must be one of ```sms``` or ```phone```
 
 ### Import Users from Active Directory ###
 
-If you are looking for an integration with ADFS, use this guide:  https://www.pagerduty.com/docs/guides/setup-adfs-sso-pagerduty/
+If you are looking for an integration with ADFS, use this guide:
 
-If you would like a one-time import of users via AD, you can use this:  https://gist.github.com/ryanhoskin/4544017
+https://www.pagerduty.com/docs/guides/setup-adfs-sso-pagerduty/
+
+If you would like a one-time import of users via AD, you can use this:
+
+```import_users_from_ad.ps1``` https://gist.github.com/lfepp/ec388dbeb2c2ad301313143f44844fa5
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### List PagerDuty Users with Contact Information ###
 http://jsfiddle.net/jorts/ve1sbyfw/
