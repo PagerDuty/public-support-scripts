@@ -89,11 +89,9 @@ http://jsfiddle.net/jorts/e6y93y6r/
 
 JSFiddle to update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
 
-TODO: Fix this script, they removed /schedules/_id/entries and I'm not sure of the best way to determine time frames for each time the vacationing user is on-call. Perhaps /oncalls could be helpful but I believe that endpoint is only the people currently on-call.
-
 ### Create Vacation Overrides ###
 
-```create_vacation_overrides.py``` https://gist.github.com/danquixote/4ca69fafac89bdb24080
+```create_vacation_overrides.py``` https://gist.github.com/lfepp/35a2ce76114e7e6e3d7dece79eb7c635
 
 Given a user going on vacation, create overrides for another user, only using the times the vacationing user is on-call.
 
@@ -126,6 +124,7 @@ http://jsfiddle.net/jorts/vLhdL7ew/
 http://jsfiddle.net/jorts/5uw7bdkw/
 
 ### List On-Call Users ###
+
 http://jsfiddle.net/jorts/uvgv57kw/
 
 ### Import Users from CSV ###
@@ -155,9 +154,8 @@ If you would like a one-time import of users via AD, you can use this:
 
 ```import_users_from_ad.ps1``` https://gist.github.com/lfepp/ec388dbeb2c2ad301313143f44844fa5
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I AM HERE IN UPDATES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 ### List PagerDuty Users with Contact Information ###
+
 http://jsfiddle.net/jorts/ve1sbyfw/
 
 ## Webhooks ##
