@@ -8,7 +8,7 @@ A sample script to programatically access and download the alerts for an inciden
 
 ### Alert Volume/Pain for On-Call Users
 
-```alert_volume.py``` https://github.com/owenkim/pagerduty-alert-volume
+```alert_volume.py``` https://github.com/lfepp/pagerduty-alert-volume-v2
 
 A quick command-line to get the incident volume assigned to an escalation policy broken down by week.
 
