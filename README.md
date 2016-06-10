@@ -1,11 +1,27 @@
-## Alerts ##
-### Download Alerts to CSV
-```get_alerts_csv.py``` https://gist.github.com/danquixote/5ba09f3fcacd284c111f
+# PagerDuty Public Support Scripts #
 
-A sample script to programatically access the PD alerts csv-page behind the login, via a single-session.
+These scripts are helpful tools the PagerDuty Support Team has collected. These scripts can be used to perform a variety of useful tasks, including:
+
+- Importing users from CSV
+- Downloading alerts to a CSV
+- Creating vacation overrides
+- Getting recent user activity
+
+These scripts have been migrated to the PagerDuty REST API v2. Documentation on this version of the API is available [here](https://v2.developer.pagerduty.com/docs). The versions of these scripts that utilize v1 of the REST API are available [here](https://gist.github.com/lfepp/120a020e057f959a0032e5b719593cdb).
+
+Most scripts have been updated to accept command-line arguments as opposed to hard-coded values. Executing these scripts without any arguments will print the usage information.
+
+## Alerts ##
+
+### Download Alerts to CSV
+
+```get_alerts_csv.py``` https://gist.github.com/lfepp/69a2288d898248800752d38e593323c1
+
+A sample script to programatically access and download the alerts for an incident as a CSV file.
 
 ### Alert Volume/Pain for On-Call Users
-```alert_volume.py``` https://github.com/owenkim/pagerduty-alert-volume
+
+```alert_volume.py``` https://github.com/lfepp/pagerduty-alert-volume-v2
 
 A quick command-line to get the incident volume assigned to an escalation policy broken down by week.
 
@@ -13,100 +29,102 @@ A quick command-line to get the incident volume assigned to an escalation policy
 
 ### Get Incident Details
 
-```get_incident_details_csv.py``` https://gist.github.com/danquixote/187fb09f64de3d294eda
+```get_incident_details_csv.py``` https://gist.github.com/lfepp/3678c96548a2bbc7707b5a781f17fdb0
 
-Given a valid date-range, output incident-details to CSV in the format:  IncidentID,Created-At,Type,Agent/User,NotificationType,ChannelType,Summary
+Sample script to output incident details to a CSV in the format:
+incident_id,created_at,type,user_or_agent_id,user_or_agent_summary,notification_type,channel_type,summary
 
-```pd-daily-incidents.py``` https://gist.github.com/julianeon/8327716
+```get_incidents_csv.py``` https://gist.github.com/lfepp/89c960ca0f3dc1ab8e5569de9882fa90
 
-All the incidents in the given time range; here, one day.
+Output all PagerDuty incidents for a given time period to a CSV file (defaults to previous 24 hours)
 
-```pd-service-incidents-print-file.rb``` https://gist.github.com/julianeon/7922342
+```incidents_in_service.rb``` https://gist.github.com/lfepp/8cb74ae2a779b1088b5a69127d4f6e61
 
-A Ruby script to pull all the incidents from a service within a given time range and print the output to the file IncidentsInService.txt.
+Pull all the incidents from a service within a given time range and print the output to the file incidents_in_service.txt
 
-```Get Recent Incidents``` https://gist.github.com/ryanhoskin/7777921
+```get_recent_incidents.sh``` https://gist.github.com/lfepp/19cdc3ca469b4d353308c84a32853fe4
 
-Get incidents from PagerDuty that have been queued up for several days.
+Pull incidents that were triggerd within the given time period and are in currently queue
 
 ### Incidents Functions ###
 
-```pd-trigger-in-multiple-services.py``` https://gist.github.com/julianeon/7830174
+``` trigger_incident_multiple_services.py``` https://gist.github.com/lfepp/a6441d1c5be7f30257a0cf0206c924c6
 
-Trigger incidents in multiple PagerDuty services.
+Trigger an incident within multiple PagerDuty services
 
 ```incidents.py``` https://github.com/ryanhoskin/pagerduty_incident_functions
 
-Trigger/acknowledge/resolve PagerDuty incidents.
+Trigger/acknowledge/resolve PagerDuty incidents
 
 ### Snooze a PagerDuty incident ###
 
 http://jsfiddle.net/jorts/dckwt4nu/
 
+JSFiddle to snooze an incident within your account
+
 ## Incident Log Entries ##
 
-```get_incident_log_entries.py``` https://gist.github.com/danquixote/8fa9a7f5d9d3b30be431
+```get_log_entry_details.rb``` https://gist.github.com/lfepp/76efb994c8460e5940f1ef8d26a36964
 
-Given a valid date-range, get the ILE 'lifecycle' for the following log-entry types: Trigger, Assign, Escalate, Notify, Repeat\_Escalation\_Path, Acknowledge, Unacknowledge, Resolve, Annotate. Output will be in CSV in the format:  IncidentID,Created-At,Type,Agent/User,NotificationType,ChannelType,Notes
+Script to retrieve detailed information about a specific log entry
 
-```pd-log-entry-detail.rb``` https://gist.github.com/julianeon/8564187
+```get_incident_log_entries.rb``` https://gist.github.com/lfepp/698f87fbb7dec5872276be058e05804a
 
-This retrieves the in-depth information about a specific log entry (for example, the body of an email).
+Get a summary of all log entries for an incident
 
-```pd-log-entries.rb``` https://gist.github.com/julianeon/8563939
+```get_log_entry_details_file.rb``` https://gist.github.com/lfepp/6ccf3369e34bf5bc50a63578c103b807
 
-Get a summary of all log entries for an incident.
-
-```pd-log-entry-print-file.rb``` https://gist.github.com/julianeon/8365468
-
-Get the information about a specified log entry.
-
-```pd-log-entries-with-timezone.rb``` https://gist.github.com/julianeon/7951622
-
-This gets log entries in the appropriate time zone.
+Script to retrieve detailed information about a specific PagerDuty log entry in a plain text file
 
 ## Schedules ##
 
-```pd-get-schedule.rb``` https://gist.github.com/julianeon/7915335
+```get_schedule.rb``` https://gist.github.com/lfepp/280893d1a1007f871022a0c6a5f77dc1
 
-Ruby script to get an individual schedule.
+Retrieve information about a specific schedule
 
 ### List All PagerDuty Schedules by Name ###
 
 http://jsfiddle.net/jorts/yrm1qbg4/
 
+JSFiddle to list all PagerDuty schedules by name
+
 ### List On-Call Shifts for a PagerDuty Schedule ###
+
 http://jsfiddle.net/jorts/wmnfkg0L/
+
+JSFiddle to list on-call shifts for a particular schedule
 
 ## Services ##
 
 ### Update Settings on All PagerDuty Services ###
-Update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
+
 http://jsfiddle.net/jorts/e6y93y6r/
+
+JSFiddle to update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
 
 ### Create Vacation Overrides ###
 
-```create_vacation_overrides.py``` https://gist.github.com/danquixote/4ca69fafac89bdb24080
+```create_vacation_overrides.py``` https://gist.github.com/lfepp/35a2ce76114e7e6e3d7dece79eb7c635
 
 Given a user going on vacation, create overrides for another user, only using the times the vacationing user is on-call.
 
 ### Schedule Recurring Maintenance Windows ###
 
-```recurring_maint_windows.py``` https://gist.github.com/mdcollins05/d9213561a058f92cbd0542c18248799d#file-recurring_maint_windows-py
+```recurring_maintenance_windows.py``` https://gist.github.com/lfepp/32afebc59aa4b88a733bcc1b4f7236f9
 
 Schedule a recurring regular maintenance window for a service or services.
 
 ### Remove All Future Maintenance Windows ###
 
-```remove_all_future_maint_windows.py``` https://gist.github.com/mdcollins05/d9213561a058f92cbd0542c18248799d#file-remove_all_future_maint_windows-py
+```remove_future_maintenance_windows.py``` https://gist.github.com/lfepp/047a363d504d6aa3945f42a4b6d08886
 
-Removes all future maintenance windows for a service.
+Removes all future maintenance windows for a service or from your entire account.
 
 ## Users ##
 
 ### Get User Activity ###
 
-```get_user_activity.py``` https://gist.github.com/ryanhoskin/8048001
+```get_user_activity.py``` https://gist.github.com/lfepp/c77421fb909f2a03114585cd19d35ad8
 
 Get the latest activity for all users within a PagerDuty account.
 
@@ -119,29 +137,38 @@ http://jsfiddle.net/jorts/vLhdL7ew/
 http://jsfiddle.net/jorts/5uw7bdkw/
 
 ### List On-Call Users ###
+
 http://jsfiddle.net/jorts/uvgv57kw/
 
 ### Import Users from CSV ###
 
-```process_users.py``` https://gist.github.com/danquixote/1de25bfd12ec27fa36ac
+```create_users.py``` https://gist.github.com/lfepp/7180035950984ed5937ceec6f2566c92
 
-Given a CSV-file called 'users.csv', in the format:
+Given a CSV named "users.csv" in the format:
 
 ```
 name,email,role,address,type
-Joe User,ju@example.com,user,15555555555,phone
-Bob Dobbs,bd@example.com,admin,15555555554,sms
+John Doe,john.doe@example.com,admin,5555555555,phone
+Jane Doe,jane.doe@example.com,user,5555555554,sms
 ```
 
-Create each user, a default contact-method/immediate email notification-rule, as well as an additional immediate notification-rule.
+Creates each user, creates a default contact method and immediate notification rule for email, and creates a contact method and immediate notification rule for SMS or phone.
+
+**Note:** Phone address must be a valide 10-digit phone number
+**Note:** Address type must be one of ```sms``` or ```phone```
 
 ### Import Users from Active Directory ###
 
-If you are looking for an integration with ADFS, use this guide:  https://www.pagerduty.com/docs/guides/setup-adfs-sso-pagerduty/
+If you are looking for an integration with ADFS, use this guide:
 
-If you would like a one-time import of users via AD, you can use this:  https://gist.github.com/ryanhoskin/4544017
+https://www.pagerduty.com/docs/guides/setup-adfs-sso-pagerduty/
+
+If you would like a one-time import of users via AD, you can use this:
+
+```import_users_from_ad.ps1``` https://gist.github.com/lfepp/ec388dbeb2c2ad301313143f44844fa5
 
 ### List PagerDuty Users with Contact Information ###
+
 http://jsfiddle.net/jorts/ve1sbyfw/
 
 ## Webhooks ##
@@ -150,12 +177,12 @@ http://jsfiddle.net/jorts/ve1sbyfw/
 
 http://jsfiddle.net/jorts/2n6a0rvv/
 
-### Replace Webhook URL on All PagerDuty Services ### 
+### Replace Webhook URL on All PagerDuty Services ###
 
 http://jsfiddle.net/jorts/yssbpupm/
 
 ##License and Copyright
-Copyright (c) 2014, PagerDuty
+Copyright (c) 2016, PagerDuty
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
