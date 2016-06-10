@@ -1,3 +1,16 @@
+# PagerDuty Public Support Scripts #
+
+These scripts are helpful tools the PagerDuty Support Team has collected. These scripts can be used to perform a variety of useful tasks, including:
+
+- Importing users from CSV
+- Downloading alerts to a CSV
+- Creating vacation overrides
+- Getting recent user activity
+
+These scripts have been migrated to the PagerDuty REST API v2. Documentation on this version of the API is available [here](https://v2.developer.pagerduty.com/docs). The versions of these scripts that utilize v1 of the REST API are available [here](https://gist.github.com/lfepp/120a020e057f959a0032e5b719593cdb).
+
+Most scripts have been updated to accept command-line arguments as opposed to hard-coded values. Executing these scripts without any arguments will print the usage information.
+
 ## Alerts ##
 
 ### Download Alerts to CSV
