@@ -140,6 +140,10 @@ http://jsfiddle.net/jorts/5uw7bdkw/
 
 http://jsfiddle.net/jorts/uvgv57kw/
 
+### Dashboard to display who is on-call along with associated contact methods ###
+
+https://github.com/ryanhoskin/pagerduty_oncall_dashboard
+
 ### Import Users from CSV ###
 
 ```create_users.py``` https://gist.github.com/lfepp/7180035950984ed5937ceec6f2566c92
