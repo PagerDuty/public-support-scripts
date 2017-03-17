@@ -168,7 +168,11 @@ class CSVImporter
 
     # Add user and email notification rule
     ["SMS", "phone"].each do |type|
-      add_contact_method(type, user_id, record)
+      if (!record.phone_number || !record.country_code)
+        puts "Phone number or country code blank; skipping creation of #{type} contact method and notification rules."
+      else
+        add_contact_method(type, user_id, record)
+      end
     end
 
     # Add user to teams
