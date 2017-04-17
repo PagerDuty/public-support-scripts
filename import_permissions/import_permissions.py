@@ -17,8 +17,8 @@ from pdreq import APIConnection
 API = None
 
 valid_roles = {
-    # Team context
-    'flexible': ["manager", "responder", "observer"], 
+    # Team context. "User" included in this list for back-compat
+    'flexible': ["user", "manager", "responder", "observer"],
     # Global context
     'fixed': ["admin", "account_owner", "read_only_user"]
 }
@@ -68,23 +68,37 @@ def parse_args():
     parser.add_argument('-l', '--log-file', dest='logfile', required=False,
         default=None, type=argparse.FileType('w'), help="""Optional log file to 
         save output messages.""")
+    parser.add_argument('-t', '--teams', dest='auto_add_teammates', 
+        action='store_true', default=False, help="""Automatically add users to
+        teams if they are granted a role on a given team and not already a
+        member.""")
     parser.add_argument('-v', '--verbose', dest='verbosity', action='count',
         default=0, help="""Logging verbosity level; maximum level 3 (-vvv).""")
+
     return parser.parse_args()
 
-def parse_permissions(csviter):
+def parse_permissions(csviter, auto_add_teammates=False):
     """Parses permissions out of a CSV file.
 
     The returned object is a dictionary mapping user IDs to the roles object.
+
+    :csviter: an iterable object containing the rows of the CSV file. Each item
+        should be an ordered list with four items: email, role, object type, and
+        object name.
+    :auto_add_teammates: If true, the script will automatically add users to
+        teams if they are to be granted a team role and aren't already members
+        of the team.
     """
     global API
     users = {} # email : user
     roles = {} # email : role : objects
     objects = {} # type-name : object
+    team_users = {}
     permissions = {} # email : role : objects
     skip = 0
     importing = 0
     for row in csviter:
+        # THE REQUIRED CSV FORMAT IS DEFINED RIGHT HERE
         email, role, object_type, object_name = row
         if role not in valid_roles['flexible']:
             logrow("Skipping row because of invalid role: \"%s\"", row, role)
@@ -123,7 +137,7 @@ def parse_permissions(csviter):
         elif user['role'] not in valid_roles['flexible']:
             logrow("User for email %s has invald role \"%s\"", row, email,
                 user['role'])
-            user[email] = False
+            users[email] = False
             skip += 1
             continue
 
@@ -154,6 +168,42 @@ def parse_permissions(csviter):
                 "error; skipping."), row, object_type, object_name)
             skip += 1
             continue
+
+        # Check team membership 
+        if object_type == 'team':
+            team_id = obj['id']
+            user_id = user['id']
+            if obj['id'] not in team_users:
+                resp = API.get(
+                    '/users',
+                    params={'team_ids[]':[team_id]}
+                )
+                if resp.status_code != 200:
+                    logrow("API error (%d) getting users in team %s; skipping.",
+                        row, resp.status_code, object_name)
+                    skip += 1
+                    continue
+                team_users[team_id] = set(map(
+                    lambda u:u['id'],
+                    resp.json()['users']
+                ))
+            if user_id not in team_users[team_id]:
+                if not auto_add_teammates:
+                    logrow(("User %s not on team %s, and -t/--teams "+
+                        "option not enabled; skipping team role."), row,
+                        user['email'], obj['name'])
+                    skip += 1
+                    continue
+                resp = API.put('/teams/%s/users/%s'%(team_id,user_id))
+                if resp.status_code != 204:
+                    logrow(("API error (%d) adding user %s (%s) to team %s; "+
+                        "skipping."), row, resp.status_code, user['email'],
+                        user['id'], object_name)
+                    skip += 1
+                    continue
+                logging.info("Added user %s (%s) to team %s.", user['email'],
+                    user_id, object_name)
+
 
         # Populate the list of permissions:
         if email not in permissions:
@@ -189,8 +239,9 @@ def set_permissions(user_id, roles):
         '/users/%s/roles'%user_id,
         payload=roles
     )
+    logging.debug("JSON = %s",json.dumps(roles, sort_keys=True, indent=4))
     if resp.status_code // 100 == 2:
-        logging.debug("Successfully set permissions for user_id=%s")
+        logging.info("Successfully set permissions for user_id=%s",user_id)
     else:
         logging.error(("Could not set permissions for user_id=%s; API "+
             "responded with status code %d"), user_id, resp.status_code)
@@ -204,7 +255,10 @@ def main():
 
     logging_init(args.verbosity, args.logfile)
 
-    permissions = parse_permissions(csv.reader(args.csv_file))
+    permissions = parse_permissions(
+        csv.reader(args.csv_file),
+        auto_add_teammates=args.auto_add_teammates
+    )
 
     n_users = len(permissions)
     for (i,(user_id,roles)) in enumerate(permissions.items()):
