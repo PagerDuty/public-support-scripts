@@ -71,7 +71,8 @@ def parse_args():
     parser.add_argument('-t', '--teams', dest='auto_add_teammates', 
         action='store_true', default=False, help="""Automatically add users to
         teams if they are granted a role on a given team and not already a
-        member.""")
+        member. Also, create teams cited in the input CSV if they don't already
+        exist.""")
     parser.add_argument('-v', '--verbose', dest='verbosity', action='count',
         default=0, help="""Logging verbosity level; maximum level 3 (-vvv).""")
 
@@ -153,14 +154,32 @@ def parse_permissions(csviter, auto_add_teammates=False):
         if not obj_ind in objects:
             try:
                 obj = API.get_object(plural_type, object_name)
-                objects[obj_ind] = obj
                 if obj:
                     logging.debug("Found object, type=%s matching name=%s: %s", 
                         object_type, object_name, obj['id'])
+                elif object_type=='team' and auto_add_teammates:
+                    # Create the team
+                    resp = API.post(
+                        '/teams',
+                        payload={'team': {
+                            'type': 'team',
+                            'name': object_name
+                        }}
+                    )
+                    if resp.status_code // 100 == 2:
+                        logging.info("No team with name %s found; created one.",
+                            object_name)
+                        obj = resp.json()['team']
+                    else:
+                        logging.warn(("API error (status %d); could not "+
+                            "create team with name %s."),resp.status_code,
+                            object_name)
+                        obj = False
             except Exception as e:
                 obj = False
                 objects[obj_ind] = False
                 logging.error(e)
+            objects[obj_ind] = obj
         else:
             obj = objects[obj_ind]
         if not obj:
@@ -241,7 +260,7 @@ def set_permissions(user_id, roles):
     )
     logging.debug("JSON = %s",json.dumps(roles, sort_keys=True, indent=4))
     if resp.status_code // 100 == 2:
-        logging.info("Successfully set permissions for user_id=%s",user_id)
+        logging.debug("Successfully set permissions for user_id=%s",user_id)
     else:
         logging.error(("Could not set permissions for user_id=%s; API "+
             "responded with status code %d"), user_id, resp.status_code)
@@ -262,7 +281,8 @@ def main():
 
     n_users = len(permissions)
     for (i,(user_id,roles)) in enumerate(permissions.items()):
-        logging.info("Setting permissions for user %d/%d", i+1, n_users)
+        logging.info("Setting permissions for user %d/%d: %s", i+1, n_users,
+            user_id)
         set_permissions(user_id, roles)
     logging.info("Import complete; total API calls: %d", len(API._requests))
 
