@@ -17,13 +17,11 @@ class AdHocMock(object):
     backport for Python 2.x has been deprecated by the PyPI maintainers and Mac
     OS X still does not come preinstalled with Python 3 but only has 2.7 
     """
-    _calls = []
-    _name = None
-    _return_value = None
 
     def __init__(self, return_value=None, name="functional mock"):
         self._name = name
         self._return_value = return_value
+        self._calls = []
 
     def __call__(self,*args,**kwargs):
         self._calls.append([args,kwargs.items()])

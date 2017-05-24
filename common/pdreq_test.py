@@ -62,7 +62,8 @@ class APIConnection_test(pdtest.TestCase):
 
     def test_get_object(self):
         class response(object): status_code=200; json=lambda x: {
-                    'objects_of_type': [{'attr1':'val1'}]
+                    'objects_of_type': [{'attr1':'val1'}],
+                    'more': False,
                 }
         self.mock(
             requests, 
@@ -81,10 +82,8 @@ class APIConnection_test(pdtest.TestCase):
         self.assertEquals(obj,{'attr1':'val1'})
         requests.get.assert_called_with(
             'https://api.pagerduty.com/objects_of_type',
-            params={'query': 'val1'},
+            params={'query': 'val1', 'limit': 100, 'offset': 0},
             headers=self.essential_headers
         )
-
-
 
 pdtest.unittest.main()
