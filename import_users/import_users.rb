@@ -61,6 +61,7 @@ class PagerDutyAgent
       :user => {
         :name => name,
         :email => email,
+        # .downcase and strip to handle inconsistencies in the .csv
         :role => role.downcase.strip,
         :job_title => title
       }
