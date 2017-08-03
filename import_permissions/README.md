@@ -18,8 +18,12 @@ The following assumptions are made:
   - `responder`: read-only access to most objects; and can acknowledge/resolve incidents.
   - `observer`: can only view objects and recevie notifications; a stakeholder.
 
+## Usage
+
+To view help info text on how to run the script and available options, run it with the `-h` flag:
+
 ```
-email
+./import_permissions.py -h
 ```
 
 ## A note on API calls 
