@@ -68,6 +68,10 @@ class PDRESTAPIError(Exception):
         self.message = message.format(**fmtvars)
         self.response = response
 
+    def __str__(self):
+        return self.message
+
+
 
 class APIConnection(object):
 
@@ -84,8 +88,9 @@ class APIConnection(object):
         else:
             raise AttributeError("APIConnection object has no attribute: "+attr)
 
-    def __init__(self, token):
+    def __init__(self, token, from_email=None):
         self._token = token
+        self._from_email = from_email
         self._requests = []
 
     def _api_request(self, method):
@@ -115,6 +120,8 @@ class APIConnection(object):
             }
             if _method in ('put','post'):
                 kw['headers']['Content-Type'] = 'application/json;charset=utf8'
+            if self._from_email:
+                kw['headers']['From'] = self._from_email
             if payload is not None:
                 kw['json'] = payload
             _api._requests.append((_method,endpoint))
