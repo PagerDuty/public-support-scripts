@@ -18,7 +18,7 @@ API = None
 
 valid_roles = {
     # Team context. "User" included in this list for back-compat
-    'flexible': ["user", "manager", "responder", "observer"],
+    'flexible': ["manager", "responder", "observer", "restricted_access"],
     # Global context
     'fixed': ["admin", "account_owner", "read_only_user"]
 }
@@ -91,6 +91,7 @@ def parse_permissions(csviter, auto_add_teammates=False):
         of the team.
     """
     global API
+
     users = {} # email : user
     roles = {} # email : role : objects
     objects = {} # type-name : object
@@ -135,12 +136,6 @@ def parse_permissions(csviter, auto_add_teammates=False):
             users[email] = False
             skip += 1
             continue
-        elif user['role'] not in valid_roles['flexible']:
-            logrow("User for email %s has invald role \"%s\"", row, email,
-                user['role'])
-            users[email] = False
-            skip += 1
-            continue
 
         # Validate object type
         if object_type not in valid_object_types:
@@ -149,7 +144,7 @@ def parse_permissions(csviter, auto_add_teammates=False):
             continue
 
         # Get object
-        obj_ind = (object_type,object_name)
+        obj_ind = (object_type, object_name)
         plural_type = valid_object_types[object_type]
         if not obj_ind in objects:
             try:
@@ -193,10 +188,7 @@ def parse_permissions(csviter, auto_add_teammates=False):
             team_id = obj['id']
             user_id = user['id']
             if obj['id'] not in team_users:
-                resp = API.get(
-                    '/users',
-                    params={'team_ids[]':[team_id]}
-                )
+                resp = API.get('/users', params={'team_ids[]':[team_id]})
                 if resp.status_code != 200:
                     logrow("API error (%d) getting users in team %s; skipping.",
                         row, resp.status_code, object_name)

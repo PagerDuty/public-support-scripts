@@ -13,10 +13,7 @@ The following assumptions are made:
 1. The email address uniquely identifies a user.
 1. The object type must be one of: `escalation_policy`, `schedule`, `service`, `team`
 1. Objects of a given type, i.e. escalation policies or services, each have names that are unique to that type.
-1. The permission level must be one of several valid types: 
-  - `manager`: full standard user access to objects, i.e. modification of settings and creation of new objects.
-  - `responder`: read-only access to most objects; and can acknowledge/resolve incidents.
-  - `observer`: can only view objects and recevie notifications; a stakeholder.
+1. The permission level must be one of several [valid types](https://support.pagerduty.com/v1/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)
 
 ## Usage
 

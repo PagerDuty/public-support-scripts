@@ -128,7 +128,8 @@ class APIConnection(object):
             return getattr(requests,_method)(url, **kw)
         return req
 
-    def get_object(self, plural_type, query, matchattr='name'):
+    def get_object(self, plural_type, query, matchattr='name', match_case=False,
+        match_space=False):
         """Obtains an object of a given type by querying it
      
         Raises an exception if the API responds w/error status. Returns False if
@@ -137,14 +138,35 @@ class APIConnection(object):
 
         :plural_type: The name of the endpoint, and plural of the object type.
         :query: The query parameter to use
-        :matchattr: Match this attribute of results exactly against the query input
+        :matchattr: Match this attribute of results against the query input
+        :match_case: Perform case-sensitive match. By default, equivalence (when
+            determining uniqueness of names) is case-insensitive, so the default
+            is False.
+        :match_space: Count trailing and leading whitespace. This should be
+            left as False unless you really need it for some reason. The API
+            (as of this writing) ignores spaces when it performs the uniqueness
+            check to avoid name collisions, so we should assume anything with
+            leading or trailing whitespace counts as equivalent.
         """
         results = self.get_all(plural_type, params={'query':query})
+        preproc = []
+        if not match_case:
+            preproc.append('lower')
+        if not match_space:
+            preproc.append('strip')
+        # Our equivalence function for comparison:
+        equiv = lambda x, pp, i: (
+            equiv(getattr(x, pp[i])(), pp, i+1) if i<len(pp) else x
+        )
+        # Our "match function" which should return true if the result value is
+        # equivalent to  our query input per the rules defined in the options
+        matchfn = lambda x: (
+            equiv(x[matchattr], preproc, 0) == equiv(query, preproc, 0)
+        )
         try:
-            return iter(filter(lambda o: o[matchattr] == query, results)).next()
+            return iter(filter(matchfn, results)).next()
         except StopIteration:
             return False
-            
 
     def get_all(self, plural_type, params={}, total=None):
         """Obtain all object records of a given type.

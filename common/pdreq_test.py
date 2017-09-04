@@ -61,8 +61,14 @@ class APIConnection_test(pdtest.TestCase):
         ) 
 
     def test_get_object(self):
+        """Tests object-lookup-by-name"""
         class response(object): status_code=200; json=lambda x: {
-                    'objects_of_type': [{'attr1':'val1'}],
+                    'objects_of_type': [
+                        {'attr1': 'val1'},
+                        {'attr1': 'val2 '}, # Test whitespace equivalence
+                        {'attr1': 'VAL3'}, # Test case insensitive equivalence
+                        {'attr1': 'VAL4 '} # Test both
+                    ],
                     'more': False,
                 }
         self.mock(
@@ -74,16 +80,48 @@ class APIConnection_test(pdtest.TestCase):
             )
         )
         api = pdreq.APIConnection(self.api_key)
+        # Strict equivalence
         obj = api.get_object(
             'objects_of_type', 
             'val1', 
-            matchattr='attr1'
+            matchattr='attr1',
+            match_case=True,
+            match_space=True
         )
-        self.assertEquals(obj,{'attr1':'val1'})
+        self.assertEquals(obj,{'attr1': 'val1'})
+        # Whitespace equivalence 
+        obj = api.get_object(
+            'objects_of_type',
+            'val2',
+            matchattr='attr1',
+            match_case=True,
+            match_space=False
+        )
+        self.assertEquals(obj,{'attr1': 'val2 '})
+        # Test case insensitive equivalence
+        obj = api.get_object(
+            'objects_of_type',
+            'val3',
+            matchattr='attr1',
+            match_case=False,
+            match_space=True
+        )
+        self.assertEquals(obj,{'attr1': 'VAL3'})
+        # Both case insensitivity and ignoring trailing/leadig space
+        obj = api.get_object(
+            'objects_of_type',
+            'val4',
+            matchattr='attr1',
+            match_case=False,
+            match_space=False
+        )
+        self.assertEquals(obj, {'attr1': 'VAL4 '})
+
         requests.get.assert_called_with(
             'https://api.pagerduty.com/objects_of_type',
             params={'query': 'val1', 'limit': 100, 'offset': 0},
             headers=self.essential_headers
         )
+
 
 pdtest.unittest.main()
