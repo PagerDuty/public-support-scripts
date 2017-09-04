@@ -61,7 +61,7 @@ class PagerDutyAgent
       :user => {
         :name => name,
         :email => email,
-        :role => role,
+        :role => role.downcase.strip,
         :job_title => title
       }
     }
