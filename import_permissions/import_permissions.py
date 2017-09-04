@@ -15,6 +15,7 @@ import sys
 from pdreq import APIConnection
 
 API = None
+ARGS = None
 
 valid_roles = {
     # Team context. "User" included in this list for back-compat
@@ -68,6 +69,13 @@ def parse_args():
     parser.add_argument('-l', '--log-file', dest='logfile', required=False,
         default=None, type=argparse.FileType('w'), help="""Optional log file to 
         save output messages.""")
+    parser.add_argument('-m', '--multi-value-delim', dest="mvdelim",
+        required=False, default=';', type=str, help="""Delimiter to use for
+        specifying multiple objects of a single type within one permissions row.
+        If set to an empty string, there will be only one object per line for
+        which permissions are being defined. When multiple object names are
+        specified in one line, the user will be granted the same permission to
+        all of them.""")
     parser.add_argument('-t', '--teams', dest='auto_add_teammates', 
         action='store_true', default=False, help="""Automatically add users to
         teams if they are granted a role on a given team and not already a
@@ -78,7 +86,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def parse_permissions(csviter, auto_add_teammates=False):
+def parse_permissions(csviter, auto_add_teammates=False, mvdelim=';'):
     """Parses permissions out of a CSV file.
 
     The returned object is a dictionary mapping user IDs to the roles object.
@@ -101,9 +109,15 @@ def parse_permissions(csviter, auto_add_teammates=False):
     importing = 0
     for row in csviter:
         # THE REQUIRED CSV FORMAT IS DEFINED RIGHT HERE
-        email, role, object_type, object_name = row
+        email, role, object_type, object_names = row
+        if mvdelim:
+            object_names = object_names.split(mvdelim)
+        else:
+            object_names = [object_names]
+
         if role not in valid_roles['flexible']:
-            logrow("Skipping row because of invalid role: \"%s\"", row, role)
+            logrow("Skipping row because of invalid role: \"%s\"", row,
+                role)
             skip += 1
             continue
         if email in users:
@@ -122,7 +136,7 @@ def parse_permissions(csviter, auto_add_teammates=False):
             if user:
                 logging.debug("Found user, id=%s, for email=%s", user['id'], 
                     email)
-
+        
         if not user:
             logrow("Skipping user with email=%s due to the above issues.", row,
                  email)
@@ -143,86 +157,89 @@ def parse_permissions(csviter, auto_add_teammates=False):
             skip += 1
             continue
 
-        # Get object
-        obj_ind = (object_type, object_name)
-        plural_type = valid_object_types[object_type]
-        if not obj_ind in objects:
-            try:
-                obj = API.get_object(plural_type, object_name)
-                if obj:
-                    logging.debug("Found object, type=%s matching name=%s: %s", 
-                        object_type, object_name, obj['id'])
-                elif object_type=='team' and auto_add_teammates:
-                    # Create the team
-                    resp = API.post(
-                        '/teams',
-                        payload={'team': {
-                            'type': 'team',
-                            'name': object_name
-                        }}
-                    )
-                    if resp.status_code // 100 == 2:
-                        logging.info("No team with name %s found; created one.",
-                            object_name)
-                        obj = resp.json()['team']
+        for object_name in object_names:
+            # Get object
+            obj_ind = (object_type, object_name)
+            plural_type = valid_object_types[object_type]
+            if not obj_ind in objects:
+                try:
+                    obj = API.get_object(plural_type, object_name)
+                    if obj:
+                        logging.debug("Found %s object matching name=%s: %s", 
+                            object_type, object_name, obj['id'])
+                    elif object_type=='team' and auto_add_teammates:
+                        # Create the team
+                        resp = API.post(
+                            '/teams',
+                            payload={'team': {
+                                'type': 'team',
+                                'name': object_name
+                            }}
+                        )
+                        if resp.status_code // 100 == 2:
+                            logging.info("No team \"%s\" found; created one.",
+                                object_name)
+                            obj = resp.json()['team']
+                        else:
+                            logging.warn(("API error (status %d); could not "+
+                                "create team with name %s."),resp.status_code,
+                                object_name)
+                            obj = False
                     else:
-                        logging.warn(("API error (status %d); could not "+
-                            "create team with name %s."),resp.status_code,
-                            object_name)
                         obj = False
-            except Exception as e:
-                obj = False
-                objects[obj_ind] = False
-                logging.error(e)
-            objects[obj_ind] = obj
-        else:
-            obj = objects[obj_ind]
-        if not obj:
-            logrow(("Object of type \"%s\", name \"%s\" not found or API "+
-                "error; skipping."), row, object_type, object_name)
-            skip += 1
-            continue
+                except Exception as e:
+                    obj = False
+                    objects[obj_ind] = False
+                    logging.error(e)
+                objects[obj_ind] = obj
+            else:
+                obj = objects[obj_ind]
+            if not obj:
+                logrow(("Object of type \"%s\", name \"%s\" not found or API "+
+                    "error; skipping."), row, object_type, object_name)
+                skip += 1
+                continue
 
-        # Check team membership 
-        if object_type == 'team':
-            team_id = obj['id']
-            user_id = user['id']
-            if obj['id'] not in team_users:
-                resp = API.get('/users', params={'team_ids[]':[team_id]})
-                if resp.status_code != 200:
-                    logrow("API error (%d) getting users in team %s; skipping.",
-                        row, resp.status_code, object_name)
-                    skip += 1
-                    continue
-                team_users[team_id] = set(map(
-                    lambda u:u['id'],
-                    resp.json()['users']
-                ))
-            if user_id not in team_users[team_id]:
-                if not auto_add_teammates:
-                    logrow(("User %s not on team %s, and -t/--teams "+
-                        "option not enabled; skipping team role."), row,
-                        user['email'], obj['name'])
-                    skip += 1
-                    continue
-                resp = API.put('/teams/%s/users/%s'%(team_id,user_id))
-                if resp.status_code != 204:
-                    logrow(("API error (%d) adding user %s (%s) to team %s; "+
-                        "skipping."), row, resp.status_code, user['email'],
-                        user['id'], object_name)
-                    skip += 1
-                    continue
-                logging.info("Added user %s (%s) to team %s.", user['email'],
-                    user_id, object_name)
+            # Check team membership 
+            if object_type == 'team':
+                team_id = obj['id']
+                user_id = user['id']
+                if obj['id'] not in team_users:
+                    resp = API.get('/users', params={'team_ids[]':[team_id]})
+                    if resp.status_code != 200:
+                        logrow("API error (%d) getting users in team %s; skipping.",
+                            row, resp.status_code, object_name)
+                        skip += 1
+                        continue
+                    team_users[team_id] = set(map(
+                        lambda u:u['id'],
+                        resp.json()['users']
+                    ))
+                if user_id not in team_users[team_id]:
+                    if not auto_add_teammates:
+                        logrow(("User %s not on team %s, and -t/--teams "+
+                            "option not enabled; skipping team role."), row,
+                            user['email'], obj['name'])
+                        skip += 1
+                        continue
+                    resp = API.put('/teams/%s/users/%s'%(team_id,user_id))
+                    if resp.status_code != 204:
+                        logrow(("API error (%d) adding user %s (%s) to team %s; "+
+                            "skipping."), row, resp.status_code, user['email'],
+                            user['id'], object_name)
+                        skip += 1
+                        continue
+                    logging.info("Added user %s (%s) to team %s.", user['email'],
+                        user_id, object_name)
 
 
-        # Populate the list of permissions:
-        if email not in permissions:
-            permissions[email] = {}
-        if role not in permissions[email]:
-            permissions[email][role] = set([])
-        permissions[email][role].add(obj_ind)
-        importing += 1
+            # Populate the list of permissions:
+            if email not in permissions:
+                permissions[email] = {}
+            if role not in permissions[email]:
+                permissions[email][role] = set([])
+            permissions[email][role].add(obj_ind)
+            importing += 1
 
     logging.info("Total rows processed: %d; skipped: %d",importing+skip,skip)
     # Compose the permissions payload list:
@@ -259,16 +276,18 @@ def set_permissions(user_id, roles):
 
 def main():
     global API
+    global ARGS
 
-    args = parse_args()
+    ARGS = parse_args()
 
-    API = APIConnection(args.api_key)
+    API = APIConnection(ARGS.api_key)
 
-    logging_init(args.verbosity, args.logfile)
+    logging_init(ARGS.verbosity, ARGS.logfile)
 
     permissions = parse_permissions(
-        csv.reader(args.csv_file),
-        auto_add_teammates=args.auto_add_teammates
+        csv.reader(ARGS.csv_file),
+        auto_add_teammates=ARGS.auto_add_teammates,
+        mvdelim = ARGS.mvdelim
     )
 
     n_users = len(permissions)
