@@ -185,7 +185,7 @@ class CSVImporter
       else
         if agent.create_teams
           puts "Could not find team #{team}, creating a new team..."
-          r = agent.add_team(team)
+          r = agent.add_team(team.strip)
           team_id = r['team']['id']
           puts "Created team #{team} with ID #{team_id}, adding user to team..."
           agent.add_user_to_team(team_id, user_id)
