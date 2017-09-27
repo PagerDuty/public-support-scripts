@@ -111,9 +111,9 @@ def parse_permissions(csviter, auto_add_teammates=False, mvdelim=';'):
         # THE REQUIRED CSV FORMAT IS DEFINED RIGHT HERE
         email, role, object_type, object_names = row
         if mvdelim:
-            object_names = object_names.split(mvdelim)
+            object_names = [n.strip() for n in object_names.split(mvdelim)]
         else:
-            object_names = [object_names]
+            object_names = [object_names.strip()]
 
         if role not in valid_roles['flexible']:
             logrow("Skipping row because of invalid role: \"%s\"", row,
