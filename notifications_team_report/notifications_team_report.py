@@ -69,6 +69,7 @@ this script?"
         params['offset'] = offset
         ile_resp = api.get('/log_entries', params=params)
         ile_bod = ile_resp.json() 
+        logging.info("Retrieved %d/%d log entries", offset, ile_bod['total'])
         for ile in ile_bod['log_entries']:
             if 'notify_log_entry' in ile['type']:
                 ile_teams = ile['teams']
