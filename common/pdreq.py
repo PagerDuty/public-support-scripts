@@ -1,5 +1,7 @@
 """PDReq
 
+@author Demitri Morgan
+
 A super-lightweight PagerDuty v2 REST API client.
 
 Built around the requests module; this is a thin wrapper that performs the
@@ -11,6 +13,8 @@ after each of the standard HTTP verbs. The methods take one positional argument,
 "endpoint", and optional keyword arguments "params" (URL parameters to append to
 the endpoint) and "payload" (the object to be JSON-encoded and sent as the
 request body). The return value will then be an instance of requests.Response.
+
+@TODO: make sure this is thread-safe and add support for threading get_all
 
 Refer to: 
 http://docs.python-requests.org/en/master/user/advanced/#request-and-response-objects
@@ -45,12 +49,13 @@ else:
 """
 
 import requests
+import threading
 
 _http_verbs = ('get','post','put','delete')
 
 class PDRESTAPIError(Exception):
     
-    def __init__(response, method, endpoint, params=[], body=None):
+    def __init__(self, response, method, endpoint, params=[], body=None):
         message = "API responded with status {status} for {method} {endpoint}:"
         fmtvars = {
             'status': response.status_code, 
@@ -99,18 +104,20 @@ class APIConnection(object):
         _method = method
         _token = self._token
         _base_url = 'https://api.pagerduty.com'
-        def req(endpoint, params={}, payload=None):
+        def req(endpoint, params={}, payload=None, throw=False):
             """Make an API request and return the requests object.
             
             :endpoint: The API endpoint to use.
             :params: URL parameters to include
             :body: The object to be JSON-encoded and sent as the payload
+            :throw: Raises a PDRESTAPIError in the case of a non-success
+                response, if this is set to True.
             """
-
             if _base_url not in endpoint:
                 url = _base_url+endpoint # Relative to base URL
             else:
                 url = endpoint # Absolute URL
+                endpoint = endpoint.replace(_base_url,'')
             kw = {
                 'headers': {
                     'Accept': 'application/vnd.pagerduty+json;version=2',
@@ -124,8 +131,11 @@ class APIConnection(object):
                 kw['headers']['From'] = self._from_email
             if payload is not None:
                 kw['json'] = payload
-            _api._requests.append((_method,endpoint))
-            return getattr(requests,_method)(url, **kw)
+            _api._requests.append((_method, endpoint))
+            resp = getattr(requests, _method)(url, **kw)
+            if throw and resp.status_code // 100 != 2:
+                raise PDRESTAPIError(resp, 'GET', endpoint, params=params)
+            return resp
         return req
 
     def get_object(self, plural_type, query, matchattr='name', match_case=False,
@@ -163,10 +173,7 @@ class APIConnection(object):
         matchfn = lambda x: (
             equiv(x[matchattr], preproc, 0) == equiv(query, preproc, 0)
         )
-        try:
-            return iter(filter(matchfn, results)).next()
-        except StopIteration:
-            return False
+        return next(iter(filter(matchfn, results)), False)
 
     def get_all(self, plural_type, params={}, total=None):
         """Obtain all object records of a given type.
@@ -193,9 +200,7 @@ class APIConnection(object):
         
         while more:
             path = '/'+plural_type
-            resp = self.get(path, params=p.copy())
-            if resp.status_code // 100 != 2:
-                raise PDRESTAPIError(resp, 'GET', path, params=p)
+            resp = self.get(path, params=p.copy(), throw=True)
             rbody = resp.json()
             more = rbody['more']
             p['offset'] += p['limit']
