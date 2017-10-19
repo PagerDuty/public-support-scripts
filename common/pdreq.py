@@ -158,7 +158,6 @@ class APIConnection(object):
             check to avoid name collisions, so we should assume anything with
             leading or trailing whitespace counts as equivalent.
         """
-        results = self.get_all(plural_type, params={'query':query})
         preproc = []
         if not match_case:
             preproc.append('lower')
@@ -173,10 +172,15 @@ class APIConnection(object):
         matchfn = lambda x: (
             equiv(x[matchattr], preproc, 0) == equiv(query, preproc, 0)
         )
-        return next(iter(filter(matchfn, results)), False)
+        return next(iter(filter(
+            matchfn, 
+            self.iter_get_all(plural_type, params={'query':query})
+        )), False)
+    
+        
 
-    def get_all(self, plural_type, params={}, total=None):
-        """Obtain all object records of a given type.
+    def iter_get_all(self, plural_type, params={}, total=None):
+        """Generator for getting all object records of a given type.
 
         Iterates through pagination and gets all instances of an object from the
         index endpoint
@@ -187,15 +191,15 @@ class APIConnection(object):
         :total: If not none, must be an integer specifying the total overall
             number of objects to retrieve. If unspecified, it will return all.
         """
-        p = {}
-        p.update(params) # local working copy
+        p = dict(params) # local working copy
         p['offset'] = 0
         if total is not None and total < 100:
             p['limit'] = total
         else:
             p['limit'] = 100
 
-        results = []
+        total = total if type(total) is int else 0
+        got_total = 0
         more = True
         
         while more:
@@ -205,9 +209,17 @@ class APIConnection(object):
             more = rbody['more']
             p['offset'] += p['limit']
             page = rbody[plural_type]
-            results.extend(page)
-            if type(total) is int and len(results) >= total:
-                break
+            for result in page:
+                yield result
+                got_total += 1
+                if total and got_total >= total:
+                    break
 
-        return results
 
+    def get_all(self, plural_type, params={}, total=None):
+        """Gets all records of a given type.
+
+        Arguments are the same as iter_get_all because this is essentially a
+        wrapper for backwards-compatiblity 
+        """
+        return list(self.iter_get_all(plural_type, params={}, total=None))
