@@ -206,7 +206,12 @@ class APIConnection(object):
             path = '/'+plural_type
             resp = self.get(path, params=p.copy(), throw=True)
             rbody = resp.json()
-            more = rbody['more']
+            if 'more' in rbody:
+                more = rbody['more']
+            else:
+                # Some index endpoints, i.e. list contact methods for users,
+                # don't fully support pagination yet
+                more = False
             p['offset'] += p['limit']
             page = rbody[plural_type]
             for result in page:
