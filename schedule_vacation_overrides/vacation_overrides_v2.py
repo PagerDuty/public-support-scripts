@@ -9,8 +9,8 @@ schedule_ids = [] # List of schedules as strings
 
 api_key = ""
 
-since = "2017-12-15T00:00:00-04:00" # Example: 2017-12-15T00:00:00-04:00
-until = "2017-12-25T00:00:00-04:00"
+since = "" # Example: 2017-12-15T00:00:00-04:00
+until = ""
 
 HEADERS = {
         "Content-Type": "application/json",
