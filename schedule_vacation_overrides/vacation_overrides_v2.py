@@ -85,6 +85,7 @@ def create_overrides():
             print("Error creating override on schedule {schedule} from {start} to {end}".format(schedule=schedule,
                                                                                                 start=start,
                                                                                                 end=end))
+            print(r.json)
 
 
 if __name__ == "__main__":
