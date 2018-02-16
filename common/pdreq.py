@@ -35,7 +35,7 @@ response = api.post("/users", payload = {"user": {
     "name": "User McUserson",
     "email": "user@company.com",
     "type": "user",
-    "role": "manager" 
+    "role": "user" 
 }})
 
 # Error handling:
