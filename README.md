@@ -89,11 +89,10 @@ operating system.
 
 ## External Scripts
 
-The following is a list of supplemental scripts that may be merged into this
-collection and standardized/documented in the future. Any that remain
-referenced here after the changes on this branch (`dev-demitri`) are merged
-back into master are deemed sufficiently well-documented and self-contained,
-i.e.:
+The following is a list of supplemental scripts that may eventually be merged
+into this collection and standardized/documented in the future according to the
+outlined above. Any that remain referenced here indefinitely have been deemed
+sufficiently well-documented and self-contained, i.e.:
 
 - They reside in their own GitHub repository (which facilitates contributing to
   them) versus a Gist or a file in itself passed around
@@ -111,7 +110,8 @@ get_alerts_csv.py
 ```
 https://gist.github.com/lfepp/69a2288d898248800752d38e593323c1
 
-A sample script to programatically access and download the alerts for an incident as a CSV file.
+A sample script to programatically access and download the alerts for an
+incident as a CSV file.
 
 #### Alert Volume/Pain for On-Call Users
 
