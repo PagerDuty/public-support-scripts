@@ -8,7 +8,8 @@ import pdpyras
 def main():
     parser = argparse.ArgumentParser(description="Deletes overrides listed "\
         "in a CSV file. The first column should be the schedule ID and the "\
-        "second should be the override ID.")
+        "second should be the override ID. More columns can be included after "
+        "the first.")
     parser.add_argument('-k', '--api-key', type=str, required=True, 
         dest='api_key', help="REST API key")
     parser.add_argument('-f', '--csv-file', type=argparse.FileType('r'),
@@ -17,7 +18,8 @@ def main():
     args = parser.parse_args()
 
     session = pdpyras.APISession(args.api_key)
-    for schedule_id, override_id in csv.reader(args.csv_file):
+    for row in csv.reader(args.csv_file):
+        schedule_id, override_id = row[:2]
         try:
             session.rdelete('/schedules/%s/overrides/%s'%(
                 schedule_id, override_id
@@ -27,9 +29,7 @@ def main():
             error = 'Network error'
             if e.response is not None:
                 error = e.response.text
-            print("Could not delete override %s; %s"%(
-                override_id, error
-            ))
+            print("Could not delete override %s; %s"%(override_id, error))
             continue
 
 if __name__ == '__main__':
