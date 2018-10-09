@@ -91,7 +91,9 @@ operating system.
 
 The following is a list of supplemental scripts that may be merged into this
 collection and standardized/documented in the future. Any that remain
-referenced here are deemed sufficiently well-documented and self-contained, i.e.:
+referenced here after the changes on this branch (`dev-demitri`) are merged
+back into master are deemed sufficiently well-documented and self-contained,
+i.e.:
 
 - They reside in their own GitHub repository (which facilitates contributing to
   them) versus a Gist or a file in itself passed around
