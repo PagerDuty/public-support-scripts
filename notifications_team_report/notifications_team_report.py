@@ -10,10 +10,16 @@ import pickle
 import sys
 import time
 
-import pdreq
+import pdpyras
 
 def ascii_keys(data):
     return dict((k.encode('ascii'), v) for (k, v) in data.items())
+
+def print_progress(result, i, n):
+    new_percent = int(100.*i/n)
+    prev_percent = int(100.*(i-1.)/n)
+    if new_percent != prev_percent:
+        logging.info("Getting data: %d%% (%d of %d)", new_percent, i, n)
 
 def main():
     # Memoizing dictionaries
@@ -23,7 +29,9 @@ def main():
     teams = {}
 
     ap = argparse.ArgumentParser(
-        description="Generates notification reports for each team."
+        description="Generates notification reports for each team. A work-"
+        "around for how notification reports in analytics cannot yet provide a "
+        "per-team drilldown nor generate the report according to the team lens."
     )
     ap.add_argument('-i', '--interval', dest='n_days', type=int, default=30,
         help="Specify a number of days back in history over which to generate\
@@ -52,11 +60,9 @@ def main():
     if args.resume_file:
         notifs, teams = pickle.load(args.resume_file)
     else:
-        api = pdreq.APIConnection(args.token)
+        api = pdpyras.APISession(args.token)
 
-        abilities_resp = api.get('/abilities', throw=True)
-
-        if 'teams' not in abilities_resp.json()['abilities']:
+        if 'teams' not in api.rget('/abilities'):
             logging.error("This account doesn't have the \"teams\" \ ability! "\
                 "Why are you even running this script?"
             )
@@ -67,37 +73,24 @@ def main():
         more = True 
         offset = 0
         params = {
-            'total': 'true',
-            'limit': 100,
             'since': (now-datetime.timedelta(args.n_days)).isoformat(),
             'until': now.isoformat(),
             'include[]': ['channels'],
         }
-        while more:
-            params['offset'] = offset
-            ile_resp = api.get('/log_entries', params=params)
-            ile_txt = ile_resp.text
-            ile_bod = json.loads(ile_txt, object_hook=ascii_keys) 
-            logging.info(
-                "Retrieved %d/%d log entries", 
-                offset+len(ile_bod['log_entries']), 
-                ile_bod['total']
-            )
-            for ile in ile_bod['log_entries']:
-                if 'notify_log_entry' in ile['type']:
-                    ile_teams = ile['teams']
-                    index = len(notifs)
-                    for team in ile_teams:
-                        teams.setdefault(team['summary'],[])
-                        teams[team['summary']].append(index)
-                    notifs.append(ile)
-                    logging.debug("Adding log entry: ID=%s", ile['id'])
-                else:
-                    logging.debug("Skipping log entry because it's not a "\
-                        "notification log entry, but %s: ID=%s", ile['type'], 
-                        ile['id'])
-            more = ile_bod['more']
-            offset += 100
+        for ile in api.iter_all('log_entries', params=params, total=True,
+                item_hook=print_progress):
+            if 'notify_log_entry' in ile['type']:
+                ile_teams = ile['teams']
+                index = len(notifs)
+                for team in ile_teams:
+                    teams.setdefault(team['summary'],[])
+                    teams[team['summary']].append(index)
+                notifs.append(ile)
+                logging.debug("Adding log entry: ID=%s", ile['id'])
+            else:
+                logging.debug("Skipping log entry because it's not a "\
+                    "notification log entry, but %s: ID=%s", ile['type'], 
+                    ile['id'])
         if args.write_file:
             logging.info("Writing log entry data to file...")
             pickle.dump((notifs, teams), args.write_file)
@@ -108,7 +101,6 @@ def main():
             'email':0, 'phone':0, 'sms':0, 'push':0, 'total':0
         })
         team_file = '%s_%d.csv'%(team, now_s)
-        print team_file
         csvf = open(team_file, 'w')
         notifsw = csv.writer(csvf)
         for index in reversed(ile_indices):
@@ -163,7 +155,6 @@ def main():
         logging.info("Wrote stats to %s", stats_file)
     else:
         logging.warn("No data written; no team-specific notifications.")
-
 
 if __name__ == '__main__':
     main() 
