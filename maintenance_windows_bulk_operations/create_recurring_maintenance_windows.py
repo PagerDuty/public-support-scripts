@@ -21,6 +21,8 @@ def create_recurring_maintenance_windows(args):
         end_date = end_date + timedelta(hours=args.period_hours)
         print("Creating a %d-minute maintenance window starting %s."%(
             args.duration_minutes, start_date))
+        if args.dry_run:
+            continue
         try:
             mw = session.rpost('maintenance_windows', json={
                 'type': 'maintenance_window',
@@ -34,7 +36,8 @@ def create_recurring_maintenance_windows(args):
             if e.response is not None:
                 msg += "HTTP %d: %s"%(e.response.status_code, e.response.text)
             print(msg)
-
+    print("(Note: no maintenance windows actually created because -n/--dry-run "
+        "was given)")
 def main():
     desc = "Create a series of recurring maintenance windows."
     ap = argparse.ArgumentParser(description=desc)
@@ -61,8 +64,11 @@ def main():
     ap.add_argument('-p', '--period', required=True, dest='period_hours',
         type=int, help=helptxt)
     helptxt = "Total number of maintenance windows to create"
-    ap.add_argument('-n', '--number', default=1, dest='num_repetitions',
+    ap.add_argument('-m', '--number', default=1, dest='num_repetitions',
         type=int, help=helptxt)
+    ap.add_argument('-n', '--dry-run', default=False, action='store_true',
+        help="Don't perform any action; instead, show the maintenance windows "
+        "that would be created.")
     args = ap.parse_args()
 
     create_recurring_maintenance_windows(args)
