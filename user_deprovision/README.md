@@ -2,7 +2,7 @@
 
 Python script to de-provision a user in PagerDuty including removing them from all schedules, escalation policies, and teams that they are a part of. The affected resources are logged and printed to the console.
 
-Original script by Lucas Epp ([lfepp/pd_user_deprovision](https://github.com/lfepp/pd_user_deprovision))
+Original script by Lucas Epp ([lfepp/pd_user_deprovision](https://github.com/lfepp/pd_user_deprovision)); refactored for long-term maintenance and support by Demitri Morgan <demitri@pagerduty.com>.
 
 ## Usage
 
@@ -22,4 +22,4 @@ Luke Epp <lucas@pagerduty.com>
 
 ## Maintainer
 
-Luke Epp <lucas@pagerduty.com>
+PagerDuty Support <support@pagerduty.com>
