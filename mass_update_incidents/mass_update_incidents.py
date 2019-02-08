@@ -9,9 +9,15 @@ import pprint
 
 import pdpyras
 
+# If you are trying to update over 10,000 incidents at a time, use the `since`,`until`, and `time_zone`
+# parameters and comment out the `date_range` parameter
 PARAMETERS = {
     'is_overview': 'true',
-    'date_range': 'all',
+    'date_range': 'all'
+    # 'since': '', 
+    # 'until': '',
+    # 'time_zone': `UTC` 
+        
 }
 
 def mass_update_incidents(args):
@@ -25,13 +31,18 @@ def mass_update_incidents(args):
         PARAMETERS['statuses[]'] = ['triggered', 'acknowledged']
     elif args.action == 'acknowledge':
         PARAMETERS['statuses[]'] = ['triggered']
-
-    for incident in session.iter_all('incidents', params=PARAMETERS):
-        session.rput(incident['self'], json={
-            'type': 'incident_reference',
-            'id': incident['id'],
-            'status': '{0}d'.format(args.action), # acknowledged or resolved
-        })
+    
+    try:
+        for incident in session.list_all('incidents', params=PARAMETERS):
+            session.rput(incident['self'], json={
+                'type': 'incident_reference',
+                'id': incident['id'],
+                'status': '{0}d'.format(args.action), # acknowledged or resolved
+            })
+    except pdpyras.PDClientError as e:
+        if e.response is not None:
+            print(e.response.text)
+        raise e        
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
