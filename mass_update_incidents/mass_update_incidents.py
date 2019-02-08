@@ -17,7 +17,6 @@ PARAMETERS = {
     # 'since': '', 
     # 'until': '',
     # 'time_zone': `UTC` 
-        
 }
 
 def mass_update_incidents(args):
