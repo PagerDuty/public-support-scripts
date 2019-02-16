@@ -9,6 +9,28 @@ This README shall serve as both a set of instructions on the usage of these
 scripts as well as a description of how this repository is to be maintained and
 organized.
 
+## Contents
+
+* [Import users](import_users)
+* [Maintenance window bulk operations](maintenance_windows_bulk_operations):
+  schedule series of recurring maintenance windows, and bulk-delete future
+  maintenance windows.
+* [Mass update incidents](mass_update_incidents): Update or resolve many
+  incidents in an automated fashion
+* [Notifications team report](notifications_team_report): Generate a report of
+  notification counts scoped to one or more specific teams
+* [Overrides bulk operations](overrides_bulk_operations): Schedule vacation
+  overrides for a given user, list overrides, or mass-delete a list of
+  overrides.
+* [Remove SMS contact methods](remove_sms_contact_methods): Delete SMS-type
+  contact methods and notification rules for all users in a PagerDuty account
+* [Update user emails](update_user_emails): perform account-wide modifications
+  to login email addresses of users based on search and replace patterns,
+  including with with regular expressions
+* [De-provision users](user_deprovision): Automate the off-boarding process for
+  PagerDuty users by removing them from schedules and escalation policies, and
+  resolving all incidents that they are assigned.
+
 ## Howto
 
 Each of the directories within this repository describes a task in `snake_case`

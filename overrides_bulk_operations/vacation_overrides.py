@@ -5,21 +5,6 @@ import requests
 import sys
 import pdpyras
 
-
-schedule_ids = [] # List of schedules as strings
-
-api_key = ""
-
-since = "" # Example: 2017-12-15T00:00:00-04:00
-until = ""
-
-HEADERS = {
-        "Content-Type": "application/json",
-        "Authorization": "Token token={}".format(api_key),
-        "Accept": "application/vnd.pagerduty+json;version=2"
-    }
-
-
 def find_shifts(session, vacationing_user, start, end, schedule_ids):
     """Find all on-call shifts on the specified schedules 
     between `since` and `until`"""

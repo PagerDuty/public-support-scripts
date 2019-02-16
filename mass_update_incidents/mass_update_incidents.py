@@ -9,9 +9,14 @@ import pprint
 
 import pdpyras
 
+# If you are trying to update over 10,000 incidents at a time, use the `since`,`until`, and `time_zone`
+# parameters and comment out the `date_range` parameter
 PARAMETERS = {
     'is_overview': 'true',
-    'date_range': 'all',
+    'date_range': 'all'
+    # 'since': '', 
+    # 'until': '',
+    # 'time_zone': `UTC` 
 }
 
 def mass_update_incidents(args):
