@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse
 import requests
@@ -25,13 +25,27 @@ def mass_update_incidents(args):
         PARAMETERS['statuses[]'] = ['triggered', 'acknowledged']
     elif args.action == 'acknowledge':
         PARAMETERS['statuses[]'] = ['triggered']
-
-    for incident in session.iter_all('incidents', params=PARAMETERS):
-        session.rput(incident['self'], json={
-            'type': 'incident_reference',
-            'id': incident['id'],
-            'status': '{0}d'.format(args.action), # acknowledged or resolved
-        })
+    try:
+        total = 0
+        for incident in session.list_all('incidents', params=PARAMETERS):
+            if args.dry_run:
+                print("Not acting on incident %s because -n/--dry-run "
+                    "specified."%incident['id'])
+                total += 1
+                continue
+            session.rput(incident['self'], json={
+                'type': 'incident_reference',
+                'id': incident['id'],
+                'status': '{0}d'.format(args.action), # acknowledged or resolved
+            })
+            print("%sd incident %s"%(args.action, incident['id']))
+            total += 1
+    except pdpyras.PDClientError as e:
+        if e.response is not None:
+            print(e.response.text)
+        raise e        
+    finally:
+        print("Total of %d incidents updated."%total)
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
@@ -48,6 +62,8 @@ def main(argv=None):
         'resolve'], help="Action to take on incidents en masse")
     ap.add_argument('-e', '--requester-email', required=True, help="Email "
         "address of the user who will be marked as performing the actions.")
+    ap.add_argument('-n', '--dry-run', default=False, action='store_true',
+        help="Dry run (don't actually do anything but show what would be done")
     args = ap.parse_args()
     mass_update_incidents(args)
 
