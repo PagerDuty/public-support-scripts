@@ -4,56 +4,174 @@
 
 import argparse
 import logging
+import os
+import subprocess
 import sys
 
 from pyzabbix import ZabbixAPI
-from six.moves import input
+from six.moves import input, string_types
 
 log = logging.getLogger()
 session = None
 debug = False
 
-#class Shell(object):
-#
-#    prefix = ''
-#
-#    def __init__(self, prefix=None):
-#        if prefix is not None:
-#            self.prefix = prefix
-#
-#    def prompt_yn(self, prompt):
-#        proceed = False
-#        while not proceed:
-#            proceed = input(prompt+' (y/n) ')
-#            if proceed:
-#                if proceed[0].lower() == 'y':
-#                    return True
-#                elif proceed[0].lower() == 'n':
-#                    return False
-#                else:
-#                    proceed = False
-#
-#    def run(self, command):
-#        if type(command[0]) is str:
-#            commands = [command]
-#        elif type(command[0]) is list:
-#            commands = command
-#        else:
-#            raise ValueError
-#        do_it = self.prompt_yn("Run the following command(s)? \n"+
-#            '\n'.join([self.prefix+(' '.join(c)) for c in command]))
-#        if not do_it:
-#            return [-1]
-#        for command in commands:
-#            command.insert(self.prefix, 0)
-#            # TODO (finish)
-#
+class Shell(object):
 
-class PDZabbixSetup(ZabbixAPI):
+    prefix = ''
+    """Command prefix, i.e. sudo/ssh"""
+
+    queue = None
+    """List of commands to be executed with the user's confirmation."""
+
+    def __init__(self, prefix=None):
+        if prefix is not None:
+            self.prefix = prefix
+        self.queue = []
+
+    def prompt_yn(self, prompt):
+        proceed = False
+        while not proceed:
+            proceed = input(prompt+' (y/n) ')
+            if proceed:
+                if proceed[0].lower() == 'y':
+                    return True
+                elif proceed[0].lower() == 'n':
+                    return False
+                else:
+                    proceed = False
+
+    def enqueue(self, command, stdin=None):
+        """
+        Enqueue a command for running before printing confirm dialog.
+
+        :param command:
+            The command to run
+        :param stdin:
+            If None, the process will not explicitly use any input stream. If a
+            string object, that will be treated as its input.
+        """
+        if type(command) is not list:
+            raise ValueError("Command must be list.")
+        self.queue.append([command, stdin])
+
+    def run_commands(self):
+        do_it = self.prompt_yn("Run the following command(s)? \n"+
+            '\n'.join([self.prefix+(' '.join(c)) for c in command]))
+        if not do_it:
+            return [-1]
+        last_child = None
+        while len(self.queue):
+            command_spec = self.queue.pop(0)
+            command = command_spec[0]
+            stdin = command_spec[1]
+            write_stdin = isinstance(string_types, stdin)
+            command.insert(0, self.prefix)
+            pipe_to = None
+            popen_kw = {}
+            # Handle pipe and other i/o options. Only one-step pipelines
+            # currently supported; sorry.
+            if '>' in command:
+                # Write output to a file
+                split_pos = command.index('>')
+                popen_kw['stdout'] = open(' '.join(command[split_pos+1:]), 'w')
+                command = command[:split_pos]
+            if '|' in command:
+                # Pipe to a secondary process
+                popen_kw['stdout'] = subprocess.PIPE
+                split_pos = command.index('|')
+                pipe_to = command[split_pos+1:]
+                # Add command prefix, i.e. sudo/ssh
+                pipe_to.insert(0, self.prefix)
+                command = command[:split_pos]
+            if write_stdin:
+                # We're going to write explicit input to the main process
+                popen_kw['stdin'] = subprocess.PIPE
+            # Start child process
+            last_child = subprocess.Popen(command, **popen_kw)
+            if write_stdin:
+                # Use a string object as STDIN for the current process, writing
+                # input and then EOF to signify end of input.
+                last_child.stdin.write(stdin)
+                last_child.stdin.close()
+            if pipe_to is not None:
+                # Pipe results to another child process
+                pipe_to = subprocess.Popen(pipe_to, stdin=last_child.stdout)
+                last_child.stdin.write(command[1])
+            last_child.wait()
+            if pipe_to is not None:
+                pipe_to.wait()
+
+class IntegrationSetup(Shell):
+
+    install_method = 'opt'
+
+    integration_scripts_path = '/usr/share/pdagent-integrations/bin'
+
+    def install_pdagent(self)
+        """Installs PagerDuty Agent"""
+        if self.install_method == 'deb':
+            # Install using apt-get
+            log.info("Installing PagerDuty Agent via \"deb\" strategy.")
+            self.enqueue(['apt-get', 'install', 'apt-transport-https'])
+            r = requests.get('https://packages.pagerduty.com/GPG-KEY-pagerduty')
+            if r.ok:
+                self.enqueue(['apt-key', 'add'], stdin=r.text)
+            else:
+                raise Exception("HTTP error (%d) packages.pagerduty.com: %s"%(
+                        r.status_code, r.text))
+            self.enqueue(['tee', '/etc/apt/sources.list.d/pdagent.list'],
+                stdin="deb https://packages.pagerduty.com/pdagent deb/")
+        elif self.install_method == 'rpm':
+            # Install using yum
+            log.info("Installing PagerDuty Agent via \"rpm\" strategy."
+            rpm_config = """[pdagent]
+name=PDAgent
+baseurl=https://packages.pagerduty.com/pdagent/rpm
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.pagerduty.com/GPG-KEY-RPM-pagerduty
+"""
+            self.enqueue(['tee', '/etc/yum.repos.d/pdagent.repo'],
+                stdin=rpm_config)
+            self.enqueue(['yum', 'install', 'pdagent', 'pdagent-integrations'])
+        elif self.install_method == 'opt':
+            self.integration_scripts_path = idir+'/pdagent-integrations/bin'
+            # Install from source to a local path
+            log.info("Installing PagerDuty Agent from source to %s",
+                self.integration_scripts_path)
+            # Initial structure
+            os.umask(0o22)
+            idir = '/opt'
+            self.enqueue(['mkdir', '-p', idir])
+            # Download and unpack PagerDuty Agent
+            self.enqueue(['curl', '-L', '-o', idir+'/pdagent.zip',
+                'https://github.com/PagerDuty/pdagent/archive/master.zip'])
+            self.enqueue(['unzip', '-d', idir, idir+'/pdagent.zip'])
+            self.enqueue(['mv', idir+'/pdagent-master', idir+'/pdagent'])
+            self.enqueue(['rm', idir+'/pdagent.zip'])
+            # Download and unpack integration scripts
+            self.enqueue(['curl', '-L', '-o', idir+'/pdagent-integrations.zip',
+                'https://github.com/PagerDuty/pdagent-integrations/archive/master.zip'])
+            self.enqueue(['unzip', '-d', idir, idir+'/pdagent-integrations.zip'])
+            self.enqueue(['mv', idir+'/pdagent-integrations-master',
+                idir+'/pdagent-integrations'])
+            # Set up directories for ephemeral files
+            self.enqueue(['mkdir', '-p', idir+'/pdagent/tmp'])
+            self.enqueue(['chmod', '777', idir+'/pdagent/tmp'])
+            self.enqueue(['ln', '-s', idir+'/pdagent/tmp', '/var/lib/pdagent'])
+            self.enqueue(['chmod', '644', '/etc/pdagent.conf'])
+            self.enqueue(['rm', idir+'/pdagent-integrations.zip'])
+            # Put default config into place
+            self.enqueue(['cp', idir+'/pdagent/conf/pdagent.conf', '/etc/'])
+            #self.enqueue(['ln', '-s', idir+'/pdagent/pdagent
+        self.run_commands()
+
+class PDZabbixSetup(ZabbixAPI, IntegrationSetup):
 
     group_name = None
     dummy_host = None
     routing_key = None
+    scripts_path = None
 
     def create(self, resource, filter_params, create_params):
         """
@@ -86,6 +204,9 @@ class PDZabbixSetup(ZabbixAPI):
             itemname='PagerDuty integration test'):
         """
         Creates a very basic host record for testing purposes.
+
+        This will make it easier to create ad-hoc alerts to test the alert
+        actions and make sure they work.
 
         :param hostname:
             What to name the host
@@ -144,6 +265,11 @@ class PDZabbixSetup(ZabbixAPI):
         """
         Set up Zabbix objects for the PagerDuty to Zabbix integration
         """
+        self.create_all_objects()
+        self.install_pdagent()
+        self.create_symlink()
+
+    def create_all_objects(self):
         # Create the media type
         media_id = self.create('mediatype', {'description': 'PagerDuty'}, {
             'description': 'PagerDuty',
@@ -216,7 +342,14 @@ class PDZabbixSetup(ZabbixAPI):
             self.create_testhost(hostname=self.dummy_host,
                 grpname=self.group_name)
 
-
+    def create_symlink(self):
+        """Create the symbolic link to the alert script."""
+        self.enqueue([
+            'ln', '-s',
+            os.path.join(self.integration_scripts_path, 'pd-zabbix'),
+            os.path.join(self.zabbix_alert_scripts_path, 'pd-zabbix')
+        ])
+        self.run_commands()
 
 def logging_init():
     stdoutf = logging.Formatter("[%(asctime)s] [%(module)s:%(lineno)s] "
@@ -230,7 +363,9 @@ def logging_init():
 
 def main():
     ap = argparse.ArgumentParser(description="Set up an on-premise integration "
-        "automatically in a single script. Currently only supports Zabbix.")
+        "automatically in a single script. Currently only supports Zabbix and "
+        "requires direct access to the filesystem with the configuration.")
+    # TODO: subcommands for other integration setups, i.e. Nagios
     ap.add_argument('-k', '--routing-key', required=True,
         help="Routing key, a.k.a. integration key, of the Zabbix integration "
         "in PagerDuty")
@@ -247,16 +382,27 @@ def main():
     ap.add_argument('-g', '--group-name', default="Zabbix servers",
         help="Name of target host group; the PagerDuty user will be granted "
         "read-only access to this group of hosts.")
+    ap.add_argument('-s', '--zabbix-alert-scripts-path',
+        default='/etc/zabbix/alert.d',
+        help="The Zabbix alert scripts path.")
+    ap.add_argument('-i', '--install-method', default=None,
+        help="If \"deb\", assume a Debian-like system and use deb/dpkg to "
+        "install PagerDuty agent. If a path is provided instead, install from "
+        "source at that path.")
+
     args = ap.parse_args()
 
     logging_init()
 
-    # Read access
+    # Configure Zabbix for the integration
+    # TODO: switch/conditional w/other setup classes
     session = PDZabbixSetup(server=args.zabbix_baseurl)
-    for attr in ('group_name', 'dummy_host', 'routing_key'):
-        setattr(session, attr, getattr(args, attr))
+    for attr in ('group_name', 'dummy_host', 'routing_key', 'scripts_path',
+            'install_method'):
+        if hasattr(session, attr):
+            setattr(session, attr, getattr(args, attr))
     session.login(args.username, args.password)
-    # Set everything up
+    # Do all the things
     session.main()
 
 
