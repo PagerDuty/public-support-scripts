@@ -12,6 +12,10 @@ organized.
 ## Contents
 
 * [Import users](import_users)
+* [IP Whitelist Maintenance](ip_whitelist_maintenance): Scripts to help
+  maintain static access control lists with PagerDuty's IP addresses, to ensure
+  connectivity with PagerDuty so that integrations can work properly. See:
+  [Whitelisting IPs](https://support.pagerduty.com/v1/docs/whitelisting-ips).
 * [Maintenance window bulk operations](maintenance_windows_bulk_operations):
   schedule series of recurring maintenance windows, and bulk-delete future
   maintenance windows.
@@ -19,6 +23,8 @@ organized.
   incidents in an automated fashion
 * [Notifications team report](notifications_team_report): Generate a report of
   notification counts scoped to one or more specific teams
+* [On-call Report](on_call_report): Get information across a PagerDuty account
+  about on-call users and escalation policy configuration.
 * [Overrides bulk operations](overrides_bulk_operations): Schedule vacation
   overrides for a given user, list overrides, or mass-delete a list of
   overrides.
