@@ -1,4 +1,4 @@
-# PagerDuty IP Address Whitelist Maitnenance
+# PagerDuty IP Address Whitelist Maintenance
 
 These scripts are designed to be run via a cron job, to help maintain ACLs that specifically permit PagerDuty-controlled IP addresses.
 
