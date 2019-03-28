@@ -1,0 +1,53 @@
+Errors with deleting resources from pdt-isabella on 1-17 at 10:42
+
+
+---services---
+
+
+services P9SOLH4 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+services P5G0L4E could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+services P26CKSR could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---escalation_policies---
+
+
+escalation_policies PZ4YTZJ could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies P0REPRD could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies P7AQQGT could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies P9M61GH could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---schedules---
+
+
+schedules PZLRDOC could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+Unable to delete schedule PWP3CZP, Bridge Schedule, because can't delete an escalation policy that contains services.
+Attached Escalation Policy: All Essential Personnel to the Bridge, PSXUYN8
+
+schedules PSCFBJM could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+Unable to delete schedule P0CTUZ1, Default, because can't delete an escalation policy that contains services.
+Attached Escalation Policy: Default, PAW33P9
+
+
+---teams---
+
+
+teams P8O2THQ could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+teams PDHGVLE could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---users---
+
+
+users PW3C4JE could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+users POI33V1 could not be found; may have already been deleted by previous execution or this script, or may be a typo.

@@ -1,0 +1,14 @@
+Backups for pdt-isabella from 1-16 at 17:45
+
+
+teams 
+
+ {"team":{"id":"P8O2THQ","name":"Support","description":null,"type":"team","summary":"Support","self":"https://api.pagerduty.com/teams/P8O2THQ","html_url":"https://pdt-isabella.pagerduty.com/teams/P8O2THQ","default_role":null,"parent":null}} 
+
+teams 
+
+ {"team":{"id":"PDHGVLE","name":"Engineering","description":null,"type":"team","summary":"Engineering","self":"https://api.pagerduty.com/teams/PDHGVLE","html_url":"https://pdt-isabella.pagerduty.com/teams/PDHGVLE","default_role":null,"parent":null}} 
+
+users 
+
+ {"user":{"name":"Charlotte Sarfati","email":"csarfati@pagerduty.com.invalid","time_zone":"America/Los_Angeles","color":"dark-slate-blue","avatar_url":"https://secure.gravatar.com/avatar/bd2bb723b2305e106c5b0d073240229d.png?d=mm&r=PG","billed":true,"role":"admin","description":null,"invitation_sent":true,"job_title":null,"teams":[],"contact_methods":[{"id":"PICRETF","type":"phone_contact_method_reference","summary":"Work","self":"https://api.pagerduty.com/users/PW3C4JE/contact_methods/PICRETF","html_url":null}],"notification_rules":[{"id":"PPMGVNN","type":"assignment_notification_rule_reference","summary":"0 minutes: channel PICRETF","self":"https://api.pagerduty.com/users/PW3C4JE/notification_rules/PPMGVNN","html_url":null}],"coordinated_incidents":[],"id":"PW3C4JE","type":"user","summary":"Charlotte Sarfati","self":"https://api.pagerduty.com/users/PW3C4JE","html_url":"https://pdt-isabella.pagerduty.com/users/PW3C4JE"}} 

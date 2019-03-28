@@ -1,0 +1,10 @@
+Errors with deleting resources from pdt-isabella on 1-14 at 15:1
+
+
+---services---
+
+
+services PLDMUB9 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---escalation_policies---

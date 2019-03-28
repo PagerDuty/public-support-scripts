@@ -1,0 +1,6 @@
+Backups for pdt-isabella from 3-27 at 10:17
+
+
+extensions 
+
+ {"extension":{"endpoint_url":null,"name":"ServiceNow (dev17862)","config":{"sync_options":"sync_all","snow_user":"pagerduty-int","target":"https://dev17862.service-now.com/api/x_pd_integration/pagerduty2sn"},"extension_schema":{"id":"P6MB86H","type":"extension_schema_reference","summary":"ServiceNow (v4.0)","self":"https://api.pagerduty.com/extension_schemas/P6MB86H","html_url":null},"extension_objects":[{"id":"PUZTM7J","type":"service_reference","summary":"SN:Database","self":"https://api.pagerduty.com/services/PUZTM7J","html_url":"https://pdt-isabella.pagerduty.com/services/PUZTM7J"}],"id":"PQFBZ87","type":"webhook","summary":"ServiceNow (dev17862)","self":"https://api.pagerduty.com/webhooks/PQFBZ87","html_url":null}} 

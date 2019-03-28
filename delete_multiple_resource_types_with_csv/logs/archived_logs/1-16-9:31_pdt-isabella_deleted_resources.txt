@@ -1,0 +1,26 @@
+Resources deleted on 1-16 at 9:31
+
+
+
+---services---
+
+
+
+---escalation_policies---
+
+Engineering- Maintenance
+
+SERVICE Test deleted because it was dependent upon escalation policy P0REPRD, Something
+
+SERVICE SN:Hardware deleted because it was dependent upon escalation policy P7AQQGT, SN:Hardware
+
+SERVICE system:apps-manager-js-blue deleted because it was dependent upon escalation policy P9M61GH, pivotalsystem:system
+
+
+---schedules---
+
+Andra
+removed the escalation policy Ambassadors Preparing for Transport because it was preventing schedule PWP3CZP, Bridge Schedule from being deletedremoved the escalation policy cool new escalation policy because it was preventing schedule PSCFBJM, Cool new schedule from being deleted
+
+---teams---
+

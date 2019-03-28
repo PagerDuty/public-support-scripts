@@ -1,0 +1,24 @@
+Errors with deleting resources from pdt-isabella on 3-27 at 10:37
+
+
+---services---
+
+
+
+---extensions---
+
+
+
+---escalation_policies---
+
+
+
+---schedules---
+
+
+
+---teams---
+
+
+
+---users---

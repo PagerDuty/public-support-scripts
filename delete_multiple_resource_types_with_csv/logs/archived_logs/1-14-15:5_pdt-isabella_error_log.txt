@@ -1,0 +1,39 @@
+Errors with deleting resources from pdt-isabella on 1-14 at 15:5
+
+
+---services---
+
+
+services PLDMUB9 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---escalation_policies---
+In order to delete escalation policy PAW33P9, Default, you must first go into the web app and remove
+       it from the service(s) listed above.In order to delete escalation policy PSI26S0, SN:Hardware, you must first go into the web app and remove
+       it from the service(s) listed above.
+
+
+---schedules---
+
+
+schedules PKN7ALN could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+schedules PI8C5F4 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---teams---
+
+
+teams PNPXM0W could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+teams PE33DS8 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---users---
+
+
+users PE8T5WY could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+users PX0KEZ2 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+users PKGABQT could not be found; may have already been deleted by previous execution or this script, or may be a typo.

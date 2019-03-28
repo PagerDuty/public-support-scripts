@@ -1,0 +1,50 @@
+Errors with deleting resources from pdt-isabella on 1-15 at 16:37
+
+
+---services---
+
+
+services PWMS5ZQ could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---escalation_policies---
+
+
+escalation_policies PCGRTER could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies PUJN9NZ could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies PUJN9NZ could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies PK42I5Y could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies PSI26S0 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---schedules---
+Unable to delete schedule P0CTUZ1, ('schedules', {'schedule': {'id': 'P0CTUZ1', 'type': 'schedule', 'summary': 'Default', 'self': 'https://api.pagerduty.com/schedules/P0CTUZ1', 'html_url': 'https://pdt-isabella.pagerduty.com/schedules/P0CTUZ1', 'name': 'Default', 'time_zone': 'America/Los_Angeles', 'description': None, 'users': [{'id': 'PQ03JZS', 'type': 'user_reference', 'summary': 'Karynn Ikeda', 'self': 'https://api.pagerduty.com/users/PQ03JZS', 'html_url': 'https://pdt-isabella.pagerduty.com/users/PQ03JZS'}], 'escalation_policies': [{'id': 'PAW33P9', 'type': 'escalation_policy_reference', 'summary': 'Default', 'self': 'https://api.pagerduty.com/escalation_policies/PAW33P9', 'html_url': 'https://pdt-isabella.pagerduty.com/escalation_policies/PAW33P9'}], 'schedule_layers': [{'name': 'Layer 1', 'rendered_schedule_entries': [], 'rendered_coverage_percentage': None, 'id': 'P7UGL76', 'start': '2018-10-23T15:50:57-07:00', 'end': None, 'rotation_virtual_start': '2018-09-07T10:00:00-07:00', 'rotation_turn_length_seconds': 604800, 'users': [{'user': {'id': 'PQ03JZS', 'type': 'user_reference', 'summary': 'Karynn Ikeda', 'self': 'https://api.pagerduty.com/users/PQ03JZS', 'html_url': 'https://pdt-isabella.pagerduty.com/users/PQ03JZS'}}], 'restrictions': []}], 'overrides_subschedule': {'name': 'Overrides', 'rendered_schedule_entries': [], 'rendered_coverage_percentage': None}, 'final_schedule': {'name': 'Final Schedule', 'rendered_schedule_entries': [], 'rendered_coverage_percentage': None}, 'teams': [{'id': 'P8O2THQ', 'type': 'team_reference', 'summary': 'Support', 'self': 'https://api.pagerduty.com/teams/P8O2THQ', 'html_url': 'https://pdt-isabella.pagerduty.com/teams/P8O2THQ'}]}}), becauseCan't delete an escalation policy that contains services.
+Escalation Policy: Default
+
+Unable to delete # P0CTUZ1 because:
+
+ {"error":{"errors":["Schedule can't be deleted if it's being used by escalation policies"],"code":2001,"message":"Invalid Input Provided"}}
+
+schedules PY1CW7Y could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---teams---
+
+
+teams PIEGZ6Z could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+teams P0C0XP9 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+teams P2STEWE could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---users---
+ERROR: Schedule can't be deleted if it's being used by escalation policies: Default
+
+Unable to delete # PQ03JZS because:
+
+ {"error":{"errors":["The user cannot be deleted as they have 1 schedule. Please remove the user from the following schedule to continue."],"conflicts":[{"type":"schedule","url":"/schedules/P0CTUZ1","id":"P0CTUZ1","name":"Default"}]}}

@@ -1,0 +1,32 @@
+Errors with deleting resources from pdt-isabella on 1-11 at 11:42
+
+
+---services---
+
+
+
+---escalation_policies---
+
+
+escalation_policies PCG267H could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+escalation_policies PYMO9ZL could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---schedules---
+
+
+Unable to delete # PKN7ALN because:
+
+ {"error":{"errors":["Schedule can't be deleted if it's being used by escalation policies"],"code":2001,"message":"Invalid Input Provided"}}
+
+schedules PI8C5F4 could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---teams---
+
+
+teams PNPXM0W could not be found; may have already been deleted by previous execution or this script, or may be a typo.
+
+
+---users---
