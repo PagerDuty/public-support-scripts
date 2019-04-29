@@ -33,6 +33,7 @@ def mass_update_incidents(args):
     
     try:
         for incident in session.list_all('incidents', params=PARAMETERS):
+            print("* Incident {}: {}".format(incident['id'], args.action))
             session.rput(incident['self'], json={
                 'type': 'incident_reference',
                 'id': incident['id'],
