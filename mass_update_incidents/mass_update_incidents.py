@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse
 import requests
@@ -33,6 +33,7 @@ def mass_update_incidents(args):
     
     try:
         for incident in session.list_all('incidents', params=PARAMETERS):
+            print("* Incident {}: {}".format(incident['id'], args.action))
             session.rput(incident['self'], json={
                 'type': 'incident_reference',
                 'id': incident['id'],
@@ -54,7 +55,7 @@ def main(argv=None):
     ap.add_argument('-u', '--user-id', default=None, help="ID of user, "
         "or comma-separated list of users, whose assigned incidents should be "
         "included in the action. Leave blank to match incidents for all users.")
-    ap.add_argument('-a', '--action', default='resolve', choices=['acknowldege',
+    ap.add_argument('-a', '--action', default='resolve', choices=['acknowledge',
         'resolve'], help="Action to take on incidents en masse")
     ap.add_argument('-e', '--requester-email', required=True, help="Email "
         "address of the user who will be marked as performing the actions.")
