@@ -9,7 +9,8 @@ import subprocess
 import sys
 
 from pyzabbix import ZabbixAPI
-from six.moves import input, string_types
+from six import string_types
+from six.moves import input
 
 log = logging.getLogger()
 session = None
@@ -54,9 +55,12 @@ class Shell(object):
             raise ValueError("Command must be list.")
         self.queue.append([command, stdin])
 
-    def run_commands(self):
-        do_it = self.prompt_yn("Run the following command(s)? \n"+
-            '\n'.join([self.prefix+(' '.join(c)) for c in command]))
+    def run_commands(self, noprompt=False, wd='.'):
+        if not noprompt:
+            do_it = self.prompt_yn("Run the following command(s)? \n"+
+                '\n'.join([self.prefix+(' '.join(c[0])) for c in self.queue]))
+        else:
+            do_it = True
         if not do_it:
             return [-1]
         last_child = None
@@ -64,16 +68,18 @@ class Shell(object):
             command_spec = self.queue.pop(0)
             command = command_spec[0]
             stdin = command_spec[1]
-            write_stdin = isinstance(string_types, stdin)
-            command.insert(0, self.prefix)
+            write_stdin = isinstance(stdin, string_types)
+            if self.prefix:
+                command.insert(0, self.prefix)
             pipe_to = None
-            popen_kw = {}
+            popen_kw = {'cwd':wd}
             # Handle pipe and other i/o options. Only one-step pipelines
             # currently supported; sorry.
+            out_file = None
             if '>' in command:
                 # Write output to a file
                 split_pos = command.index('>')
-                popen_kw['stdout'] = open(' '.join(command[split_pos+1:]), 'w')
+                out_file = open(' '.join(command[split_pos+1:]), 'w+')
                 command = command[:split_pos]
             if '|' in command:
                 # Pipe to a secondary process
@@ -81,25 +87,33 @@ class Shell(object):
                 split_pos = command.index('|')
                 pipe_to = command[split_pos+1:]
                 # Add command prefix, i.e. sudo/ssh
-                pipe_to.insert(0, self.prefix)
+                if self.prefix:
+                    pipe_to.insert(0, self.prefix)
                 command = command[:split_pos]
             if write_stdin:
                 # We're going to write explicit input to the main process
                 popen_kw['stdin'] = subprocess.PIPE
             # Start child process
+            if pipe_to is None and out_file is not None:
+                popen_kw['stdout'] = out_file
             last_child = subprocess.Popen(command, **popen_kw)
             if write_stdin:
                 # Use a string object as STDIN for the current process, writing
                 # input and then EOF to signify end of input.
-                last_child.stdin.write(stdin)
+                last_child.stdin.write(str.encode(stdin))
                 last_child.stdin.close()
             if pipe_to is not None:
-                # Pipe results to another child process
-                pipe_to = subprocess.Popen(pipe_to, stdin=last_child.stdout)
-                last_child.stdin.write(command[1])
+                # Pipe output to another child process
+                popen_kw_2 = {'stdin':last_child.stdout, 'cwd':wd}
+                if out_file is not None:
+                    popen_kw_2['stdout'] = out_file
+                pipe_to = subprocess.Popen(pipe_to, **popen_kw_2)
+            # Clean up and conclude
             last_child.wait()
             if pipe_to is not None:
                 pipe_to.wait()
+            if out_file is not None:
+                out_file.close()
 
 class IntegrationSetup(Shell):
 
@@ -107,7 +121,7 @@ class IntegrationSetup(Shell):
 
     integration_scripts_path = '/usr/share/pdagent-integrations/bin'
 
-    def install_pdagent(self)
+    def install_pdagent(self):
         """Installs PagerDuty Agent"""
         if self.install_method == 'deb':
             # Install using apt-get
@@ -123,7 +137,7 @@ class IntegrationSetup(Shell):
                 stdin="deb https://packages.pagerduty.com/pdagent deb/")
         elif self.install_method == 'rpm':
             # Install using yum
-            log.info("Installing PagerDuty Agent via \"rpm\" strategy."
+            log.info("Installing PagerDuty Agent via \"rpm\" strategy.")
             rpm_config = """[pdagent]
 name=PDAgent
 baseurl=https://packages.pagerduty.com/pdagent/rpm
@@ -177,7 +191,8 @@ class PDZabbixSetup(ZabbixAPI, IntegrationSetup):
         """
         Idempotent object creator function.
 
-        Searches for an existing object of the given resource before creating it.
+        Searches for an existing Zabbix configuration object of the given
+        resource before creating it.
 
         :param resource:
             The type of object, i.e. host
@@ -203,7 +218,7 @@ class PDZabbixSetup(ZabbixAPI, IntegrationSetup):
     def create_testhost(self, hostname='dummy_host', grpname='Zabbix servers', 
             itemname='PagerDuty integration test'):
         """
-        Creates a very basic host record for testing purposes.
+        Creates a very basic Zabbix host record for testing purposes.
 
         This will make it easier to create ad-hoc alerts to test the alert
         actions and make sure they work.
@@ -250,7 +265,7 @@ class PDZabbixSetup(ZabbixAPI, IntegrationSetup):
         })
 
     def id_property_names(self, resource):
-        """Guess the name of the ID property based on the resource type"""
+        """Guess the name Zabbix ID property name based on the resource type"""
         id_property_name = resource
         # Work around antipatterns with special exceptions
         if resource=='usergroup':
@@ -343,7 +358,7 @@ class PDZabbixSetup(ZabbixAPI, IntegrationSetup):
                 grpname=self.group_name)
 
     def create_symlink(self):
-        """Create the symbolic link to the alert script."""
+        """Create the symbolic link to the Zabbix alert script."""
         self.enqueue([
             'ln', '-s',
             os.path.join(self.integration_scripts_path, 'pd-zabbix'),
@@ -375,7 +390,7 @@ def main():
         help="Zabbix user password for authenticating in the XMLRPC API")
     ap.add_argument('-b', '--zabbix-baseurl', default='http://127.0.0.1:8080',
         help="Base URL including protocol through port (if applicable). "
-        "Must not include the trailing slash.")
+        "Must not include the initial trailing slash of the web root.")
     ap.add_argument('-d', '--dummy-host', default=None,
         help="Name of dummy host to create for testing the integration itself. "
         "If unspecified, no host will be created.")
