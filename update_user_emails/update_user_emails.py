@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# PagerDuty Support asset: update_user_emails
+
 import argparse
 import csv
 import pdpyras
