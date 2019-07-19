@@ -1,24 +1,20 @@
 #!/usr/bin/env python
-
 # PagerDuty Support asset: mass_update_incidents
-
 import argparse
 import requests
 import sys
 import json
-from datetime import date
+from datetime import date, datetime
 import pprint
-
+import time
 import pdpyras
-
 # Default parameters:
 PARAMETERS = {
     'is_overview': 'true',
-    # 'since': '', 
+    # 'since': '',
     # 'until': '',
-    # 'time_zone': `UTC` 
+    # 'time_zone': `UTC`
 }
-
 def mass_update_incidents(args):
     session = pdpyras.APISession(args.api_key,
         default_from=args.requester_email)
@@ -50,30 +46,28 @@ def mass_update_incidents(args):
     try:
         print("Please be patient as this can take a while for large volumes "
             "of incidents.")
-        
-        # TODO: grab 100 open incidents at a time, if there are no incidents, stop, otherwise continue
         limit = 100
         PARAMETERS['limit'] = limit
-        incidents = session.rget(
-            '/incidents',
-            params=PARAMETERS
-        )
-        for incident in session.list_all('incidents', params=PARAMETERS):
-            print("* Incident {}: {}".format(incident['id'], args.action))
-            if args.dry_run:
-                continue
-            session.rput(incident['self'], json={
-                'type': 'incident_reference',
-                'id': incident['id'],
-                'status': '{0}d'.format(args.action), # acknowledged or resolved
-            })
-    
-    # TODO: stop script if we get a 500 error
+        incidents = session.rget('/incidents', params=PARAMETERS)
+        count = 0
+        start_time = datetime.now()
+        while len(incidents) > 0:
+            for incident in incidents:
+                print("* Incident {}: {}".format(incident['id'], args.action))
+                if args.dry_run:
+                    continue
+                session.rput(incident['self'], json={
+                    'type': 'incident_reference',
+                    'id': incident['id'],
+                    'status': '{0}d'.format(args.action), # acknowledged or resolved
+                })
+                count += 1
+                print count, datetime.now() - start_time
+            incidents = session.rget('/incidents', params=PARAMETERS)
     except pdpyras.PDClientError as e:
         if e.response is not None:
             print(e.response.text)
-        raise e        
-
+        raise e
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
         "either corresponding to a given service, or assigned to a given "
@@ -101,6 +95,5 @@ def main(argv=None):
         "address of the user who will be marked as performing the actions.")
     args = ap.parse_args()
     mass_update_incidents(args)
-
 if __name__=='__main__':
     sys.exit(main())
