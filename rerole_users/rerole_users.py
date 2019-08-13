@@ -12,6 +12,10 @@ session = None
 users = {}
 teams = {}
 team_members = {} # Indexed by team ID, each value a dict indexed by user ID
+valid_roles = {
+        'base': ['limited_user', 'user', 'admin'],
+        'team': []
+    }
 
 def decide_new_roles(args, user, per_user_base_role, per_user_team_role,
         per_user_per_team_roles=None):
@@ -200,6 +204,8 @@ def get_all_rerole_operations(args):
 
     # Apply logic to determine what base/team roles to grant via
     # decide_new_roles on each item returned by get_users
+    get_valid_roles()
+
     for rerole_task in get_users(args):
         user, base_role, team_role, per_team_roles = rerole_task
         if user['role'] in args.skip_roles:
@@ -363,6 +369,16 @@ def get_users(args):
         for email in team_roles:
             yield [users[email], None, None, team_roles[email]]
 
+def get_valid_roles():
+    global session, valid_roles
+    abilities = session.rget('/abilities')
+    if 'read_only_users' in abilities:
+        valid_roles['base'].extend(['read_only_user', 'read_only_limited_user'])
+    if 'permissions_service' in abilities:
+        valid_roles['base'].extend(['restricted_access', 'observer'])
+    if 'teams' in abilities or 'teams_hierarchy' in abilities:
+        valid_roles['team'].extend(['observer', 'manager', 'responder'])
+
 def handle_exception(e):
     msg = "API Error: %s ; "%e
     response = e.response
@@ -522,18 +538,16 @@ def valid_role(role, team=False):
     :param team: True if this is a team role we are validating
     :rtype: None, str
     """
+    global valid_roles
     roletype = ('base', 'team')[int(team)]
-    valid_roles = {
-        'base': ['restricted_access', 'observer', 'limited_user', 'user',
-            'admin'],
-        'team': ['observer', 'manager', 'responder']
-    }[roletype]
-    if role in valid_roles or role is None:
+    roles = valid_roles[roletype]
+
+    if role in roles or role is None:
         return role
     else:
         msg = "WARNING: Ignoring invalid {rt} role \"{role}\"; {rt} roles "\
             "must be one of the following: {roles}"
-        print(msg.format(rt=roletype, role=role, roles=', '.join(valid_roles)))
+        print(msg.format(rt=roletype, role=role, roles=', '.join(roles)))
 
 def main():
     global session

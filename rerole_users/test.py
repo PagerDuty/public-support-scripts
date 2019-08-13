@@ -18,6 +18,11 @@ class ReroleUsersTest(unittest.TestCase):
         """
         args = MagicMock()
         user = {'role':'user'}
+        rerole_users.valid_roles = {
+        'base': ['limited_user', 'user', 'admin', 'manager', 'observer', 
+            'restricted_access', 'read_only_user', 'read_only_limited_user'],
+        'team': ['observer', 'manager', 'responder']
+    }
         # Command line args, no per-user
         args.new_base_role = 'observer'
         args.new_team_role = 'manager'
