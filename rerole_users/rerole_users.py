@@ -446,12 +446,11 @@ def set_base_role(user_id, new_base_role, prev_base_role):
     try:
         print("Setting base role for user %s: %s (was %s)"%(user_id,
             new_base_role, prev_base_role))
-        r = session.put('users/'+user_id, json={"user":{"role": new_base_role}})
-        if r.ok:
-            print("Success")
-        else:
-            print("Failed to set role for user: "+user_id)
+        user = session.rput('users/'+user_id, json={"user":{"role": new_base_role}})
+        if user:
+            print("Successfully changed role for %s"%(user_id))
     except pdpyras.PDClientError as e:
+        print("Failed to set role for user: "+user_id)
         handle_exception(e)
 
 def set_role_on_all_teams(user_id, new_team_role, teams):
