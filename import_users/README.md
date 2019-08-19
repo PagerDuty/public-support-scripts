@@ -20,6 +20,7 @@ In this format:
 - `role` must be a valid user role value; see [Roles in the REST API and
   SAML](https://support.pagerduty.com/v1/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)
   in the PagerDuty Knowledge Base.
+- there must be no spaces between the commas and the items they separate   
 
 ## Notes and Caveats
 
