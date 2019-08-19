@@ -24,7 +24,7 @@ In this format:
 
 ## Input Format
 
-executing the script, run:
+To execute the script, run:
 
 ```
 ruby import_users.rb -a API_KEY_HERE -f PATH_TO_FILE_HERE -e REQUESTER_EMAIL
