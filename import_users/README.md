@@ -22,6 +22,14 @@ In this format:
   in the PagerDuty Knowledge Base.
 - there must be no spaces between the commas and the items they separate   
 
+## Input Format
+
+executing the script, run:
+
+```
+ruby import_users.rb -a API_KEY_HERE -f PATH_TO_FILE_HERE -e REQUESTER_EMAIL
+```
+
 ## Notes and Caveats
 
 ### Each user will be sent an invitation email the moment that they are created
