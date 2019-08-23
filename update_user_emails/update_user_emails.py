@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# PagerDuty Support asset: update_user_emails,fix_emails
+
 import argparse
 import csv
 import pdpyras
@@ -8,6 +10,20 @@ import re
 import sys
 
 session = None
+
+def apply_replacement_logic(args, email):
+    """Returns the new email address according to replacement options."""
+    regex_replace = True
+    find = args.find_pattern
+    if args.find_pattern is None:
+        find = args.query
+        regex_replace = False
+    repl = args.replacement_pattern
+    if regex_replace:
+        to_email = re.sub(find, repl, email)
+    else:
+        to_email = email.replace(find, repl)
+    return to_email
 
 def update_email(user, new_email):
     """
@@ -69,42 +85,57 @@ def get_user_email_changes(args):
     else:
         # Derive find/replace list from dynamic query/regex
         kw = {}
-        if args.contact_methods:
+        if not args.no_contact_methods:
             kw['params'] = {'include[]':['contact_methods']}
         if args.query:
             kw.setdefault('params', {})
             kw['params']['query'] = args.query
-        regex_replace = True
-        find = args.find_pattern
-        if args.find_pattern is None:
-            find = args.query
-            regex_replace = False
-        repl = args.replacement_pattern
         for user in session.iter_all('users', **kw):
             if args.query and not args.query in user['email']:
                 # Email doesn't match but maybe some of their name did
                 continue
-            if regex_replace:
-                to_email = re.sub(find, repl, user['email'])
-            else:
-                to_email = user['email'].replace(find, repl)
+            to_email = apply_replacement_logic(args, user['email'])
             yield (user, to_email)
 
 def replace_emails(args):
     global session
     for (user, new_email) in get_user_email_changes(args):
-        print("Updating %s (%s): %s -> %s"%( 
-            user['name'], user['id'], user['email'], new_email
-        ))
-        if not args.dry_run:
-            update_email(user, new_email)
-        if args.contact_methods:
+        print("User ID=%s (%s):"%(user['id'], user['summary']))
+        if user['email'] != new_email:
+            print("\tUpdating email: %s -> %s"%(user['email'], new_email))
+            if not args.dry_run:
+                update_email(user, new_email)
+        else:
+            print("\tNo change in login email.")
+        if not args.no_contact_methods:
             for cm in user['contact_methods']:
-                if cm['type'] == 'email_contact_method' and \
-                        cm['address'] == user['email']:
-                    print("\tUpdating contact method %s"%cm['id'])
-                    if not args.dry_run:
-                        update_contact_method(cm, new_email)
+                # It must be an email contact method, and it must either match
+                # the user's profile email or this must be a dynamic, all-users
+                # non-CSV global find-and-replace (in which case we permit the
+                # same replacement pattern from being applied to the contact
+                # method, even if the replacement operation is different for the
+                # contact method than for the profile email)
+                if cm['type'] == 'email_contact_method':
+                    if cm['address'] == user['email']:
+                        # Use the new value from the CSV
+                        new_cm_address = new_email
+                    elif not args.csv_file:
+                        # Use the globally applicable find/replace logic
+                        new_cm_address = apply_replacement_logic(
+                            args, 
+                            cm['address']
+                        )
+                    else:
+                        # Skip because it's not the address we want to replace
+                        # (because the addresses to replace are specified via
+                        # CSV file and this isn't one of them):
+                        continue
+                    if cm['address'] != new_cm_address:
+                        print("\tUpdating contact method %s: %s to %s"%(
+                            cm['id'], cm['address'], new_email
+                        ))
+                        if not args.dry_run:
+                            update_contact_method(cm, new_cm_address)
 
 def main():
     global session
@@ -138,17 +169,18 @@ def main():
     ap.add_argument('-n', '--dry-run', default=False, action='store_true',
         help="Don't actually make changes, but print out each change that "
         "would be made.")
-    ap.add_argument('-c', '--contact-methods', default=False,
-        action='store_true', help="Update email contact methods as well as "
-        "login email addresses.")
+    ap.add_argument('-o', '--no-contact-methods', default=False,
+        action='store_true', help="Do not update email contact methods as well "
+        "as login email addresses. By default this is False and contact "
+        "methods will be included.")
     args = ap.parse_args()
-    if args.all_users and not (args.find_pattern and args.replacement_pattern)\
-            or args.query and not args.replacement_pattern:
+    if args.all_users and None in (args.find_pattern, args.replacement_pattern)\
+            or (args.query and args.replacement_pattern is None):
         print("There is insufficient information to determine what you want to "
             "do.\n- If using the --all-users option, you must also provide "
-            "--find-regex and --replace-regex to specify how the emails should "
+            "--find and --replace to specify how the emails should "
             "be updated\n- If using --query, you must at least provide "
-            "--replace-regex")
+            "--replace")
         return
     session = pdpyras.APISession(args.api_key)
     replace_emails(args)

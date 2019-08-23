@@ -1,5 +1,7 @@
 # Import Users from CSV
 
+**Note: this script should be run using a global API key (and not a personal/user API key). If a personal API token is used, this user will be added to every created team**
+
 ## Input Format
 
 To use this script, you must first have a CSV file ready formatted as follows:
@@ -18,6 +20,15 @@ In this format:
 - `role` must be a valid user role value; see [Roles in the REST API and
   SAML](https://support.pagerduty.com/v1/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)
   in the PagerDuty Knowledge Base.
+- there must be no spaces between the commas and the items they separate   
+
+## Input Format
+
+To execute the script, run:
+
+```
+ruby import_users.rb -a API_KEY_HERE -f PATH_TO_FILE_HERE -e REQUESTER_EMAIL
+```
 
 ## Notes and Caveats
 
