@@ -233,8 +233,11 @@ class DeleteUser(APISession):
 
     def remove_user_from_team(self, team_id):
         """Remove a user from a team"""
-        self.rdelete('/teams/{team_id}/users/{user_id}'.format(
+        try:
+            self.rdelete('/teams/{team_id}/users/{user_id}'.format(
                 team_id=team_id, user_id=self.user_id))
+        except PDClientError as e:
+            handle_exception(e)    
 
     def team_has_user(self, team_users):
         """Check the users on a team for the deletion user"""
