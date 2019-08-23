@@ -1,4 +1,0 @@
-DateTime >= 4.3
-six >= 1.12.0
-requests >= 2.10
-pdpyras
