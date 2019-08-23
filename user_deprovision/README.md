@@ -16,6 +16,10 @@ This script is meant to be used as a command line tool with the following argume
 
 **-f**, **--from-header**: The PagerDuty email address of the user that is requesting the deletion
 
+## Notes and Caveats
+
+You might see a 400 error when removing a user from the team, but this error itself is sometimes erroneous. If you the log output shows that the user wasn't successfully removed from the team, but was successfully deleted, you can trust the latter information and ignore the former. 
+
 ## Author
 
 Luke Epp <lucas@pagerduty.com>
