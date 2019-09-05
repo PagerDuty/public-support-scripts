@@ -395,14 +395,6 @@ def print_rerole_stats(rerole_stats):
             print("\tTo %s: %d"%(role, rerole_stats[roletype][role]))
 
 def rerole_users(args):
-    # Set up rollback file, if specified
-    rf = None
-    trf = None
-    if args.rollback_file is not None:
-        rf = csv.writer(args.rollback_file)
-    if args.rollback_teamroles_file is not None:
-        trf = csv.writer(args.rollback_teamroles_file)
-
     # Prepare, present user with summary and prompt for Y/N to proceed
     print("Collecting list of user rerole operations...")
     rerole_ops = list(get_all_rerole_operations(args))
@@ -411,16 +403,14 @@ def rerole_users(args):
     if rerole_stats is not None:
         print_rerole_stats(rerole_stats)
 
-    # Check for backup file option
-    if not args.assume_yes and (rf is None or trf is None):
-        cont = input("No rollback file specified for base and/or team roles.\n"
-            "\nIt is highly recommended that you specify both backup options, "
-            "to store the existing role data (as a backup) via options -m/-b "
-            "(see the helptext by running with -h/--help for more details).\n\n"
-            "Without these options, you'll be SOL in the event that something "
-            "goes wrong and you need to revert changes.\n\n"
-            "That being said, are you ABSOLUTELY SURE you want to proceed? "
-            "(y/n) ")
+    # Set backup files
+    rf = csv.writer(args.rollback_file)
+    print("Backing up base roles to {}".format(args.rollback_file.name))
+    trf = csv.writer(args.rollback_teamroles_file)
+    print("Backing up team roles to {}".format(args.rollback_teamroles_file.name))
+
+    if not args.assume_yes:
+        cont = input("Update user roles? (y/n) ")
         cont = cont.strip().lower()[0] == 'y'
         if not cont:
             print("Aborted.")
@@ -609,13 +599,13 @@ def main():
         "permissions to the previous state before having run the rerole "\
         "script, via the --roles-from-file option."
     parser.add_argument('-b', '--rollback-file', dest='rollback_file',
-        default=None, type=argparse.FileType('w'), help=helptxt)
+        default='rollback.csv', type=argparse.FileType('w'), help=helptxt)
     helptxt = "File to which the prior user team roles should be written. "\
         "Files written to with this option can then be used to reset the "\
         "fine-grained per-user-per-team roles to the previous state before "\
         "having run the rerole script, via the --team-roles-from-file option."
     parser.add_argument('-m', '--rollback-teamroles-file', 
-        dest='rollback_teamroles_file', type=argparse.FileType('w'),
+        default='rollback_teamroles.csv', dest='rollback_teamroles_file', type=argparse.FileType('w'),
         help=helptxt)
     helptxt="Assume a yes answer to all prompts i.e. to proceed in the case "\
         "that no backup file was specified."
