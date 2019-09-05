@@ -22,6 +22,7 @@ PARAMETERS = {
 def mass_update_incidents(args):
     session = pdpyras.APISession(args.api_key,
         default_from=args.requester_email)
+    session.url = "https://api.cloudoverflow.com"
     if args.user_id:
         PARAMETERS['user_ids[]'] = args.user_id.split(',')
         print("Acting on incidents assigned to user(s): "+args.user_id)
@@ -47,22 +48,42 @@ def mass_update_incidents(args):
         PARAMETERS['date_range'] = 'all'
         print("Getting incidents of all time")
     print("Parameters: "+str(PARAMETERS))
-    try:
-        print("Please be patient as this can take a while for large volumes "
+    print("Please be patient as this can take a while for large volumes "
             "of incidents.")
-        for incident in session.list_all('incidents', params=PARAMETERS):
-            print("* Incident {}: {}".format(incident['id'], args.action))
-            if args.dry_run:
+    try:
+        while session.rget('incidents', params=PARAMETERS):
+            try:
+                for incident in session.iter_all('incidents', params=PARAMETERS):
+                    print("* Incident {}: {}".format(incident['id'], args.action))
+                    if args.dry_run:
+                        continue
+                    try:
+                        session.rput(incident['self'], json={
+                            'type': 'incident_reference',
+                            'id': incident['id'],
+                            'status': '{0}d'.format(args.action), # acknowledged or resolved
+                        })
+                        
+                    except pdpyras.PDClientError as e:
+                        if e.response is not None:
+                            print(e.response.text)
+            except pdpyras.PDClientError as e:
+                if e.response is not None:
+                    res = e.response.json()
+                    if res['error']['code'] == 2002:
+                        if args.dry_run:
+                            print('Pagination limit reached. Exiting since this is a dry-run and no incidents are being updated.')
+                            break
+                        else:
+                            print('Pagination limit reached. Resetting offset to 0.')
+                    else:    
+                        print(e.response.text)
                 continue
-            session.rput(incident['self'], json={
-                'type': 'incident_reference',
-                'id': incident['id'],
-                'status': '{0}d'.format(args.action), # acknowledged or resolved
-            })
-    except pdpyras.PDClientError as e:
+    except  pdpyras.PDClientError as e:
         if e.response is not None:
             print(e.response.text)
-        raise e        
+        raise e
+
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
