@@ -414,7 +414,7 @@ def rerole_users(args):
         cont = cont.strip().lower()[0] == 'y'
         if not cont:
             print("Aborted.")
-            return False
+            return
 
     # Proceed
     for (user, role_spec) in rerole_ops:
