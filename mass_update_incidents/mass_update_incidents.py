@@ -22,7 +22,7 @@ PARAMETERS = {
 def mass_update_incidents(args):
     session = pdpyras.APISession(args.api_key,
         default_from=args.requester_email)
-    session.url = "https://api.cloudoverflow.com"
+        
     if args.user_id:
         PARAMETERS['user_ids[]'] = args.user_id.split(',')
         print("Acting on incidents assigned to user(s): "+args.user_id)
