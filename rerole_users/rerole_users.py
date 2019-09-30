@@ -374,7 +374,7 @@ def get_valid_roles():
     abilities = session.rget('/abilities')
     if 'read_only_users' in abilities:
         valid_roles['base'].extend(['read_only_user', 'read_only_limited_user'])
-    if 'permissions_service' in abilities:
+    if 'advanced_permissions' in abilities:
         valid_roles['base'].extend(['restricted_access', 'observer'])
     if 'teams' in abilities or 'teams_hierarchy' in abilities:
         valid_roles['team'].extend(['observer', 'manager', 'responder'])
