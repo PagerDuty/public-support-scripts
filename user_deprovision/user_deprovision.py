@@ -32,6 +32,7 @@ import json
 import logging
 import os
 import time
+import csv
 
 from copy import deepcopy as copy
 from datetime import datetime
@@ -431,8 +432,14 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
 
 
 def main(args):
-    n_u = len(args.user_emails)
-    print("%d users to delete: %s"%(n_u, ', '.join(args.user_emails)))
+    email_list = []
+    for (i, item) in enumerate(csv.reader(args.user_csv)):
+        # Skip blank rows
+        if not item[0].strip():
+            continue 
+        email_list.append( item[0].strip() )
+    n_u = len(email_list)
+    print("%d users to delete: %s"%(n_u, ', '.join(email_list)))
     # Prompt to fill in some gaps and confirm we want to continue:
     from_email = args.from_email
     if not args.from_email:
@@ -460,14 +467,14 @@ def main(args):
 
     # Do the deed:
     count = 0
-    for email in args.user_emails:
+    for email in email_list:
         if args.prompt_del and not input_yn(
             "Proceed with deletion of user (%s)"%email):
             continue
         count += delete_user(args.access_token, email, from_email,
             args.prompt_del, args.auto_resolve, args.backup)
     log.info("%d user(s) out of %d specified have been deleted."%(
-        count, len(args.user_emails)
+        count, len(email_list)
     ))
 
 if __name__ == '__main__':
@@ -480,9 +487,9 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--user-email', '-u',
-        help="Email address(es) of user(s) to be deleted. This option may be "
-            "given more than once to specify multiple users.",
-        dest='user_emails', action='append', default=[],
+        help="File specifying list of users to delete. The file should be a CSV "\
+        "with user(s) login email(s) in a single column.",
+        dest='user_csv', type=argparse.FileType('r'),
         required=True
     )
     parser.add_argument(
