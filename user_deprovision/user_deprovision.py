@@ -433,13 +433,15 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
 
 def main(args):
     email_list = []
-    for (i, item) in enumerate(csv.reader(args.user_csv)):
-        # Skip blank rows
-        if not item[0].strip():
-            continue 
-        email_list.append( item[0].strip() )
-    n_u = len(email_list)
-    print("%d users to delete: %s"%(n_u, ', '.join(email_list)))
+    with open(args.user_csv) as file:
+        for (i, row) in enumerate(csv.reader(file)):
+            email = row[0].strip()
+            # Skip blank emails 
+            if not email:
+                continue 
+            email_list.append( email )
+    file.closed
+    print("%d users to delete: %s"%(len(email_list), ', '.join(email_list)))
     # Prompt to fill in some gaps and confirm we want to continue:
     from_email = args.from_email
     if not args.from_email:
@@ -486,10 +488,10 @@ if __name__ == '__main__':
         required=True
     )
     parser.add_argument(
-        '--user-email', '-u',
+        '--users-emails-from-csv', '-u',
         help="File specifying list of users to delete. The file should be a CSV "\
         "with user(s) login email(s) in a single column.",
-        dest='user_csv', type=argparse.FileType('r'),
+        dest='user_csv', type=str,
         required=True
     )
     parser.add_argument(
