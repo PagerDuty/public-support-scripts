@@ -326,8 +326,8 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
         if len(ep['escalation_rules']) != 0 or (
                 prompt_del and not input_yn(
                     "Escalation policy ID=%s, name=%s will be empty. Delete?"%(
-                        escalation_policies[i]['id'],
-                        escalation_policies[i]['name']
+                        ep['id'],
+                        ep['name']
                     )
                 )):
             # Update the escalation policy
@@ -347,7 +347,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
                 log.warning('Could not delete escalation policy %s. It no '
                     'longer has any on-call engineers or schedules but may '
                     'still be in use by services in your account.', 
-                    escalation_policies[i]['name'])
+                    ep['name'])
     log.info("Finished escalation policies for user %s.", user_id)
 
     #############
