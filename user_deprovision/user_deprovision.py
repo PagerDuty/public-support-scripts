@@ -32,6 +32,7 @@ import json
 import logging
 import os
 import time
+import csv
 
 from copy import deepcopy as copy
 from datetime import datetime
@@ -325,8 +326,8 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
         if len(ep['escalation_rules']) != 0 or (
                 prompt_del and not input_yn(
                     "Escalation policy ID=%s, name=%s will be empty. Delete?"%(
-                        escalation_policies[i]['id'],
-                        escalation_policies[i]['name']
+                        ep['id'],
+                        ep['name']
                     )
                 )):
             # Update the escalation policy
@@ -346,7 +347,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
                 log.warning('Could not delete escalation policy %s. It no '
                     'longer has any on-call engineers or schedules but may '
                     'still be in use by services in your account.', 
-                    escalation_policies[i]['name'])
+                    ep['name'])
     log.info("Finished escalation policies for user %s.", user_id)
 
     #############
@@ -431,8 +432,16 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
 
 
 def main(args):
-    n_u = len(args.user_emails)
-    print("%d users to delete: %s"%(n_u, ', '.join(args.user_emails)))
+    email_list = []
+    with open(args.user_csv) as file:
+        for (i, row) in enumerate(csv.reader(file)):
+            email = row[0].strip()
+            # Skip blank emails 
+            if not email:
+                continue 
+            email_list.append( email )
+    file.closed
+    print("%d users to delete: %s"%(len(email_list), ', '.join(email_list)))
     # Prompt to fill in some gaps and confirm we want to continue:
     from_email = args.from_email
     if not args.from_email:
@@ -460,14 +469,14 @@ def main(args):
 
     # Do the deed:
     count = 0
-    for email in args.user_emails:
+    for email in email_list:
         if args.prompt_del and not input_yn(
             "Proceed with deletion of user (%s)"%email):
             continue
         count += delete_user(args.access_token, email, from_email,
             args.prompt_del, args.auto_resolve, args.backup)
     log.info("%d user(s) out of %d specified have been deleted."%(
-        count, len(args.user_emails)
+        count, len(email_list)
     ))
 
 if __name__ == '__main__':
@@ -479,10 +488,10 @@ if __name__ == '__main__':
         required=True
     )
     parser.add_argument(
-        '--user-email', '-u',
-        help="Email address(es) of user(s) to be deleted. This option may be "
-            "given more than once to specify multiple users.",
-        dest='user_emails', action='append', default=[],
+        '--users-emails-from-csv', '-u',
+        help="File specifying list of users to delete. The file should be a CSV "\
+        "with user(s) login email(s) in a single column.",
+        dest='user_csv', type=str,
         required=True
     )
     parser.add_argument(
