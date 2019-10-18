@@ -8,11 +8,11 @@ Original script by Lucas Epp ([lfepp/pd_user_deprovision](https://github.com/lfe
 
 This script is meant to be used as a command line tool with the following arguments:
 
-`./user_deprovision.py --access-token ENTER_PD_ACCESS_TOKEN --user-email user-to-delete@example.com --from-email user-requesting-deletion@example.com`
+`./user_deprovision.py --access-token ENTER_PD_ACCESS_TOKEN --users-emails-from-csv ./emails-to-remove.csv --from-email user-requesting-deletion@example.com`
 
 **-a**, **--access-token**: A valid PagerDuty v2 REST API access token from your account
 
-**-u**, **--user-email**: The PagerDuty email address for the user you want to delete from your account
+**-u**, **--users-emails-from-csv**: A csv file of the PagerDuty email address(es) for the user(s) you want to delete from your account
 
 **-f**, **--from-header**: The PagerDuty email address of the user that is requesting the deletion
 
