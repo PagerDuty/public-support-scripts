@@ -19,5 +19,10 @@ example2.com.
 ./update_user_emails.py -k API-KEY -q example1.com -e '([^@]+)@example1.com' -r '\1@example2.com'
 ```
 
+While the above examples only change the subdomain of the email addresses (everything 
+after the @), if you would like to change the _prefixes_ of  email addresses (anything 
+before the @), you will want to run this script using the csv option. For example,
+only the csv option will allow you to change name@company.com to aname@newcompany.com
+
 Note, you can preview the change before enacting it by running the script with
 the `-n` flag.
