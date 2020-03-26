@@ -33,13 +33,13 @@ import logging
 import os
 import time
 import csv
-
-from copy import deepcopy as copy
 from datetime import datetime
-from pdpyras import APISession, PDClientError
+
 from six.moves import input
+from pdpyras import APISession, PDClientError
 
 log = logging.getLogger('user_deprovision')
+
 
 def handle_exception(e):
     r = e.response
@@ -49,6 +49,7 @@ def handle_exception(e):
     else:
         log.exception(e)
 
+
 def input_yn(message):
     """Prompt for a yes or no
 
@@ -57,12 +58,13 @@ def input_yn(message):
         @param (prompt): question requiring y/n answer from user
     Returns: Boolean value of the user's answer
     """
-    response = input(message+" (y/n): ").strip().lower()
+    response = input(message + " (y/n): ").strip().lower()
     valid_responses = ('n', 'y')
     if response and response[0] in valid_responses:
         return bool(valid_responses.index(response))
     else:
         return input_yn(message)
+
 
 class DeleteUser(APISession):
     """Class to handle all user deletion logic.
@@ -94,14 +96,14 @@ class DeleteUser(APISession):
         if 'teams' in url:
             # Removed the user from team. Record that this was done
             user_id, team_id = url.split('/')[::-2][:2]
-            filename = "removeduser-%s-fromteam-%s-%d"%(user_id, team_id, now)
+            filename = "removeduser-%s-fromteam-%s-%d" % (user_id, team_id, now)
             # Just create an empty file (TODO: retrieve and save team role)
             open(os.path.join('backup', filename), 'a').write('')
         else:
             # Save the object in a JSON file.
             obj = self.rget(url)
-            filename = '%s-%s-%s-%d.json'%(modification, obj['type'], obj['id'],
-                now)
+            filename = '%s-%s-%s-%d.json' % (modification, obj['type'], obj['id'],
+                                             now)
             fh = open(os.path.join('backup', filename), 'w')
             json.dump(obj, fh)
             fh.close()
@@ -116,7 +118,7 @@ class DeleteUser(APISession):
 
     def delete_user(self):
         """Delete user from PagerDuty"""
-        r = self.delete('users/'+self.user_id)
+        r = self.delete('users/' + self.user_id)
         return r.ok
 
     def list_open_incidents(self, additional_params=None):
@@ -151,7 +153,7 @@ class DeleteUser(APISession):
             log.info('Resolving %s', incident['id'])
             try:
                 self.rput(incident['self'],
-                    json={'type':'incident_reference', 'status':'resolved'})
+                          json={'type': 'incident_reference', 'status': 'resolved'})
             except PDClientError as e:
                 handle_exception(e)
                 log.error("Could not resolve incident %s.", incident['id'])
@@ -161,7 +163,7 @@ class DeleteUser(APISession):
         """List all escalation policies user is on"""
         if not hasattr(self, '_escalation_policies'):
             self._escalation_policies = self.list_all('escalation_policies',
-                params={'user_ids[]': self.user_id})
+                                                      params={'user_ids[]': self.user_id})
         return self._escalation_policies
 
     def list_users_on_team(self, team_id):
@@ -184,7 +186,7 @@ class DeleteUser(APISession):
         :param obj:
             PagerDuty object or resource reference
         """
-        if obj==None: # Assume it's the user we want to remove
+        if obj == None:  # Assume it's the user we want to remove
             obj = self.user
         obj_type = obj['type'].replace('_reference', '')
         new_rules = []
@@ -240,8 +242,8 @@ class DeleteUser(APISession):
             self.rdelete('/teams/{team_id}/users/{user_id}'.format(
                 team_id=team_id, user_id=self.user_id))
         except PDClientError as e:
-                handle_exception(e)
-                
+            handle_exception(e)
+
     def team_has_user(self, team_users):
         """Check the users on a team for the deletion user"""
         for user in team_users:
@@ -261,11 +263,12 @@ class DeleteUser(APISession):
     def user(self):
         if not (hasattr(self, '_user') and self._user):
             self._user = self.find('users', self.email,
-                attribute='email')
+                                   attribute='email')
         return self._user
 
+
 def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
-        backup):
+                backup):
     """
     Deletes a PagerDuty user.
 
@@ -278,12 +281,12 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     user_deleter = DeleteUser(access_token, user_email, from_email, backup)
     if user_deleter.user is None:
         log.error("Unable to find user matching email %s; skipping.",
-            user_email)
+                  user_email)
         return 0
     # Get the user ID of the user to be deleted
     user_id = user_deleter.user_id
     log.info('Deleting user: %(id)s (%(name)s <%(email)s>)',
-        user_deleter.user)
+             user_deleter.user)
 
     #############
     # Incidents #
@@ -295,18 +298,18 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     if n_incidents > 0:
         # Determine if we want to auto-resolve them
         autores = auto_resolve or input_yn("There are currently %d open "
-            "incidents that this user is assigned. Do you want to auto-resolve "
-            "them? (y/n): "%n_incidents)
+                                           "incidents that this user is assigned. Do you want to auto-resolve "
+                                           "them? (y/n): " % n_incidents)
         if autores:
             log.info('Resolving all open incidents...')
             user_deleter.resolve_incidents(incidents)
             log.info('Successfully resolved all open incidents')
         else:
             log.critical("There are currently %d open incidents that this "
-                 "user is assigned. Please resolve them and try again.",
-                 n_incidents)
-            log.info("The %s%d incidents assigned to this user are: ", 
-                "first " if len(n_incidents) > 20 else "", n_incidents)
+                         "user is assigned. Please resolve them and try again.",
+                         n_incidents)
+            log.info("The %s%d incidents assigned to this user are: ",
+                     "first " if len(n_incidents) > 20 else "", n_incidents)
             for i in incidents[:20]:
                 log.info(i['self'])
             return 0
@@ -325,15 +328,15 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
         # delete the escalation policy
         if len(ep['escalation_rules']) != 0 or (
                 prompt_del and not input_yn(
-                    "Escalation policy ID=%s, name=%s will be empty. Delete?"%(
-                        ep['id'],
-                        ep['name']
-                    )
-                )):
+            "Escalation policy ID=%s, name=%s will be empty. Delete?" % (
+                    ep['id'],
+                    ep['name']
+            )
+        )):
             # Update the escalation policy
             try:
                 # Delete description in case it is null
-                del(ep['description'])
+                del (ep['description'])
                 user_deleter.rput(ep['self'], json=ep)
             except PDClientError as e:
                 handle_exception(e)
@@ -341,13 +344,13 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
             # Attempt to delete the empty EP otherwise:
             try:
                 log.info("Escalation policy %s is empty after removing "
-                    "the user; deleting it.", ep['id'])
+                         "the user; deleting it.", ep['id'])
                 user_deleter.rdelete(ep['self'])
             except Exception:
                 log.warning('Could not delete escalation policy %s. It no '
-                    'longer has any on-call engineers or schedules but may '
-                    'still be in use by services in your account.', 
-                    ep['name'])
+                            'longer has any on-call engineers or schedules but may '
+                            'still be in use by services in your account.',
+                            ep['name'])
     log.info("Finished escalation policies for user %s.", user_id)
 
     #############
@@ -365,36 +368,36 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
             # If deleting, remove the schedule from any escalation policies
             if not non_empty and (prompt_del and input_yn(
                     ("Schedule (ID=%s, name=%s) will be empty after removing " \
-                     "user. Delete it?")%(schedule['id'], schedule['name'])
-                )):
+                     "user. Delete it?") % (schedule['id'], schedule['name'])
+            )):
                 for ep_ref in schedule['escalation_policies']:
                     # Remove schedule from escalation policies...
                     ep = user_deleter.rget(ep_ref['self'])
                     user_deleter.remove_from_escalation_policy(ep, obj=sched)
                     # Update the escalation policy if there are rules or delete
                     # the escalation policy if there are none
-                    if len(ep['escalation_rules']) > 0 :
+                    if len(ep['escalation_rules']) > 0:
                         try:
-                            log.info("Updating escalation policy "+ep['id'])
+                            log.info("Updating escalation policy " + ep['id'])
                             user_deleter.rput(ep['self'], json=ep)
                         except PDClientError as e:
                             handle_exception(e)
                     elif not prompt_del or input_yn((
-                            "Escalation policy (ID=%s, name=%s) will be empty" \
-                            "after removing the schedule to be deleted. " \
-                            "Delete the escalation policy also?")%(
-                                ep['id'], ep['name'])):
+                                                            "Escalation policy (ID=%s, name=%s) will be empty" \
+                                                            "after removing the schedule to be deleted. " \
+                                                            "Delete the escalation policy also?") % (
+                                                            ep['id'], ep['name'])):
                         try:
                             log.info("Escalation policy %s will be empty "
-                                "after removing the schedule to be deleted "
-                                "(%s). The escalation policy will also be "
-                                "deleted.", ep['id'], schedule['id'])
+                                     "after removing the schedule to be deleted "
+                                     "(%s). The escalation policy will also be "
+                                     "deleted.", ep['id'], schedule['id'])
                             user_deleter.rdelete(ep['self'])
                         except Exception:
                             log.warning("Escalation policy %s no longer "
-                                "has any on-call engineers or schedules but "
-                                "is still attached to services in your "
-                                "account. ", ep['id'])
+                                        "has any on-call engineers or schedules but "
+                                        "is still attached to services in your "
+                                        "account. ", ep['id'])
                 user_deleter.rdelete(schedule['self'])
             else:
                 # Save updated schedule with user removed
@@ -417,10 +420,10 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     # Show the impact of removing the user:
     for resource in ('schedules', 'escalation_policies', 'teams'):
         label = resource.capitalize().replace('_', ' ')
-        suffix = '/users/{id}' if resource=='teams' else ''
+        suffix = '/users/{id}' if resource == 'teams' else ''
         log.info('%s affected: %d', label, sum([
             user_deleter.api_call_counts.get(
-                '%s:%s/{id}%s'%(method, resource, suffix), 0
+                '%s:%s/{id}%s' % (method, resource, suffix), 0
             ) for method in ('put', 'delete')
         ]))
     if user_deleter.delete_user():
@@ -438,10 +441,10 @@ def main(args):
             email = row[0].strip()
             # Skip blank emails 
             if not email:
-                continue 
-            email_list.append( email )
+                continue
+            email_list.append(email)
     file.closed
-    print("%d users to delete: %s"%(len(email_list), ', '.join(email_list)))
+    print("%d users to delete: %s" % (len(email_list), ', '.join(email_list)))
     # Prompt to fill in some gaps and confirm we want to continue:
     from_email = args.from_email
     if not args.from_email:
@@ -452,10 +455,10 @@ def main(args):
     logdir = os.path.join(os.getcwd(), 'logs')
     if not os.path.isdir(os.path.join(os.getcwd(), './logs')):
         os.mkdir(logdir)
-    logfile = os.path.join(logdir, '%s.log'%datetime.now().isoformat())
-    file_formatter = logging.Formatter(                                             
-        fmt=u"[%(asctime)s] %(levelname)s: %(message)s", 
-        datefmt=u"%Y-%m-%dT%H:%M:%S"                                           
+    logfile = os.path.join(logdir, '%s.log' % datetime.now().isoformat())
+    file_formatter = logging.Formatter(
+        fmt=u"[%(asctime)s] %(levelname)s: %(message)s",
+        datefmt=u"%Y-%m-%dT%H:%M:%S"
     )
     fileh = logging.FileHandler(logfile)
     fileh.setFormatter(file_formatter)
@@ -471,13 +474,14 @@ def main(args):
     count = 0
     for email in email_list:
         if args.prompt_del and not input_yn(
-            "Proceed with deletion of user (%s)"%email):
+                "Proceed with deletion of user (%s)" % email):
             continue
         count += delete_user(args.access_token, email, from_email,
-            args.prompt_del, args.auto_resolve, args.backup)
-    log.info("%d user(s) out of %d specified have been deleted."%(
+                             args.prompt_del, args.auto_resolve, args.backup)
+    log.info("%d user(s) out of %d specified have been deleted." % (
         count, len(email_list)
     ))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Delete a PagerDuty user')
@@ -489,8 +493,8 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--users-emails-from-csv', '-u',
-        help="File specifying list of users to delete. The file should be a CSV "\
-        "with user(s) login email(s) in a single column.",
+        help="File specifying list of users to delete. The file should be a CSV " \
+             "with user(s) login email(s) in a single column.",
         dest='user_csv', type=str,
         required=True
     )
@@ -507,17 +511,17 @@ if __name__ == '__main__':
     parser.add_argument(
         '--delete-yes-to-all', '-y',
         help="When removing a user results in an empty object, i.e. an "
-            "escalation policy with no rules, the script will prompt you as to "
-            "whether you want to remove the empty object. Enabling this flag "
-            "skips this prompting for deletion of objects and deletes all "
-            "empty objects automatically.",
+             "escalation policy with no rules, the script will prompt you as to "
+             "whether you want to remove the empty object. Enabling this flag "
+             "skips this prompting for deletion of objects and deletes all "
+             "empty objects automatically.",
         dest='prompt_del', action='store_false', default=True
     )
     parser.add_argument(
         '--backup', '-b',
         help="Make backup JSON files of all objects that are deleted or "
-            "updated, in a directory named 'backup' within the current working "
-            "directory.",
+             "updated, in a directory named 'backup' within the current working "
+             "directory.",
         default=False, action='store_true'
     )
     parser.add_argument(
