@@ -306,7 +306,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
                          "user is assigned. Please resolve them and try again.",
                          n_incidents)
             log.info("The %s%d incidents assigned to this user are: ",
-                     "first " if len(n_incidents) > 20 else "", n_incidents)
+                     "first " if n_incidents > 20 else "", n_incidents)
             for i in incidents[:20]:
                 log.info(i['self'])
             return 0
