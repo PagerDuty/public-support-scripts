@@ -440,7 +440,7 @@ def main(args):
             if not email:
                 continue
             email_list.append(email)
-    file.closed
+
     print("%d users to delete: %s" % (len(email_list), ', '.join(email_list)))
     # Prompt to fill in some gaps and confirm we want to continue:
     from_email = args.from_email
