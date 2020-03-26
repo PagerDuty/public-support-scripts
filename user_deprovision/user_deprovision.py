@@ -183,7 +183,7 @@ class DeleteUser(APISession):
         :param obj:
             PagerDuty object or resource reference
         """
-        if obj == None:  # Assume it's the user we want to remove
+        if obj is None:  # Assume it's the user we want to remove
             obj = self.user
         obj_type = obj['type'].replace('_reference', '')
         new_rules = []
