@@ -55,7 +55,7 @@ def input_yn(message):
 
     Summary: Prompt a y/n question
     Attributes:
-        @param (prompt): question requiring y/n answer from user
+        @param message: question requiring y/n answer from user
     Returns: Boolean value of the user's answer
     """
     response = input(message + " (y/n): ").strip().lower()
