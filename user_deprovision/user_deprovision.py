@@ -124,10 +124,8 @@ class DeleteUser(APISession):
     def list_open_incidents(self, additional_params=None):
         """
         Get any open incidents assigned to the user.
-        
-        :param user_id:
-            The ID of the user.
-        :additional_params:
+
+        :param additional_params:
             Parameters to send to the list incidents index. One could specify
             ``'date_range': 'all'`` to get all incidents and not just those that
             are recent, for instance, or restrict to certain service IDs using
@@ -162,8 +160,7 @@ class DeleteUser(APISession):
     def escalation_policies(self):
         """List all escalation policies user is on"""
         if not hasattr(self, '_escalation_policies'):
-            self._escalation_policies = self.list_all('escalation_policies',
-                                                      params={'user_ids[]': self.user_id})
+            self._escalation_policies = self.list_all('escalation_policies', params={'user_ids[]': self.user_id})
         return self._escalation_policies
 
     def list_users_on_team(self, team_id):
@@ -181,8 +178,8 @@ class DeleteUser(APISession):
         """
         Remove a user or schedule from an escalation policy's rules.
 
-        :param escalation_rules:
-            The escalation policy's ``escalation_rules``
+        :param escalation_policy:
+            reference to the escalation policy to remove the user from
         :param obj:
             PagerDuty object or resource reference
         """
