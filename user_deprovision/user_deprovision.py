@@ -431,9 +431,9 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
         return 0
 
 
-def main(args):
+def main(arguments):
     email_list = []
-    with open(args.user_csv) as file:
+    with open(arguments.user_csv) as file:
         for (i, row) in enumerate(csv.reader(file)):
             email = row[0].strip()
             # Skip blank emails 
@@ -443,8 +443,8 @@ def main(args):
 
     print("%d users to delete: %s" % (len(email_list), ', '.join(email_list)))
     # Prompt to fill in some gaps and confirm we want to continue:
-    from_email = args.from_email
-    if not args.from_email:
+    from_email = arguments.from_email
+    if not arguments.from_email:
         from_email = input(
             "Please enter email address of the requesting agent: "
         ).strip()
@@ -461,7 +461,7 @@ def main(args):
     fileh.setFormatter(file_formatter)
     log.addHandler(fileh)
     log.setLevel(logging.INFO)
-    if args.verbose:
+    if arguments.verbose:
         stderrh = logging.StreamHandler()
         stderrh.setFormatter(logging.Formatter(u"%(levelname)s: %(message)s"))
         log.addHandler(stderrh)
@@ -470,11 +470,11 @@ def main(args):
     # Do the deed:
     count = 0
     for email in email_list:
-        if args.prompt_del and not input_yn(
+        if arguments.prompt_del and not input_yn(
                 "Proceed with deletion of user (%s)" % email):
             continue
-        count += delete_user(args.access_token, email, from_email,
-                             args.prompt_del, args.auto_resolve, args.backup)
+        count += delete_user(arguments.access_token, email, from_email,
+                             arguments.prompt_del, arguments.auto_resolve, arguments.backup)
     log.info("%d user(s) out of %d specified have been deleted." % (
         count, len(email_list)
     ))
