@@ -41,6 +41,15 @@ from pdpyras import APISession, PDClientError
 log = logging.getLogger('user_deprovision')
 
 
+class Resources:
+    def __init__(self):
+        self.schedules = None
+        self.teams = None
+
+
+RESOURCES = Resources()
+
+
 def handle_exception(e):
     r = e.response
     if r is not None:
@@ -169,8 +178,8 @@ class DeleteUser(APISession):
 
     def schedule_has_user(self, schedule):
         """Check if a schedule contains a particular user"""
-        for user in schedule['users']:
-            if user['id'] == self.user_id:
+        for user in schedule.get('users', []):
+            if user.get('id') == self.user_id:
                 return True
         return False
 
@@ -354,23 +363,32 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     # Schedules #
     #############
     log.info("Removing user %s from schedules...", user_id)
-    schedules = user_deleter.list_all('schedules')
-    log.debug('Schedules: %s', ','.join([s['id'] for s in schedules]))
-    for sched in schedules:
+
+    if RESOURCES.schedules is None:
+        print("gathering schedules for the account. This could take several minutes.")
+        RESOURCES.schedules = user_deleter.list_all('schedules')
+
+    log.debug('Schedules: %s', ','.join([s['id'] for s in RESOURCES.schedules]))
+    for schedule in RESOURCES.schedules:
         # Get the specific schedule
-        schedule = user_deleter.rget(sched['self'])
+
+        if schedule.get('details') is None:
+            schedule_details = user_deleter.rget(schedule['self'])
+            schedule['details'] = schedule_details
+
+
         # Check if user is in schedule
-        if user_deleter.schedule_has_user(schedule):
-            non_empty = user_deleter.remove_from_schedule(schedule)
+        if user_deleter.schedule_has_user(schedule.get('details')):
+            non_empty = user_deleter.remove_from_schedule(schedule.get('details'))
             # If deleting, remove the schedule from any escalation policies
             if not non_empty and (prompt_del and input_yn(
                     ("Schedule (ID=%s, name=%s) will be empty after removing " \
-                     "user. Delete it?") % (schedule['id'], schedule['name'])
+                     "user. Delete it?") % (schedule.get('details', {}).get('id'), schedule.get('details', {}).get('name'))
             )):
-                for ep_ref in schedule['escalation_policies']:
+                for ep_ref in schedule.get('details', {}).get('escalation_policies'):
                     # Remove schedule from escalation policies...
                     ep = user_deleter.rget(ep_ref['self'])
-                    user_deleter.remove_from_escalation_policy(ep, obj=sched)
+                    user_deleter.remove_from_escalation_policy(ep, obj=schedule)
                     # Update the escalation policy if there are rules or delete
                     # the escalation policy if there are none
                     if len(ep['escalation_rules']) > 0:
@@ -388,26 +406,34 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
                             log.info("Escalation policy %s will be empty "
                                      "after removing the schedule to be deleted "
                                      "(%s). The escalation policy will also be "
-                                     "deleted.", ep['id'], schedule['id'])
+                                     "deleted.", ep['id'], schedule.get('details', {}).get('id'))
                             user_deleter.rdelete(ep['self'])
                         except Exception:
                             log.warning("Escalation policy %s no longer "
                                         "has any on-call engineers or schedules but "
                                         "is still attached to services in your "
                                         "account. ", ep['id'])
-                user_deleter.rdelete(schedule['self'])
+                user_deleter.rdelete(schedule.get('details', {}).get('self'))
             else:
                 # Save updated schedule with user removed
-                user_deleter.rput(schedule['self'], json=schedule)
+                user_deleter.rput(schedule.get('details', {}).get('self'), json=schedule.get('details'))
     log.info("Finished schedules for user %s.", user_id)
 
     #########
     # Teams #
     #########
     log.info("Removing user %s from teams...", user_id)
-    for team in user_deleter.iter_all('teams'):
-        team_users = user_deleter.list_users_on_team(team['id'])
-        if user_deleter.team_has_user(team_users):
+
+    if RESOURCES.teams is None:
+        print("gathering teams for the account. This could take several minutes.")
+        RESOURCES.teams = user_deleter.list_all('teams')
+
+    for team in RESOURCES.teams:
+
+        if team.get('users') is None:
+            team['users'] = user_deleter.list_users_on_team(team.get('id'))
+
+        if user_deleter.team_has_user(team['users']):
             user_deleter.remove_user_from_team(team['id'])
     log.info("Finished teams for user %s.", user_id)
 
