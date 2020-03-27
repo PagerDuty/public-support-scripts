@@ -42,12 +42,34 @@ log = logging.getLogger('user_deprovision')
 
 
 class Resources:
-    def __init__(self):
+    def __init__(self, access_token, from_email):
         self.schedules = None
         self.teams = None
+        self.session = APISession(access_token, default_from=from_email)
 
+    def get_schedules(self):
+        if self.schedules is None:
+            log.info("Retrieving all schedules on the account. This could take several minutes.")
+            print("Retrieving all schedules on the account. This could take several minutes.")
+            self.schedules = self.session.list_all('schedules')
 
-RESOURCES = Resources()
+            log.info("Retrieving a list of users for each schedule. This could take several minutes.")
+            for schedule in self.schedules:
+                schedule['details'] = self.session.rget(schedule.get('self'))
+
+        return self.schedules
+
+    def get_teams(self):
+        if self.teams is None:
+            log.info("Retrieving all teams on the account. This could take several minutes.")
+            print("Retrieving all teams on the account. This could take several minutes.")
+            self.teams = self.session.list_all('teams')
+
+            log.info("Retrieving a list of users for each team. This could take several minutes.")
+            for team in self.teams:
+                team['users'] = self.session.list_all('users', params={'team_ids[]': team.get('id')})
+
+        return self.teams
 
 
 def handle_exception(e):
@@ -277,8 +299,7 @@ class DeleteUser(APISession):
         return self._user
 
 
-def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
-                backup):
+def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve, backup, resources):
     """
     Deletes a PagerDuty user.
 
@@ -302,7 +323,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     # Incidents #
     #############
     log.info("Checking for incidents assigned to user %s...", user_id)
-    # Check for open incidents user is currently in use for
+    # Check for open incidents user is currently in use foro
     incidents = user_deleter.list_open_incidents()
     n_incidents = len(incidents)
     if n_incidents > 0:
@@ -368,25 +389,13 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     #############
     log.info("Removing user %s from schedules...", user_id)
 
-    if RESOURCES.schedules is None:
-        print("gathering schedules for the account. This could take several minutes.")
-        RESOURCES.schedules = user_deleter.list_all('schedules')
-
-    log.debug('Schedules: %s', ','.join([s['id'] for s in RESOURCES.schedules]))
-    for schedule in RESOURCES.schedules:
-        # Get the specific schedule
-
-        if schedule.get('details') is None:
-            schedule_details = user_deleter.rget(schedule['self'])
-            schedule['details'] = schedule_details
-
-
+    for schedule in resources.get_schedules():
         # Check if user is in schedule
         if user_deleter.schedule_has_user(schedule.get('details')):
             non_empty = user_deleter.remove_from_schedule(schedule.get('details'))
             # If deleting, remove the schedule from any escalation policies
             if not non_empty and (prompt_del and input_yn(
-                    ("Schedule (ID=%s, name=%s) will be empty after removing " \
+                    ("Schedule (ID=%s, name=%s) will be empty after removing "
                      "user. Delete it?") % (schedule.get('details', {}).get('id'), schedule.get('details', {}).get('name'))
             )):
                 for ep_ref in schedule.get('details', {}).get('escalation_policies'):
@@ -402,8 +411,8 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
                         except PDClientError as e:
                             handle_exception(e)
                     elif not prompt_del or input_yn((
-                                                            "Escalation policy (ID=%s, name=%s) will be empty" \
-                                                            "after removing the schedule to be deleted. " \
+                                                            "Escalation policy (ID=%s, name=%s) will be empty"
+                                                            "after removing the schedule to be deleted. "
                                                             "Delete the escalation policy also?") % (
                                                             ep['id'], ep['name'])):
                         try:
@@ -428,15 +437,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
     #########
     log.info("Removing user %s from teams...", user_id)
 
-    if RESOURCES.teams is None:
-        print("gathering teams for the account. This could take several minutes.")
-        RESOURCES.teams = user_deleter.list_all('teams')
-
-    for team in RESOURCES.teams:
-
-        if team.get('users') is None:
-            team['users'] = user_deleter.list_users_on_team(team.get('id'))
-
+    for team in resources.get_teams():
         if user_deleter.team_has_user(team['users']):
             user_deleter.remove_user_from_team(team['id'])
     log.info("Finished teams for user %s.", user_id)
@@ -461,23 +462,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
         return 0
 
 
-def main(arguments):
-    email_list = []
-    with open(arguments.user_csv) as file:
-        for (i, row) in enumerate(csv.reader(file)):
-            email = row[0].strip()
-            # Skip blank emails 
-            if not email:
-                continue
-            email_list.append(email)
-
-    print("%d users to delete: %s" % (len(email_list), ', '.join(email_list)))
-    # Prompt to fill in some gaps and confirm we want to continue:
-    from_email = arguments.from_email
-    if not arguments.from_email:
-        from_email = input(
-            "Please enter email address of the requesting agent: "
-        ).strip()
+def setup_logging(is_log_verbose):
     # Initialize logging:
     logdir = os.path.join(os.getcwd(), 'logs')
     if not os.path.isdir(os.path.join(os.getcwd(), './logs')):
@@ -491,19 +476,38 @@ def main(arguments):
     fileh.setFormatter(file_formatter)
     log.addHandler(fileh)
     log.setLevel(logging.INFO)
-    if arguments.verbose:
+    if is_log_verbose:
         stderrh = logging.StreamHandler()
         stderrh.setFormatter(logging.Formatter(u"%(levelname)s: %(message)s"))
         log.addHandler(stderrh)
         log.setLevel(logging.DEBUG)
+
+
+def main(arguments):
+    resources = Resources(arguments.access_token, arguments.from_email)
+
+    email_list = []
+    with open(arguments.user_csv) as file:
+        for (i, row) in enumerate(csv.reader(file)):
+            email = row[0].strip()
+            # Skip blank emails 
+            if not email:
+                continue
+            email_list.append(email)
+
+    print("{} users to be deleted".format(len(email_list)))
+
+    # Initialize logging:
+    setup_logging(arguments.verbose)
 
     # Do the deed:
     count = 0
     for email in email_list:
         if arguments.prompt_del and not input_yn("Proceed with deletion of user (%s)" % email):
             continue
-        count += delete_user(arguments.access_token, email, from_email,
-                             arguments.prompt_del, arguments.auto_resolve, arguments.backup)
+        count += delete_user(arguments.access_token, email, arguments.from_email,
+                             arguments.prompt_del, arguments.auto_resolve, arguments.backup, resources)
+
     log.info("%d user(s) out of %d specified have been deleted." % (
         count, len(email_list)
     ))
