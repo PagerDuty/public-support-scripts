@@ -198,10 +198,6 @@ class DeleteUser(APISession):
             self._escalation_policies = self.list_all('escalation_policies', params={'user_ids[]': self.user_id})
         return self._escalation_policies
 
-    def list_users_on_team(self, team_id):
-        """List all users on a particular team"""
-        return self.list_all('users', params={'team_ids[]': team_id})
-
     def schedule_has_user(self, schedule):
         """Check if a schedule contains a particular user"""
         for user in schedule.get('users', []):
