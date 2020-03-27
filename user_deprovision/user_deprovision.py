@@ -296,7 +296,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve,
         # Determine if we want to auto-resolve them
         autores = auto_resolve or input_yn("There are currently %d open "
                                            "incidents that this user is assigned. Do you want to auto-resolve "
-                                           "them? (y/n): " % n_incidents)
+                                           "them?" % n_incidents)
         if autores:
             log.info('Resolving all open incidents...')
             user_deleter.resolve_incidents(incidents)
