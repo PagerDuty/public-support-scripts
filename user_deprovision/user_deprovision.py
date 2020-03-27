@@ -157,13 +157,17 @@ class DeleteUser(APISession):
             List of incident-like dict objects, i.e. retrieved from the API
         """
         for incident in incidents:
-            log.info('Resolving %s', incident['id'])
-            try:
-                self.rput(incident['self'],
-                          json={'type': 'incident_reference', 'status': 'resolved'})
-            except PDClientError as e:
-                handle_exception(e)
-                log.error("Could not resolve incident %s.", incident['id'])
+            if len(incident.get('assignments')) > 1:
+                log.info('Resolving %s', incident['id'])
+                try:
+                    self.rput(incident['self'],
+                              json={'type': 'incident_reference', 'status': 'resolved'})
+                except PDClientError as e:
+                    handle_exception(e)
+                    log.error("Could not resolve incident %s.", incident['id'])
+            else:
+                log.info('Not resolving incident {}, as there are {} other responders'.format(
+                    incident.get('id'), len(incident.get('assignments'))))
 
     @property
     def escalation_policies(self):
@@ -496,8 +500,7 @@ def main(arguments):
     # Do the deed:
     count = 0
     for email in email_list:
-        if arguments.prompt_del and not input_yn(
-                "Proceed with deletion of user (%s)" % email):
+        if arguments.prompt_del and not input_yn("Proceed with deletion of user (%s)" % email):
             continue
         count += delete_user(arguments.access_token, email, from_email,
                              arguments.prompt_del, arguments.auto_resolve, arguments.backup)
