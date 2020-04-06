@@ -47,9 +47,9 @@ class PagerDutyAgent
     end
     response = connection.post(path, body_json, headers)
 
-    if !response.success
-      raise "Error: #{response.body}"
+    if !response.success?
       $errors.push(response.body)
+      raise "WOW Error: #{response.body}"
     end
 
     return JSON.parse(response.body)
@@ -60,9 +60,9 @@ class PagerDutyAgent
       { 'Authorization' => "Token token=#{token}",
         'Accept' => 'application/vnd.pagerduty+json;version=2'})
 
-    if !response.success
-      raise "Error: #{response.body}"
+    if !response.success?
       $errors.push(response.body)
+      raise "Error: #{response.body}"
     end
 
     puts response.status
@@ -229,14 +229,6 @@ class CSVImporter
     CSV.foreach(csv_file) do |row|
       import_user(row_to_record(row))
     end
-
-    if $errors.length > 0
-      puts "\n\nERRORS FOUND:\n\n"
-      $errors.each do |error|
-        puts error
-      end
-    end
-
   end
 
   def row_to_record(row)
@@ -267,3 +259,10 @@ end.parse!
 agent = PagerDutyAgent.new(options[:access_token], options[:requester_email], options[:create_teams])
 
 CSVImporter.new(agent, options[:csv_path]).import
+
+if $errors.length > 0
+  puts "\n\nERRORS FOUND:\n\n"
+  $errors.each do |error|
+    puts error
+  end
+end
