@@ -6,6 +6,8 @@ require 'json'
 require 'csv'
 require 'optparse'
 
+$errors = []
+
 class PagerDutyAgent
   attr_reader :token
   attr_reader :requester_email
@@ -44,7 +46,12 @@ class PagerDutyAgent
         'Accept' => 'application/vnd.pagerduty+json;version=2'}
     end
     response = connection.post(path, body_json, headers)
-    raise "Error: #{response.body}" unless response.success?
+
+    if !response.success
+      raise "Error: #{response.body}"
+      $errors.push(response.body)
+    end
+
     return JSON.parse(response.body)
   end
 
@@ -52,7 +59,12 @@ class PagerDutyAgent
     response = connection.put(path, body,
       { 'Authorization' => "Token token=#{token}",
         'Accept' => 'application/vnd.pagerduty+json;version=2'})
-    raise "Error: #{response.body}" unless response.success?
+
+    if !response.success
+      raise "Error: #{response.body}"
+      $errors.push(response.body)
+    end
+
     puts response.status
   end
 
@@ -217,6 +229,14 @@ class CSVImporter
     CSV.foreach(csv_file) do |row|
       import_user(row_to_record(row))
     end
+
+    if $errors.length > 0
+      puts "\n\nERRORS FOUND:\n\n"
+      $errors.each do |error|
+        puts error
+      end
+    end
+
   end
 
   def row_to_record(row)
