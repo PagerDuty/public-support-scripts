@@ -12,7 +12,6 @@ class PagerDutyAgent
   attr_reader :requester_email
   attr_reader :create_teams
   attr_reader :connection
-  attr_reader :log
 
   def initialize(token, requester_email, create_teams)
     @log = Logger.new("import_errors_for_#{requester_email}.log")
