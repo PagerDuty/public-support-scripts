@@ -29,7 +29,10 @@ class PagerDutyAgent
     response = connection.get(path, query,
         { 'Authorization' => "Token token=#{token}",
           'Accept' => 'application/vnd.pagerduty+json;version=2'})
-    raise "Error: #{response.body}" unless response.success?
+    if !response.success?
+      $errors.push(response.body)
+      raise "Error: #{response.body}"
+    end
     JSON.parse(response.body)
   end
 
@@ -49,7 +52,7 @@ class PagerDutyAgent
 
     if !response.success?
       $errors.push(response.body)
-      raise "WOW Error: #{response.body}"
+      raise "Error: #{response.body}"
     end
 
     return JSON.parse(response.body)
