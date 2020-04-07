@@ -10,22 +10,22 @@ This script is meant to be used as a command line tool with the following argume
 
 `./user_deprovision.py --access-token ENTER_PD_ACCESS_TOKEN --users-emails-from-csv ./emails-to-remove.csv --from-email user-requesting-deletion@example.com`
 
-**`-a`**, **`--access-token`**: A valid PagerDuty v2 REST API access token from your account
+`-a`, `--access-token`: A valid PagerDuty v2 REST API access token from your account
 
-**`-u`**, **`--users-emails-from-csv`**: A csv file of the PagerDuty email address(es) for the user(s) you want to delete from your account
+`-u`, `--users-emails-from-csv`: A csv file of the PagerDuty email address(es) for the user(s) you want to delete from your account
 
-**`-f`**, **`--from-header`**: The PagerDuty email address of the user that is requesting the deletion
+`-f`, `--from-header`: The PagerDuty email address of the user that is requesting the deletion
 
 ### Optional arguments
 
-**`-v`**, **`--verbose`**: output the logs to the console while running
+`-v`, `--verbose`: output the logs to the console while running
 
-**`-b`**., **`--backup`**: backup info about each user to a json file
+`-b`., `--backup`: backup info about each user to a json file
 
-**`-y`**, **`--yes-to-all`**: by default the script will ask you before deleting _each user_, which can be tedious for 
+`-y`, `--delete-yes-to-all`: by default the script will ask you before deleting _each user_, which can be tedious for 
 large data sets.
 
-**`-r`**, **`-auto-resolve-incidents`**: when the script encounters a user that has open incidents, it will pause and 
+`-r`, `-auto-resolve-incidents`: when the script encounters a user that has open incidents, it will pause and 
 ask if you'd like to resolve those incidents. Even if you select `yes`, the script will not resolve incidents that have
 responders other than the user to be deleted. 
 

@@ -319,7 +319,7 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve, 
     # Incidents #
     #############
     log.info("Checking for incidents assigned to user %s...", user_id)
-    # Check for open incidents user is currently in use foro
+    # Check for open incidents user is currently in use for
     incidents = user_deleter.list_open_incidents()
     n_incidents = len(incidents)
     if n_incidents > 0:
