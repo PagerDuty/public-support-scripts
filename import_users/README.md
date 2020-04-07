@@ -30,6 +30,10 @@ To execute the script, run:
 ruby import_users.rb -a API_KEY_HERE -f PATH_TO_FILE_HERE -e REQUESTER_EMAIL
 ```
 
+## Errors
+
+Errors are printed to the terminal as they happen, and are also recorded in a log file named after the requester_email. The log file will tell you the HTTP status, the response body, and the attempted payload or query.
+
 ## Notes and Caveats
 Use --help to view all commandline options. There is an option (-t) that will create teams for you if they do not already exist.
 Whitespace is bad. The only place where whitespace is permitted is between the first and last names and inside team names. There cannot be whitespace anywhere else in the CSV.
