@@ -5,6 +5,7 @@ require 'faraday'
 require 'json'
 require 'csv'
 require 'optparse'
+require 'logger'
 
 class PagerDutyAgent
   attr_reader :token
@@ -13,6 +14,7 @@ class PagerDutyAgent
   attr_reader :connection
 
   def initialize(token, requester_email, create_teams)
+    @log = Logger.new("import_errors_for_#{requester_email}.log")
     @token = token
     @requester_email = requester_email
     @create_teams = create_teams
@@ -27,7 +29,10 @@ class PagerDutyAgent
     response = connection.get(path, query,
         { 'Authorization' => "Token token=#{token}",
           'Accept' => 'application/vnd.pagerduty+json;version=2'})
-    raise "Error: #{response.body}" unless response.success?
+    if !response.success?
+      @log.error("Status: #{response.status}--Response: #{response.body}---Query: #{query}")
+      raise "Error: #{response.body}"
+    end
     JSON.parse(response.body)
   end
 
@@ -44,7 +49,12 @@ class PagerDutyAgent
         'Accept' => 'application/vnd.pagerduty+json;version=2'}
     end
     response = connection.post(path, body_json, headers)
-    raise "Error: #{response.body}" unless response.success?
+
+    if !response.success?
+      @log.error("Status: #{response.status}--Response: #{response.body}---Payload: #{body}")
+      raise "Error: #{response.body}"
+    end
+
     return JSON.parse(response.body)
   end
 
@@ -52,7 +62,12 @@ class PagerDutyAgent
     response = connection.put(path, body,
       { 'Authorization' => "Token token=#{token}",
         'Accept' => 'application/vnd.pagerduty+json;version=2'})
-    raise "Error: #{response.body}" unless response.success?
+
+    if !response.success?
+      @log.error("Status: #{response.status}--Response: #{response.body}---Payload: #{body}")
+      raise "Error: #{response.body}"
+    end
+
     puts response.status
   end
 
