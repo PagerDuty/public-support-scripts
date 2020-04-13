@@ -26,10 +26,12 @@ This script is meant to be used as a command line tool with the following argume
 large data sets.
 
 `-r`, `-auto-resolve-incidents`: when the script encounters a user that has open incidents, it will pause and 
-ask if you'd like to resolve those incidents. Even if you select `yes`, the script will not resolve incidents that have
-responders other than the user to be deleted. 
+ask if you'd like to resolve those incidents. If you do not resolve all incidents associated with a user, the user will
+not be successfully deleted. 
 
 ## Notes and Caveats
+
+**If you do not resolve all incidents associated with a user, the user will not be successfully deleted.**
 
 You might see a 400 error when removing a user from the team, but this error itself is sometimes erroneous. If the log output shows that the user wasn't successfully removed from the team, but was successfully deleted, you can trust the latter information and ignore the former. 
 

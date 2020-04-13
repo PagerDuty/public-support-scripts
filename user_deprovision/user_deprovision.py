@@ -179,17 +179,13 @@ class DeleteUser(APISession):
             List of incident-like dict objects, i.e. retrieved from the API
         """
         for incident in incidents:
-            if len(incident.get('assignments')) > 1:
-                log.info('Resolving %s', incident['id'])
-                try:
-                    self.rput(incident['self'],
-                              json={'type': 'incident_reference', 'status': 'resolved'})
-                except PDClientError as e:
-                    handle_exception(e)
-                    log.error("Could not resolve incident %s.", incident['id'])
-            else:
-                log.info('Not resolving incident {}, as there are {} other responders'.format(
-                    incident.get('id'), len(incident.get('assignments'))))
+            log.info('Resolving %s', incident['id'])
+            try:
+                self.rput(incident['self'],
+                          json={'type': 'incident_reference', 'status': 'resolved'})
+            except PDClientError as e:
+                handle_exception(e)
+                log.error("Could not resolve incident %s.", incident['id'])
 
     @property
     def escalation_policies(self):
