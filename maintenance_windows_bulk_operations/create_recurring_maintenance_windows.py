@@ -36,8 +36,9 @@ def create_recurring_maintenance_windows(args):
             if e.response is not None:
                 msg += "HTTP %d: %s"%(e.response.status_code, e.response.text)
             print(msg)
-    print("(Note: no maintenance windows actually created because -n/--dry-run "
-        "was given)")
+    if args.dry_run:
+        print("(Note: no maintenance windows actually created because -n/--dry-run "
+            "was given)")
 def main():
     desc = "Create a series of recurring maintenance windows."
     ap = argparse.ArgumentParser(description=desc)
