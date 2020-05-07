@@ -5,4 +5,5 @@
 .ruby-version
 Gemfile.lock
 .idea
-backup
+backup/
+logs/
