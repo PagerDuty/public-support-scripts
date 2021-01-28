@@ -3,30 +3,41 @@
 import argparse
 import pdpyras
 import sys
+import csv
+
+ 
 
 team_managers=[]
 
 def get_users(role, session):
     sys.stdout.write("Listing %ss:\n"%role)
     members = [] 
-    for user in session.iter_all('users'): 
-      if user['role'] == role:
-        sys.stdout.write(user['name'] + "\n")
-        members.append(user['name'])
-    total_for_role = str(len(members))   
-    sys.stdout.write("Total number of "+role+"s: "+total_for_role)
-    sys.stdout.write("\n-----\n")
+    with open('member_roles.csv', 'a+') as csvfile:
+      writer = csv.writer(csvfile)
+      writer.writerow(['Name', 'Role'])
+      for user in session.iter_all('users'): 
+        if user['role'] == role:
+          sys.stdout.write(user['name'] + "\n")
+          writer.writerow([user['name'], role])
+          members.append(user['name'])
+      total_for_role = str(len(members))   
+      sys.stdout.write("Total number of "+role+"s: "+total_for_role)
+      sys.stdout.write("\n-----\n")
 
-def get_managers(team_id, session): 
-    for member in session.iter_all('teams/%s/members'%team_id):
-     if member['role'] == 'manager':
-       sys.stdout.write(member['user']['summary'] + "\n")
-       team_managers.append(member['user']['summary'])
+def get_managers(team_id, team_name, session):
+    with open('member_roles.csv', 'a+', newline='') as csvfile:
+      writer = csv.writer(csvfile) 
+      for member in session.iter_all('teams/%s/members'%team_id):
+        if member['role'] == 'manager':
+          sys.stdout.write(member['user']['summary'] + "\n")
+          writer.writerow([member['user']['summary'], "Team Manager, " + team_name])
+          team_managers.append(member['user']['summary'])
     
 
 def get_teams(session):
     for team in session.iter_all('teams'):
-      get_managers(team['id'], session)
+      team_name = (team['summary'])
+      get_managers(team['id'], team_name, session)
     total_team_managers = str(len(team_managers))
     sys.stdout.write("Total number of team managers: "+total_team_managers+"\n")
     
