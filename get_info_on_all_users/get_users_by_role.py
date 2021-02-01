@@ -7,6 +7,7 @@ import csv
 
 # create a dictionary to keep track of how many people are in each role
 role_types_count = {}
+allowed_roles=['admin','read_only_user','read_only_limited_user','user','limited_user','observer','restricted_access','owner']
 team_managers=[]
 
 def get_users(role, session):
@@ -65,16 +66,23 @@ if __name__ == '__main__':
   for role in roles:
     if role == "team_managers":
       get_teams(session)
-    else:  
+    elif role in allowed_roles:  
       get_users(role, session)
+    else:  
+      sys.stdout.write("\n"+role+" is not an acceptable value. Please only use the following values with the -r flag:\n")
+      for api_value in allowed_roles:
+        sys.stdout.write(api_value+"\n")
+      sys.stdout.write("\n")  
   for role_type, total in role_types_count.items():
     sys.stdout.write(role_type+": "+str(total)+"\n")
-  with open('member_roles.csv', 'a+') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow([])
-    writer.writerow(["Role Type", "Total"])
-    for role_type, total in role_types_count.items():
-      writer.writerow([role_type, total])      
+
+# to write the totals for each role type at the bottom of the csv  
+  # with open('member_roles.csv', 'a+') as csvfile:
+  #   writer = csv.writer(csvfile)
+  #   writer.writerow([])
+  #   writer.writerow(["Role Type", "Total"])
+  #   for role_type, total in role_types_count.items():
+  #     writer.writerow([role_type, total])      
       
 # This script will take a comma separated list of roles as a command line argument and fetches all the users in an account that match one of 
 # roles provided in the list. Roles will be fetched in the order that they are provided in the command line argument. Running with -v flag will 
@@ -85,6 +93,3 @@ if __name__ == '__main__':
 # how to run:
 # python get_users_by_role.py -k API-KEY-HERE -r COMMA-SEPARATED-ROLES-LIST
 # acceptable values for roles: admin,read_only_user,read_only_limited_user,user,limited_user,observer,restricted_access,owner
-
-
-
