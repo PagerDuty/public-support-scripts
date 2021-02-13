@@ -11,6 +11,7 @@ allowed_roles=['admin','read_only_user','read_only_limited_user','user','limited
 team_managers=[]
 
 def write_rows(column1, column2):
+# one function for writing to csv
   with open(filename, 'a+') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow([column1, column2])
@@ -45,6 +46,7 @@ def get_managers(team_id, team_name, session):
     
 
 def get_teams(session):
+# first need to get all teams before we can look up team managers  
   role_types_count['team managers'] = 0 
   for team in session.iter_all('teams'):
     team_name = (team['summary'])
@@ -82,14 +84,7 @@ if __name__ == '__main__':
       sys.stdout.write("\n")  
   for role_type, total in role_types_count.items():
     sys.stdout.write(role_type+": "+str(total)+"\n")
-
-# to write the totals for each role type at the bottom of the csv  
-  # with open('member_roles.csv', 'a+') as csvfile:
-  #   writer = csv.writer(csvfile)
-  #   writer.writerow([])
-  #   writer.writerow(["Role Type", "Total"])
-  #   for role_type, total in role_types_count.items():
-  #     writer.writerow([role_type, total])      
+     
       
 # This script will take a comma separated list of roles as a command line argument and fetches all the users in an account that match one of 
 # roles provided in the list. Roles will be fetched in the order that they are provided in the command line argument. Running with -v flag will 
