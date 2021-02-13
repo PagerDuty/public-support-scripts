@@ -10,11 +10,11 @@ role_types_count = {}
 allowed_roles=['admin','read_only_user','read_only_limited_user','user','limited_user','observer','restricted_access','owner']
 team_managers=[]
 
-def write_rows(column1, column2):
+def write_rows(column1, column2, column3):
 # one function for writing to csv
   with open(filename, 'a+') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow([column1, column2])
+    writer.writerow([column1, column2, column3])
 
 
 def get_users(role, session):
@@ -27,7 +27,7 @@ def get_users(role, session):
       role_types_count[role] += 1
       if args.logging: 
         sys.stdout.write(user['name'] + "\n")
-      write_rows(user['name'], role)
+      write_rows(user['name'], role, user['email'])
       members.append(user['name'])
   total_for_role = str(len(members))
   if args.logging:   
@@ -41,7 +41,9 @@ def get_managers(team_id, team_name, session):
       role_types_count['team managers'] += 1
       if args.logging: 
         sys.stdout.write(member['user']['summary'] + "\n")
-      write_rows([member['user']['summary'], "Team Manager, " + team_name])
+      user_id = member['user']['id']  
+      user = session.rget('/users/%s'%user_id)  
+      write_rows(user['name'], "Team Manager, " + team_name, user['email'])
       team_managers.append(member['user']['summary'])
     
 
@@ -71,14 +73,14 @@ if __name__ == '__main__':
     filename = args.filename + '.csv'
   else:
     filename = args.filename
-  write_rows('Name','Role')  
+  write_rows('Name','Role', 'Email')  
   for role in roles:
     if role == "team_managers":
       get_teams(session)
     elif role in allowed_roles:  
       get_users(role, session)
     else:  
-      sys.stdout.write("\n"+role+" is not an acceptable value. Please only use the following values with the -r flag:\n")
+      sys.stdout.write("\n"+role+" is not an acceptable value. Please only use the following values with the -r flag:\nteam_managers\n")
       for api_value in allowed_roles:
         sys.stdout.write(api_value+"\n")
       sys.stdout.write("\n")  
