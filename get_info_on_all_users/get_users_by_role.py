@@ -10,37 +10,38 @@ role_types_count = {}
 allowed_roles=['admin','read_only_user','read_only_limited_user','user','limited_user','observer','restricted_access','owner']
 team_managers=[]
 
+def write_rows(column1, column2):
+  with open(filename, 'a+') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow([column1, column2])
+
+
 def get_users(role, session):
   role_types_count[role] = 0
   if args.logging: 
     sys.stdout.write("Listing %ss:\n"%role)
   members = [] 
-  with open('member_roles.csv', 'a+') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(['Name', 'Role'])
-    for user in session.iter_all('users'): 
-      if user['role'] == role:
-        role_types_count[role] += 1
-        if args.logging: 
-          sys.stdout.write(user['name'] + "\n")
-        writer.writerow([user['name'], role])
-        members.append(user['name'])
-    total_for_role = str(len(members))
-    if args.logging:   
-      sys.stdout.write("Total number of "+role+"s: "+total_for_role)
-      sys.stdout.write("\n-----\n")
+  for user in session.iter_all('users'): 
+    if user['role'] == role:
+      role_types_count[role] += 1
+      if args.logging: 
+        sys.stdout.write(user['name'] + "\n")
+      write_rows(user['name'], role)
+      members.append(user['name'])
+  total_for_role = str(len(members))
+  if args.logging:   
+    sys.stdout.write("Total number of "+role+"s: "+total_for_role)
+    sys.stdout.write("\n-----\n")
 
 
 def get_managers(team_id, team_name, session):
-  with open('member_roles.csv', 'a+', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    for member in session.iter_all('teams/%s/members'%team_id):
-      if member['role'] == 'manager':
-        role_types_count['team managers'] += 1
-        if args.logging: 
-          sys.stdout.write(member['user']['summary'] + "\n")
-        writer.writerow([member['user']['summary'], "Team Manager, " + team_name])
-        team_managers.append(member['user']['summary'])
+  for member in session.iter_all('teams/%s/members'%team_id):
+    if member['role'] == 'manager':
+      role_types_count['team managers'] += 1
+      if args.logging: 
+        sys.stdout.write(member['user']['summary'] + "\n")
+      write_rows([member['user']['summary'], "Team Manager, " + team_name])
+      team_managers.append(member['user']['summary'])
     
 
 def get_teams(session):
@@ -59,10 +60,16 @@ if __name__ == '__main__':
       "stated in the command line argument")
   ap.add_argument('-k', '--api-key', required=True, help="REST API key")
   ap.add_argument('-r', '--roles', required=True, help="roles to be fetched", dest='roles')
+  ap.add_argument('-f', '--filename', required=True, help="filename for csv", dest='filename')
   ap.add_argument('-v', '--logging', default=False, dest='logging', help="verbose logging", action='store_true')
   args = ap.parse_args()
   session = pdpyras.APISession(args.api_key)
   roles = (args.roles).split(',')
+  if args.filename[-4:] != '.csv':
+    filename = args.filename + '.csv'
+  else:
+    filename = args.filename
+  write_rows('Name','Role')  
   for role in roles:
     if role == "team_managers":
       get_teams(session)
