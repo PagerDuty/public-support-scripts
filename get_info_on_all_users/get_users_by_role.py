@@ -95,5 +95,5 @@ if __name__ == '__main__':
 # The script also creates a csv with names in the first column and users in the second. At the bottom of the CSV the totals for each role type
 # are listed.  
 # how to run:
-# python get_users_by_role.py -k API-KEY-HERE -r COMMA-SEPARATED-ROLES-LIST
+# python get_users_by_role.py -k API-KEY-HERE -r COMMA-SEPARATED-ROLES-LIST -f FILENAME-FOR-CSV
 # acceptable values for roles: admin,read_only_user,read_only_limited_user,user,limited_user,observer,restricted_access,owner
