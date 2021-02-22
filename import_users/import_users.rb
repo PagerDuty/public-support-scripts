@@ -179,13 +179,13 @@ class CSVImporter
       record.role = "user" if !record.role
       # Default title to " "
       record.title = " " if !record.title
-      puts "Adding user: #{record}."
+      puts "Adding user: #{record.name}."
       $log.info("Attempting to add user #{record.name}.")
       $log.info("User's record details: #{record}.")
       user = agent.add_user(record.name, record.email, record.role.downcase, record.title)
       user_id = user["user"]["id"]
-      puts "Added user with id: #{user_id}."
-      $log.info("Created a new user with id: #{user_id} and login email #{record.email}.")
+      puts "Added user with ID #{user_id}."
+      $log.info("Created a new user with ID #{user_id} and login email #{record.email}.")
     end
 
     # Add user and email notification rule
