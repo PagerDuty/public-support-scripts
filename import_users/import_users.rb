@@ -14,14 +14,15 @@ class PagerDutyAgent
   attr_reader :connection
 
   def initialize(token, requester_email, create_teams)
-    @log = Logger.new("import_errors_for_#{requester_email}.log")
-    @token = token
     @requester_email = requester_email
+    @token = token
     @create_teams = create_teams
     @connection = Faraday.new(:url => "https://api.pagerduty.com",
                               :ssl => {:verify => true}) do |c|
       c.request  :url_encoded
       c.adapter  :net_http
+    #logger defined as a global variable accessible to all classes in the script
+    $log = Logger.new("import_errors_for_#{requester_email}.log")
     end
   end
 
@@ -30,7 +31,8 @@ class PagerDutyAgent
         { 'Authorization' => "Token token=#{token}",
           'Accept' => 'application/vnd.pagerduty+json;version=2'})
     if !response.success?
-      @log.error("Status: #{response.status}--Response: #{response.body}---Query: #{query}")
+      $log.error("Status: #{response.status}
+        Response: #{response.body}---Query: #{query}")
       raise "Error: #{response.body}"
     end
     JSON.parse(response.body)
@@ -41,7 +43,7 @@ class PagerDutyAgent
     if @extra_headers
       headers = { 'Authorization' => "Token token=#{token}",
         'Content-Type' => 'application/json',
-        'From' => "#{requester_email}",
+        'From' => "#{$requester_email}",
         'Accept' => 'application/vnd.pagerduty+json;version=2'}
     else
       headers = { 'Authorization' => "Token token=#{token}",
@@ -51,7 +53,7 @@ class PagerDutyAgent
     response = connection.post(path, body_json, headers)
 
     if !response.success?
-      @log.error("Status: #{response.status}--Response: #{response.body}---Payload: #{body}")
+      $log.error("Status: #{response.status}--Response: #{response.body}---Payload: #{body}")
       raise "Error: #{response.body}"
     end
 
@@ -64,7 +66,7 @@ class PagerDutyAgent
         'Accept' => 'application/vnd.pagerduty+json;version=2'})
 
     if !response.success?
-      @log.error("Status: #{response.status}--Response: #{response.body}---Payload: #{body}")
+      $log.error("Status: #{response.status}--Response: #{response.body}---Payload: #{body}")
       raise "Error: #{response.body}"
     end
 
@@ -158,7 +160,7 @@ class CSVImporter
   end
 
   def import_user(record)
-
+    $log.info("Attempting to find existing user by email #{record.email}.")
     # Try to find an existing user
     users = agent.find_user_by_email(record.email)
     user = nil; user_id = nil
@@ -167,56 +169,68 @@ class CSVImporter
       # FIXME: Make sure this is actually the user and not just the first user
       user = users["users"][0]
       user_id = user["id"]
-      puts "Found user: #{record.email}"
-      puts "Found contact methods: #{agent.contact_methods(user_id)}"
+      puts "Found user: #{record.email}."
+      $log.info("Found existing user #{record.email}.")
+      puts "Found contact methods: #{agent.contact_methods(user_id)}."
+      $log.info("Found existing contact methods #{record.email}.")
       puts ""
     else
       # Default role to user
       record.role = "user" if !record.role
       # Default title to " "
       record.title = " " if !record.title
-      puts "Adding user: #{record}"
+      puts "Adding user: #{record.name}."
+      $log.info("Attempting to add user #{record.name}.")
+      $log.info("User's record details: #{record}.")
       user = agent.add_user(record.name, record.email, record.role.downcase, record.title)
       user_id = user["user"]["id"]
-      puts "Added user with id: #{user_id}"
+      puts "Added user with ID #{user_id}."
+      $log.info("Created a new user with ID #{user_id} and login email #{record.email}.")
     end
 
     # Add user and email notification rule
     ["SMS", "phone"].each do |type|
       if (!record.phone_number || !record.country_code)
-        puts "Phone number or country code blank; skipping creation of #{type} contact method and notification rules."
+        puts "Phone number and/or country code blank; skipping creation of #{type} contact method and notification rules."
+        $log.info("Phone number and/or country code blank; skipping creation of #{type} contact method and notification rules.")
       else
         add_contact_method(type, user_id, record)
       end
     end
 
     # Add user to teams
-    puts "Adding user to teams"
+    puts "Adding user to teams."
+    $log.info("Adding user #{record.name} to teams.")
     teams = record.teams ? record.teams.split(";") : []
     teams.each do |team|
       team_id = agent.get_team_id(agent.find_teams_by_name(team.strip)["teams"], team.strip)
       if team_id
         agent.add_user_to_team(team_id, user_id)
+        $log.info("Added #{record.name} to team #{team}")
       else
         if agent.create_teams
-          puts "Could not find team #{team}, creating a new team..."
+          puts "Could not find team #{team}, creating a new team."
+          $log.info("Could not find existing team #{team}, creating a new team.")
           r = agent.add_team(team.strip)
           team_id = r['team']['id']
-          puts "Created team #{team} with ID #{team_id}, adding user to team..."
+          puts "Created team #{team} with ID #{team_id}, adding user to team."
           agent.add_user_to_team(team_id, user_id)
+          $log.info("Added #{record.name} to team #{team}.")
         else
-          puts "Could not find team #{team}, skipping..."
+          puts "Could not find team #{team}, skipping."
+          $log.info("Could not find team #{team}, skipping.")
         end
       end
     end
 
   rescue Exception => e
-    puts "Error adding user: #{record}, #{e}"
+    puts "Error adding or updating user: #{record}, #{e}."
   end
 
   # type: phone, SMS, email
   def add_contact_method(type, user_id, record)
-    puts "Adding #{type} notification"
+    puts "Adding #{type} notification."
+    $log.info("Attempting to add #{type} notification for user #{record.name}.")
     contact_method = agent.add_contact(user_id, type,
       record.phone_number, record.country_code, "Mobile")
     contact_method_id = contact_method["contact_method"]["id"]
