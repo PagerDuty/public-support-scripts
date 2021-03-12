@@ -266,8 +266,8 @@ OptionParser.new do |opts|
   opts.on('-f', '--csv-path [String]', 'Path to CSV file') do |f|
     options[:csv_path] = f
   end
-  opts.on('-t', '--[no-]no-new-teams', 'If a non-existing team is named in the file, skip') do |t|
-    options[:no_new_teams] = t
+  opts.on('-n', '--[no-]no-new-teams', 'If a non-existing team is named in the file, skip') do |n|
+    options[:no_new_teams] = n
   end
 end.parse!
 
