@@ -10,13 +10,13 @@ require 'logger'
 class PagerDutyAgent
   attr_reader :token
   attr_reader :requester_email
-  attr_reader :create_teams
+  attr_reader :no_new_teams
   attr_reader :connection
 
-  def initialize(token, requester_email, create_teams)
+  def initialize(token, requester_email, no_new_teams)
     @requester_email = requester_email
     @token = token
-    @create_teams = create_teams
+    @no_new_teams = no_new_teams
     @connection = Faraday.new(:url => "https://api.pagerduty.com",
                               :ssl => {:verify => true}) do |c|
       c.request  :url_encoded
@@ -206,20 +206,18 @@ class CSVImporter
       team_id = agent.get_team_id(agent.find_teams_by_name(team.strip)["teams"], team.strip)
       if team_id
         agent.add_user_to_team(team_id, user_id)
-        $log.info("Added #{record.name} to team #{team}")
+        $log.info("Added #{record.name} to team #{team}")  
+      elsif agent.no_new_teams
+        puts "Could not find team #{team}, skipping."
+        $log.info("Could not find team #{team}, skipping.")
       else
-        if agent.create_teams
-          puts "Could not find team #{team}, creating a new team."
-          $log.info("Could not find existing team #{team}, creating a new team.")
-          r = agent.add_team(team.strip)
-          team_id = r['team']['id']
-          puts "Created team #{team} with ID #{team_id}, adding user to team."
-          agent.add_user_to_team(team_id, user_id)
-          $log.info("Added #{record.name} to team #{team}.")
-        else
-          puts "Could not find team #{team}, skipping."
-          $log.info("Could not find team #{team}, skipping.")
-        end
+        puts "Could not find team #{team}, creating a new team."
+        $log.info("Could not find existing team #{team}, creating a new team.")
+        r = agent.add_team(team.strip)
+        team_id = r['team']['id']
+        puts "Created team #{team} with ID #{team_id}, adding user to team."
+        agent.add_user_to_team(team_id, user_id)
+        $log.info("Added #{record.name} to team #{team}.")
       end
     end
 
@@ -268,11 +266,11 @@ OptionParser.new do |opts|
   opts.on('-f', '--csv-path [String]', 'Path to CSV file') do |f|
     options[:csv_path] = f
   end
-  opts.on('-t', '--[no-]create-teams', 'Auto-provision teams that do not already exist') do |t|
-    options[:create_teams] = t
+  opts.on('-n', '--[no-]no-new-teams', 'If a non-existing team is named in the file, skip') do |n|
+    options[:no_new_teams] = n
   end
 end.parse!
 
-agent = PagerDutyAgent.new(options[:access_token], options[:requester_email], options[:create_teams])
+agent = PagerDutyAgent.new(options[:access_token], options[:requester_email], options[:no_new_teams])
 
 CSVImporter.new(agent, options[:csv_path]).import
