@@ -16,8 +16,7 @@ In this format:
   without country code
 - `teams` is a semicolon-delimited list of teams to which the given user should
   be added
-- `team_roles` is a semicolon-delimited list of team roles to which the given team should
-    be added
+- `team_roles` is a semicolon-delimited list of team roles that will be applied to the give team(s) in the order defined.
 - `email` is the user's login address, and it must uniquely match the user.
 - `role` must be a valid user role value; see [Roles in the REST API and
   SAML](https://support.pagerduty.com/v1/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)
