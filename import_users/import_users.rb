@@ -117,8 +117,9 @@ class PagerDutyAgent
     post("/users/#{user_id}/notification_rules", request_body)
   end
 
-  def add_user_to_team(team_id, user_id)
-    put("/teams/#{team_id}/users/#{user_id}")
+  def add_user_to_team(team_id, user_id, team_role)
+    request_body = {'role' => team_role}
+    put("/teams/#{team_id}/users/#{user_id}", request_body)
   end
 
   def add_team(team_name)
@@ -149,7 +150,7 @@ end
 
 class CSVImporter
 
-  Record = Struct.new(:name, :email, :role, :title, :country_code, :phone_number, :teams)
+  Record = Struct.new(:name, :email, :role, :title, :country_code, :phone_number, :teams, :team_roles)
 
   attr_reader :agent
   attr_reader :csv_file
@@ -202,11 +203,16 @@ class CSVImporter
     puts "Adding user to teams."
     $log.info("Adding user #{record.name} to teams.")
     teams = record.teams ? record.teams.split(";") : []
-    teams.each do |team|
+
+    teams.each_with_index do |team,team_index|
+      team_role = team_roles(record,team_index)
       team_id = agent.get_team_id(agent.find_teams_by_name(team.strip)["teams"], team.strip)
       if team_id
-        agent.add_user_to_team(team_id, user_id)
-        $log.info("Added #{record.name} to team #{team}")  
+        agent.add_user_to_team(team_id, user_id, team_role)
+        puts "Added #{record.name} to team #{team}"
+        $log.info("Added #{record.name} to team #{team}")
+        puts "Role #{team_role} applied to #{team} team for #{record.name}"
+        $log.info("Role #{team_role} applied to #{team} team for #{record.name}")
       elsif agent.no_new_teams
         puts "Could not find team #{team}, skipping."
         $log.info("Could not find team #{team}, skipping.")
@@ -216,7 +222,8 @@ class CSVImporter
         r = agent.add_team(team.strip)
         team_id = r['team']['id']
         puts "Created team #{team} with ID #{team_id}, adding user to team."
-        agent.add_user_to_team(team_id, user_id)
+        agent.add_user_to_team(team_id, user_id, team_role)
+        puts "Added #{record.name} to #{team}, with role #{team_role}."
         $log.info("Added #{record.name} to team #{team}.")
       end
     end
@@ -248,7 +255,19 @@ class CSVImporter
 
   def row_to_record(row)
     # NOTE: You may need to adjust this if the format of your row is different.
-    Record.new(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+    Record.new(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+  end
+
+  private
+
+  def team_roles(record,team_index)
+    team_roles = record.team_roles ? record.team_roles.split(";") : []
+
+    # return first role if there is only one
+    return team_roles[0] if team_roles.length == 1
+
+    #return team role associated with the team OR return responder as default
+    team_roles[team_index] || 'responder'
   end
 
 end
