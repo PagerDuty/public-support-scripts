@@ -16,7 +16,7 @@ In this format:
   without country code
 - `teams` is a semicolon-delimited list of teams to which the given user should
   be added
-  - `team_roles` is a semicolon-delimited list of team roles to which the given team should
+- `team_roles` is a semicolon-delimited list of team roles to which the given team should
     be added
 - `email` is the user's login address, and it must uniquely match the user.
 - `role` must be a valid user role value; see [Roles in the REST API and
@@ -41,7 +41,7 @@ In the above example team1 will be set as manager and team2 will be set as obser
 team1;team2;team3,observer
 ```
 
-In the above example all the teams will be set as observers team role
+In the above example all the teams will be set as observer team role
 
 ## Input Format
 
