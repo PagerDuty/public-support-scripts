@@ -266,8 +266,12 @@ class CSVImporter
     # return first role if there is only one
     return team_roles[0] if team_roles.length == 1
 
+    role = team_roles[team_index] == '' ? 'responder' : team_roles[team_index]
+
+    puts team_index
+    puts role
     #return team role associated with the team OR return responder as default
-    team_roles[team_index] || 'responder'
+    return role
   end
 
 end
