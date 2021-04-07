@@ -42,6 +42,14 @@ team1;team2;team3,observer
 
 In the above example all the teams will be set as observer team role
 
+- If you want the last team to have the team role as manager
+
+```
+...,team1;team2;team3,;;manager
+```
+
+In the above example the first two team roles are blank therefore responder team role will be applied and the last team will be set as manager
+
 ## Input Format
 
 To execute the script, run:
