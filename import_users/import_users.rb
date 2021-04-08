@@ -261,11 +261,13 @@ class CSVImporter
   private
 
   def team_roles(record,team_index)
+    #role must be one of the following manager,observer,responder in the csv file as per our API
     team_roles = record.team_roles ? record.team_roles.split(";") : []
 
     # return first role if there is only one
     return team_roles[0] if team_roles.length == 1
 
+    #replace all the blank array elements with the default of 'responder'
     team_roles.map! { |r| r&.empty? ? 'responder' : r }
 
     #return team role associated with the team OR return responder as default
