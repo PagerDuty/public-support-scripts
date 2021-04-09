@@ -207,12 +207,16 @@ class CSVImporter
     teams.each_with_index do |team,team_index|
       team_role = team_roles(record,team_index)
       team_id = agent.get_team_id(agent.find_teams_by_name(team.strip)["teams"], team.strip)
+      user_role = record.role.include?('ready_only')
+
       if team_id
-        agent.add_user_to_team(team_id, user_id, team_role)
-        puts "Added #{record.name} to team #{team}"
-        $log.info("Added #{record.name} to team #{team}")
-        puts "Role #{team_role} applied to #{team} team for #{record.name}"
-        $log.info("Role #{team_role} applied to #{team} team for #{record.name}")
+        if user_role ? team_role = 'observer' : team_role
+          agent.add_user_to_team(team_id, user_id, team_role)
+          puts "Added #{record.name} to team #{team}"
+          $log.info("Added #{record.name} to team #{team}")
+          puts "Role #{team_role} applied to #{team} team for #{record.name}"
+          $log.info("Role #{team_role} applied to #{team} team for #{record.name}")
+        end
       elsif agent.no_new_teams
         puts "Could not find team #{team}, skipping."
         $log.info("Could not find team #{team}, skipping.")
@@ -222,6 +226,7 @@ class CSVImporter
         r = agent.add_team(team.strip)
         team_id = r['team']['id']
         puts "Created team #{team} with ID #{team_id}, adding user to team."
+        user_role ? team_role = 'observer' : team_role
         agent.add_user_to_team(team_id, user_id, team_role)
         puts "Added #{record.name} to #{team}, with role #{team_role}."
         $log.info("Added #{record.name} to team #{team}, with role #{team_role}.")
