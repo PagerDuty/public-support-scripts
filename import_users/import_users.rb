@@ -224,7 +224,7 @@ class CSVImporter
         puts "Created team #{team} with ID #{team_id}, adding user to team."
         agent.add_user_to_team(team_id, user_id, team_role)
         puts "Added #{record.name} to #{team}, with role #{team_role}."
-        $log.info("Added #{record.name} to team #{team}.")
+        $log.info("Added #{record.name} to team #{team}, with role #{team_role}.")
       end
     end
 
