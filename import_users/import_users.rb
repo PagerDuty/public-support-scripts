@@ -153,7 +153,7 @@ class CSVImporter
   Record = Struct.new(:name, :email, :role, :title, :country_code, :phone_number, :teams, :team_roles)
 
   DEFAULT_TEAM_ROLES = {'owner': 'manager','admin': 'manager','user': 'manager','limited_user': 'responder','ready_only_user': 'observer',
-                         'ready_only_limited_user': 'observer'}.freeze
+                         'ready_only_limited_user': 'observer', 'observer': 'observer'}.freeze
 
   attr_reader :agent
   attr_reader :csv_file
