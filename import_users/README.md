@@ -26,6 +26,10 @@ In this format:
 
 ## Team Roles
 
+When provisioning a user through the REST API or SAML, the user will by default be given the Manager (a.k.a. User) role, unless specified in the user's role property. The value set for it must be one of a set of fixed values that is recognized by our internal APIs, or our web services will respond with status 400 Invalid Request.
+
+The values of the role field of user records, and also the permissions system, are as follows:
+
 | title               | value                  | flexible/fixed |
 |---------------------|------------------------|----------------|
 | Global Admin        | admin                  | Fixed          |
@@ -36,9 +40,9 @@ In this format:
 | Observer            | observer               | Flexible       |
 | Restricted Access   | restricted_access      | Flexible       |
 
-- There are three team roles manager, responder and observer
-- A user with base role owner and admin will be applied a fixed team role of manager
-- A user with base role ready_only_user and ready_only_limited_user will be applied a fixed team role of observer
+- There are three team roles `manager`, `responder` and `observer`
+- A user with base role `owner` and `admin` will be applied a fixed team role of `manager`
+- A user with base role `ready_only_user` and `ready_only_limited_user` will be applied a fixed team role of `observer`
 - If no team roles are supplied the default team role will be added to the team(s) based on the user role
 - The order of the team should match the order of the team roles
 
