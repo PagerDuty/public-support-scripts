@@ -26,7 +26,7 @@ In this format:
 
 ## Team Roles
 
-When a user is added to or associated with a team for the first time, their default team role will be dependent on their base role. Users can be added to a team manually or automatically by being added to an escalation policy that is associated with a team. Read more about team role (https://support.pagerduty.com/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)[here].
+When a user is added to or associated with a team for the first time, their default team role will be dependent on their base role. Users can be added to a team manually or automatically by being added to an escalation policy that is associated with a team. Read more about team role [here](https://support.pagerduty.com/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml).
 
 | Base Role           | Default Team Role When Added to a Team |
 |---------------------|----------------------------------------|
