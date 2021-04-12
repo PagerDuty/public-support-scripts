@@ -152,6 +152,9 @@ class CSVImporter
 
   Record = Struct.new(:name, :email, :role, :title, :country_code, :phone_number, :teams, :team_roles)
 
+  DEFAULT_TEAM_ROLES = {'owner': 'manager','admin': 'manager','user': 'manager','limited_user': 'responder','ready_only_user': 'observer',
+                         'ready_only_limited_user': 'observer'}.freeze
+
   attr_reader :agent
   attr_reader :csv_file
 
@@ -207,16 +210,13 @@ class CSVImporter
     teams.each_with_index do |team,team_index|
       team_role = team_roles(record,team_index)
       team_id = agent.get_team_id(agent.find_teams_by_name(team.strip)["teams"], team.strip)
-      user_role = record.role.include?('ready_only')
 
       if team_id
-        if user_role ? team_role = 'observer' : team_role
-          agent.add_user_to_team(team_id, user_id, team_role)
-          puts "Added #{record.name} to team #{team}"
-          $log.info("Added #{record.name} to team #{team}")
-          puts "Role #{team_role} applied to #{team} team for #{record.name}"
-          $log.info("Role #{team_role} applied to #{team} team for #{record.name}")
-        end
+        agent.add_user_to_team(team_id, user_id, team_role)
+        puts "Added #{record.name} to team #{team}"
+        $log.info("Added #{record.name} to team #{team}")
+        puts "Role #{team_role} applied to #{team} team for #{record.name}"
+        $log.info("Role #{team_role} applied to #{team} team for #{record.name}")
       elsif agent.no_new_teams
         puts "Could not find team #{team}, skipping."
         $log.info("Could not find team #{team}, skipping.")
@@ -226,7 +226,6 @@ class CSVImporter
         r = agent.add_team(team.strip)
         team_id = r['team']['id']
         puts "Created team #{team} with ID #{team_id}, adding user to team."
-        user_role ? team_role = 'observer' : team_role
         agent.add_user_to_team(team_id, user_id, team_role)
         puts "Added #{record.name} to #{team}, with role #{team_role}."
         $log.info("Added #{record.name} to team #{team}, with role #{team_role}.")
@@ -267,16 +266,26 @@ class CSVImporter
 
   def team_roles(record,team_index)
     #role must be one of the following manager,observer,responder in the csv file as per our API
+    user_role = record.role
+
+    #return observer as fixed role if base role is one of the ready_only
+    return 'observer' if user_role.include?('ready_only')
+
+    default_role = DEFAULT_TEAM_ROLES["#{user_role}".to_sym]
+
+    #return manager as fixed role if base role is either admin or owner
+    return 'manager' if user_role == 'owner' || user_role == 'admin'
+
     team_roles = record.team_roles ? record.team_roles.split(";") : []
 
     # return first role if there is only one
     return team_roles[0] if team_roles.length == 1
 
-    #replace all the blank array elements with the default of 'responder'
-    team_roles.map! { |r| r&.empty? ? 'responder' : r }
+    #replace all the blank array elements with the default
+    team_roles.map! { |r| r&.empty? ? default_role : r }
 
-    #return team role associated with the team OR return responder as default
-    team_roles[team_index] || 'responder'
+    #return team role associated with the team OR return default team role
+    team_roles[team_index] || default_role
   end
 end
 
