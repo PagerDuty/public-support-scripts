@@ -26,19 +26,18 @@ In this format:
 
 ## Team Roles
 
-When provisioning a user through the REST API or SAML, the user will by default be given the Manager (a.k.a. User) role, unless specified in the user's role property. The value set for it must be one of a set of fixed values that is recognized by our internal APIs, or our web services will respond with status 400 Invalid Request.
+When a user is added to or associated with a team for the first time, their default team role will be dependent on their base role. Users can be added to a team manually or automatically by being added to an escalation policy that is associated with a team. Read more about team role (https://support.pagerduty.com/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)[here].
 
-The values of the role field of user records, and also the permissions system, are as follows:
+| Base Role           | Default Team Role When Added to a Team |
+|---------------------|----------------------------------------|
+| Observer**          | Observer                               |
+| Stakeholder         | Observer                               |
+| Restricted Access** | Observer                               |
+| Responder**         | Responder                              |
+| Manager**           | Manager                                |
+| Global Admin        | Manager                                |
 
-| title               | value                  | flexible/fixed |
-|---------------------|------------------------|----------------|
-| Global Admin        | admin                  | Fixed          |
-| Full Stakeholder    | read_only_user         | Fixed          |
-| Limited Stakeholder | read_only_limited_user | Fixed          |
-| Manager / User      | user                   | Flexible       |
-| Responder           | limited_user           | Flexible       |
-| Observer            | observer               | Flexible       |
-| Restricted Access   | restricted_access      | Flexible       |
+** Users with flexible base roles (Restricted Access, Observer, Responder, Manager) can have their default team roles changed to grant them more more or less permissions on a specific team.
 
 - There are three team roles `manager`, `responder` and `observer`
 - A user with base role `owner` and `admin` will be applied a fixed team role of `manager`
