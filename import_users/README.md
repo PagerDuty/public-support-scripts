@@ -7,7 +7,7 @@
 To use this script, you must first have a CSV file ready formatted as follows:
 
 ```
-name,email,role,title,country_code,phone_number,teams
+name,email,role,title,country_code,phone_number,teams,team_roles
 ```
 
 In this format:
@@ -16,12 +16,55 @@ In this format:
   without country code
 - `teams` is a semicolon-delimited list of teams to which the given user should
   be added
+- `team_roles` is a semicolon-delimited list of team roles that will be applied to the give team(s) in the order defined.
 - `email` is the user's login address, and it must uniquely match the user.
 - `role` must be a valid user role value; see [Roles in the REST API and
   SAML](https://support.pagerduty.com/v1/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml)
   in the PagerDuty Knowledge Base.
 - there must be **no spaces** between the commas and the items they separate  
 - do not include column headers
+
+## Team Roles
+
+When a user is added to or associated with a team for the first time, their default team role will be dependent on their base role. Users can be added to a team manually or automatically by being added to an escalation policy that is associated with a team. Read more about team role [here](https://support.pagerduty.com/docs/advanced-permissions#section-roles-in-the-rest-api-and-saml).
+
+| Base Role           | Default Team Role When Added to a Team |
+|---------------------|----------------------------------------|
+| Observer**          | Observer                               |
+| Stakeholder         | Observer                               |
+| Restricted Access** | Observer                               |
+| Responder**         | Responder                              |
+| Manager**           | Manager                                |
+| Global Admin        | Manager                                |
+
+** Users with flexible base roles (Restricted Access, Observer, Responder, Manager) can have their default team roles changed to grant them more more or less permissions on a specific team.
+
+- There are three team roles `manager`, `responder` and `observer`
+- A user with base role `owner` and `admin` will be applied a fixed team role of `manager`
+- A user with base role `ready_only_user` and `ready_only_limited_user` will be applied a fixed team role of `observer`
+- If no team roles are supplied the default team role will be added to the team(s) based on the user role
+- The order of the team should match the order of the team roles
+
+```
+..team1;team2,manager;observer
+```
+In the above example team1 will be set as manager and team2 will be set as observer respectively
+
+- To apply the same team role for all teams you can define one team role
+
+```
+team1;team2;team3,observer
+```
+
+In the above example all the teams will be set as observer team role
+
+- If you want the last team to have the team role as manager
+
+```
+...,team1;team2;team3,;;manager
+```
+
+In the above example the first two team roles are blank therefore responder team role will be applied and the last team will be set as manager
 
 ## Input Format
 
@@ -43,7 +86,7 @@ ruby import_users.rb -a API_KEY_HERE -f PATH_TO_FILE_HERE -e REQUESTER_EMAIL
 Errors are printed to the terminal as they happen, and are also recorded in a log file named after the requester_email. The log file will tell you the HTTP status, the response body, and the attempted payload or query.
 
 ## Notes and Caveats
-Use --help to view all commandline options. 
+Use --help to view all commandline options.
 
 **Whitespace is bad**. The only place where whitespace is permitted is within fields: between the first and last names and inside team names and job titles. There cannot be whitespace anywhere else in the CSV.
 
