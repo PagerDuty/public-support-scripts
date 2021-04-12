@@ -269,7 +269,7 @@ class CSVImporter
     user_role = record.role
 
     #return observer as fixed role if base role is one of the ready_only
-    return 'observer' if user_role.include?('ready_only')
+    return 'observer' if user_role.include?('read_only')
 
     default_role = DEFAULT_TEAM_ROLES["#{user_role}".to_sym]
 
