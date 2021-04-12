@@ -26,13 +26,26 @@ In this format:
 
 ## Team Roles
 
-- If no team roles are supplied the default team role of responder will be added to the team(s)
+| title               | value                  | flexible/fixed |
+|---------------------|------------------------|----------------|
+| Global Admin        | admin                  | Fixed          |
+| Full Stakeholder    | read_only_user         | Fixed          |
+| Limited Stakeholder | read_only_limited_user | Fixed          |
+| Manager / User      | user                   | Flexible       |
+| Responder           | limited_user           | Flexible       |
+| Observer            | observer               | Flexible       |
+| Restricted Access   | restricted_access      | Flexible       |
+
+- There are three team roles manager, responder and observer
+- A user with base role owner and admin will be applied a fixed team role of manager
+- A user with base role ready_only_user and ready_only_limited_user will be applied a fixed team role of observer
+- If no team roles are supplied the default team role will be added to the team(s) based on the user role
 - The order of the team should match the order of the team roles
 
 ```
 ..team1;team2,manager;observer
 ```
-In the above example team1 will be set as manager and team2 will be set as observer etc
+In the above example team1 will be set as manager and team2 will be set as observer respectively
 
 - To apply the same team role for all teams you can define one team role
 
