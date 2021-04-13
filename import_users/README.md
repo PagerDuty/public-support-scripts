@@ -40,7 +40,7 @@ When a user is added to or associated with a team for the first time, their defa
 ** Users with flexible base roles (Restricted Access, Observer, Responder, Manager) can have their default team roles changed to grant them more more or less permissions on a specific team.
 
 - There are three team roles `manager`, `responder` and `observer`
-- A user with base role `owner` and `admin` will be applied a fixed team role of `manager`
+- A user with base role `admin` will be applied a fixed team role of `manager`
 - A user with base role `ready_only_user` and `ready_only_limited_user` will be applied a fixed team role of `observer`
 - If no team roles are supplied the default team role will be added to the team(s) based on the user role
 - The order of the team should match the order of the team roles
