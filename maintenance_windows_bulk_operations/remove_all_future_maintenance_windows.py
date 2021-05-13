@@ -6,15 +6,15 @@ import pdpyras
 
 def remove_all_future_maintenance_windows(args):
     session = pdpyras.APISession(args.api_key)
-    progress_printer = lambda o, i, n: (print("Deleting %d/%d: %s"%(
-        i, n, o['summary']
+    progress_printer = lambda o, i, n: (print("Deleting %d: %s starting %s"%(
+        i, o['summary'], o['start_time']
     )))
     mw_params = {"filter":"future"}
     if len(args.service_ids):
         mw_params['service_ids[]'] = args.service_ids
 
     for mw in session.iter_all("maintenance_windows",
-            item_hook=progress_printer, params=mw_params, total=True):
+            item_hook=progress_printer, params=mw_params, total=False):
         if args.dry_run:
             continue
         try:
