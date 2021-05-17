@@ -21,9 +21,23 @@ class PagerDutyAgent
                               :ssl => {:verify => true}) do |c|
       c.request  :url_encoded
       c.adapter  :net_http
+    end
+    #making an initial call to /users to extract subdomain corresponding to the API key
+    initial = connection.get("/users", query = {}, { 'Authorization' => "Token token=#{token}",
+          'Accept' => 'application/vnd.pagerduty+json;version=2'})
+    users = JSON.parse(initial.body)['users']
+    subdomain = users[0]['html_url'][/https:\/\/(.*)\.pagerduty\.com.*/, 1]
+    puts("About to perform user import for #{subdomain}, proceed? (y/n)")
+    #evaluating agent input
+    decision = ""
+    while decision.chomp != "y"
+      decision = gets
+      if decision.chomp == "n"
+      abort "Discontinuing user import"
+    end
+    end
     #logger defined as a global variable accessible to all classes in the script
     $log = Logger.new("import_errors_for_#{requester_email}.log")
-    end
   end
 
   def get(path, query = {})
