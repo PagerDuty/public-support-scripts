@@ -39,18 +39,7 @@ class Extension_Enabler:
     def enable_all_extensions(self):
         more = True
         offset = 0
-        results = []
-
-        while more:
-            url = (self.baseurl + "?include%5B%5D=temporarily_disabled"
-                                + f"&limit=100&offset={offset}")
-            response = requests.get(url, headers=self.headers).json()
-            results.extend(response['extensions'])
-
-            if response['more'] == False:
-                more = False
-
-            offset = offset + 100
+        results = self.retrieve_all_extensions()
 
         self.validate_API_response(results)
         subdomain = results[0]['extension_objects'][0].get('html_url', 
@@ -69,6 +58,24 @@ class Extension_Enabler:
             print(f"All extensions on '{subdomain}' were already enabled.")
 
         print(" --- Script completed. ---")
+
+    def retrieve_all_extensions(self):
+        more = True
+        offset = 0
+        results = []
+
+        while more:
+            url = (self.baseurl + "?include%5B%5D=temporarily_disabled"
+                                + f"&limit=100&offset={offset}")
+            response = requests.get(url, headers=self.headers).json()
+            results.extend(response['extensions'])
+
+            if response['more'] == False:
+                more = False
+
+            offset = offset + 100
+
+        return results
 
     def validate_API_response(self, results):
         if len(results) == 0:
