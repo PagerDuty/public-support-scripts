@@ -135,3 +135,7 @@ treat the whole file as if it were one line. If in doubt, use the
 
 Moreover, some difficulty has been observed using this script with input files
 that contain unicode characters.
+
+#### The script performs API key's subdomain validation
+
+The script will validate the initially provided API key and prompt to confirm by entering y/n. It will not start or exit until either option is selected.
