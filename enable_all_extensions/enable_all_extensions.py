@@ -33,8 +33,8 @@ class Extension_Enabler:
             print(f"extension {ex_id} {ex_type} '{ex_name}' was reenabled")
         else:
             print(f"ERROR: {ex_id} {ex_type} '{ex_name}' was not reenabled\n"
-                f"       Received status code {response.status_code}\n"
-                f"       Link: {link}")
+                  f"       Received status code {response.status_code}\n"
+                  f"       Link: {link}")
 
     def enable_all_extensions(self):
         more = True
@@ -79,7 +79,7 @@ class Extension_Enabler:
 
     def validate_API_response(self, results):
         if len(results) == 0:
-            print("The API returned to extensions for the account.")
+            print("The API returned no extensions for the account.")
             sys.exit()
         else:
             ext = results[0]
