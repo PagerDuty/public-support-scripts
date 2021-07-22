@@ -14,6 +14,7 @@ import pdpyras
 # Default parameters:
 PARAMETERS = {
     'is_overview': 'true',
+    # 'with_suppressed' : 'true', #Uncomment to included Trigger (Suppressed) incidents
     # 'since': '', 
     # 'until': '',
     # 'time_zone': `UTC` 
