@@ -206,16 +206,6 @@ class CSVImporter
       $log.info("Created a new user with ID #{user_id} and login email #{record.email}.")
     end
 
-    # Add user and email notification rule
-    ["SMS", "phone"].each do |type|
-      if (!record.phone_number || !record.country_code)
-        puts "Phone number and/or country code blank; skipping creation of #{type} contact method and notification rules."
-        $log.info("Phone number and/or country code blank; skipping creation of #{type} contact method and notification rules.")
-      else
-        add_contact_method(type, user_id, record)
-      end
-    end
-
     # Add user to teams
     puts "Adding user to teams."
     $log.info("Adding user #{record.name} to teams.")
@@ -243,6 +233,16 @@ class CSVImporter
         agent.add_user_to_team(team_id, user_id, team_role)
         puts "Added #{record.name} to #{team}, with role #{team_role}."
         $log.info("Added #{record.name} to team #{team}, with role #{team_role}.")
+      end
+    end
+
+    # Add user and email notification rule
+    ["SMS", "phone"].each do |type|
+      if (!record.phone_number || !record.country_code)
+        puts "Phone number and/or country code blank; skipping creation of #{type} contact method and notification rules."
+        $log.info("Phone number and/or country code blank; skipping creation of #{type} contact method and notification rules.")
+      else
+        add_contact_method(type, user_id, record)
       end
     end
 
