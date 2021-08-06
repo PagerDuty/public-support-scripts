@@ -118,13 +118,8 @@ bulk using a different automation.
 
 If the users corresponding to the email addresses already exist in the account,
 then they will be added to the teams specified in the last column of the input
-CSV, and moreover, contact methods will be added to them. However, if they
-already have contact methods matching the phone numbers, an error will be
-raised and the script will proceed to the next user without continuing work on
-that user (i.e. adding them to teams).
-
-If only adding users to a team, one can leave the phone number and phone
-country code columns blank.
+CSV, and contact methods will be added to them unless they
+already have contact methods matching the phone numbers given.
 
 #### The parser cannot gracefully handle unicode characters or Windows-style linebreaks
 
