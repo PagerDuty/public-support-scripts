@@ -200,6 +200,20 @@ class CSVImporter
       puts "Adding user: #{record.name}."
       $log.info("Attempting to add user #{record.name}.")
       $log.info("User's record details: #{record}.")
+      # verifying if country code value is either null or numeric string
+      # the contrary may suggest commas in user's title
+      unless (record.to_a[4].nil? || record.to_a[4].to_i != 0 || record.to_a[4] == " ")
+        puts("Title property for #{record.email} may include commas, proceed? y/n")
+        #evaluating agent input
+        decision = ""
+        while decision.chomp != "y"
+        decision = gets
+        if decision.chomp == "n"
+        $log.error("User#{record.email} was not imported due to title property misconfiguration")
+        abort "Discontinuing user import for #{record.email}"
+        end
+        end
+      end
       user = agent.add_user(record.name, record.email, record.role.downcase, record.title)
       user_id = user["user"]["id"]
       puts "Added user with ID #{user_id}."
@@ -267,6 +281,7 @@ class CSVImporter
 
   def import
     CSV.foreach(csv_file) do |row|
+      $log.info(row)
       import_user(row_to_record(row))
     end
   end
