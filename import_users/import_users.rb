@@ -181,7 +181,7 @@ class CSVImporter
   # verifying if country code value is either null or numeric string
   # the contrary may suggest commas in user's title
   unless (record.to_a[4].nil? || record.to_a[4].to_i != 0 || record.to_a[4] == " ")
-    puts("Title property for #{record.email} may include commas, proceed? y/n")
+    puts("Title property for #{record.email} may include commas, proceed? (y/n)")
     #evaluating agent input
     decision = ""
     while decision.chomp != "y"
