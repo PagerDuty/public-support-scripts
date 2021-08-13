@@ -97,11 +97,12 @@ class PagerDutyAgent
       :contact_method => {
         :type => type,
         :address => address,
+        :country_code => country_code,
         :label => label
       }
     }
-    request_body[:contact_method][:country_code] = country_code if ["sms_contact_method", "phone_contact_method"].include?(type)
-    post("/users/#{user_id}/contact_methods", request_body)
+    #request_body[:contact_method][:country_code] = country_code if ["sms_contact_method", "phone_contact_method"].include?(type)
+    #post("/users/#{user_id}/contact_methods", request_body)
   end
 
   def add_notification_rule(user_id, contact_method_id, contact_method_type, delay_in_minutes)
@@ -268,8 +269,8 @@ class CSVImporter
     #role must be one of the following manager,observer,responder in the csv file as per our API
     user_role = record.role
 
-    #return observer as fixed role if base role is one of the ready_only
-    return 'observer' if user_role.include?('read_only')
+    #return observer as fixed role if base role is observer or stakeholder 
+    return 'observer' if user_role == 'read_only_limited_user' || user_role == 'restricted_access' || user_role == 'read_only_user'
 
     default_role = DEFAULT_TEAM_ROLES["#{user_role}".to_sym]
 
