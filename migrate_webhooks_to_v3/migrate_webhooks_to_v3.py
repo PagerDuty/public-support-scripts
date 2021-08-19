@@ -6,9 +6,6 @@ import sys
 import csv
 import json
 
-V1_EXTENSION_SCHEMA_ID = 'PF9KMXH'
-V2_EXTENSION_SCHEMA_ID = 'PJFWPEP'
-
 
 class WebhookGetter:
     def __init__(self, args):
@@ -19,37 +16,58 @@ class WebhookGetter:
             "Authorization": f"Token token={args.api_key}"
         }
         self.csv_file = args.backup_file
+        self.v1_extension_schema_id = 'PF9KMXH'
+        self.v2_extension_schema_id = 'PJFWPEP'
 
     @staticmethod
     def extract_v1v2_fields(webhook_object):
+        """Extracts webhook url, filter id, description and other fields from v1/v2
+         webhook object to be copied to v3"""
         reduced_object = {'id': webhook_object['id'],
+                          'extension_schema_id': webhook_object['extension_schema']['id'],
                           'url': webhook_object['endpoint_url'],
                           'description': webhook_object['name'],
                           'filter_id': webhook_object['extension_objects'][0]['id'],
                           'filter_type': webhook_object['extension_objects'][0]['type']}
         return reduced_object
 
-    def write_json_to_csv(self, webhook_version, fields_to_be_mapped, full_webhook_object):
-        #LOGIC FOR IDENTIFYING V1 / V2 VERSION OF THE WEBHOOK HERE
-        with open(self.csv_file):
-            writer = csv.writer(self.csv_file)
-            writer.writerow([webhook_version, fields_to_be_mapped, full_webhook_object])
-
+    def write_json_to_csv(self, webhooks):
+        """Creates a csv with webhook type, fields used for v3 webhook creation
+        and full JSON payload of v1/v2 webhook"""
+        for n, item in enumerate(webhooks[1]):
+            fields_to_be_mapped = webhooks[1][n]
+            full_webhook_object = webhooks[0][n]
+            webhook_version = 'Generic Webhook V1' if item['extension_schema_id'] == self.v1_extension_schema_id \
+                else 'Generic Webhook V2'
+            with open(self.csv_file, 'a+') as file:
+                writer = csv.writer(file)
+                writer.writerow([webhook_version, fields_to_be_mapped, full_webhook_object])
 
     def get_v1v2_webhooks(self):
+        """Makes a GET request to /extensions endpoint, filters out generic v1/v2 webhooks
+         and saves them in a nested list, with first item being a list of full webhook payloads and
+         second item being a list of objects with fields to be used for webhook v3 creation"""
         more = True
         offset = 0
+        full_payload = []
+        reduced_payload = []
         v1_v2_webhooks = []
 
         while more:
             response = requests.get(self.baseurl, headers=self.headers).json()
-            v1_v2_webhooks.extend(
+            reduced_payload.extend(
                 [self.extract_v1v2_fields(i) for i in response['extensions']
-                 if i['extension_schema']['id'] in [V1_EXTENSION_SCHEMA_ID, V2_EXTENSION_SCHEMA_ID]])
+                 if i['extension_schema']['id'] in [self.v1_extension_schema_id, self.v2_extension_schema_id]])
+            full_payload.extend(
+                [i for i in response['extensions']
+                 if i['extension_schema']['id'] in [self.v1_extension_schema_id, self.v2_extension_schema_id]])
             if not response['more']:
                 more = False
             offset = offset + 100
+        v1_v2_webhooks.append(full_payload)
+        v1_v2_webhooks.append(reduced_payload)
         return v1_v2_webhooks
+
 
 class WebhookCreator:
     def __init__(self, args, webhook_list):
@@ -90,6 +108,7 @@ class WebhookCreator:
 }''')
 
     def create_v3_webhook(self, webhook_params):
+        """Constructs a v3 webhook payload"""
         v3_webhook = self.v3_payload
         v3_webhook['webhook_subscription']['delivery_method']['url'] = webhook_params['url']
         v3_webhook['webhook_subscription']['description'] = webhook_params['description']
@@ -97,17 +116,40 @@ class WebhookCreator:
         return json.dumps(v3_webhook)
 
     def create_webhooks(self):
+        """Creates v3 webhooks"""
         for webhook in self.webhooks:
             data = self.create_v3_webhook(webhook)
-            print(type(data))
-            print(data)
             response = requests.post(self.baseurl, headers=self.headers, data=data)
             if 200 <= response.status_code < 300:
-                print(f"""Created a v3 copy of {webhook['id']} ({webhook['description']})
+                print(f"""Created a v3 copy of webhook {webhook['id']} ({webhook['description']})
                 on service {webhook['filter_id']}""")
             else:
-                print(f"""ERROR: v3 copy of {webhook['id']} ({webhook['description']}) on service
+                print(f"""ERROR: v3 copy of webhook {webhook['id']} ({webhook['description']}) on service
                 {webhook['filter_id']} was not created\n"""
+                      f"Received status code {response.status_code}\n")
+
+
+class WebhookDeleter:
+    def __init__(self, args, webhook_list):
+        self.baseurl = 'https://api.pagerduty.com/extensions'
+        self.headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.pagerduty+json;version=2",
+            "Authorization": f"Token token={args.api_key}"
+        }
+        self.webhooks = webhook_list
+
+    def delete_v1v2webhooks(self):
+        """Deletes v1/v2 webhooks"""
+        for webhook in self.webhooks:
+            response = requests.delete(self.baseurl + f"/{webhook['id']}", headers=self.headers)
+            print(response)
+            if 200 <= response.status_code < 300:
+                print(f"""Deleted a v1/v2 webhook with {webhook['id']} ({webhook['description']})
+                on service {webhook['filter_id']}""")
+            else:
+                print(f"""ERROR: a v1/v2 webhook with {webhook['id']} ({webhook['description']}) on service
+                {webhook['filter_id']} was not deleted\n"""
                       f"Received status code {response.status_code}\n")
 
 
@@ -124,10 +166,17 @@ def main():
                     '--backup_file',
                     required=True,
                     help='Filename to save information on retrieved v1/v2 webhooks')
-
+    ap.add_argument('-a', '--action', default='copy', choices=['copy',
+                                                               'delete'],
+                    help="Action to take on v1/v2 webhooks en masse")
     args = ap.parse_args()
-    v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
-    WebhookCreator(args, v1_v2_webhooks).create_webhooks()
+    if args.action == 'copy':
+        v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
+        WebhookCreator(args, v1_v2_webhooks[1]).create_webhooks()
+        WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
+    elif args.action == 'delete':
+        v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
+        WebhookDeleter(args, v1_v2_webhooks[1]).delete_v1v2webhooks()
 
 
 if __name__ == "__main__":
