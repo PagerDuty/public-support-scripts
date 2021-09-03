@@ -9,7 +9,9 @@ import json
 
 class WebhookGetter:
     def __init__(self, args):
-        self.baseurl = 'https://api.pagerduty.com/extensions'
+        self.api = 'api.eu' if args.europe else 'api'
+        self.extension_url = f'https://{self.api}.pagerduty.com/extensions'
+        self.subscription_url = f'https://{self.api}.pagerduty.com/webhook_subscriptions'
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/vnd.pagerduty+json;version=2",
@@ -21,8 +23,8 @@ class WebhookGetter:
 
     @staticmethod
     def extract_v1v2_fields(webhook_object):
-        """Extracts webhook url, filter id, description and other fields from v1/v2
-         webhook object to be copied to v3"""
+        """Extracts webhook url, filter id, description and other fields from v1/v2 
+        webhook object to be copied to v3"""
         reduced_object = {'id': webhook_object['id'],
                           'extension_schema_id': webhook_object['extension_schema']['id'],
                           'url': webhook_object['endpoint_url'],
@@ -43,10 +45,26 @@ class WebhookGetter:
                 writer = csv.writer(file)
                 writer.writerow([webhook_version, fields_to_be_mapped, full_webhook_object])
 
+    def test_connection(self):
+        response = requests.get(self.extension_url + '?limit=1', headers=self.headers)
+        try:
+            status = response.status_code
+            json_response = response.json()
+            if status >= 400:
+                print(f"ERROR: {status}\n       {json_response.get('error', 'error')}")
+        except:
+            print(response)
+            sys.exit()
+        finally:
+            if response.status_code >= 400:
+                sys.exit()
+
     def get_v1v2_webhooks(self):
         """Makes a GET request to /extensions endpoint, filters out generic v1/v2 webhooks
-         and saves them in a nested list, with first item being a list of full webhook payloads and
-         second item being a list of objects with fields to be used for webhook v3 creation"""
+        and saves them in a nested list, with first item being a list of full webhook payloads and
+        second item being a list of objects with fields to be used for webhook v3 creation"""
+        self.test_connection()
+
         more = True
         offset = 0
         full_payload = []
@@ -54,7 +72,7 @@ class WebhookGetter:
         v1_v2_webhooks = []
 
         while more:
-            response = requests.get(self.baseurl, headers=self.headers).json()
+            response = requests.get(self.extension_url + f'?limit=100&offset={offset}', headers=self.headers).json()
             reduced_payload.extend(
                 [self.extract_v1v2_fields(i) for i in response['extensions']
                  if i['extension_schema']['id'] in [self.v1_extension_schema_id, self.v2_extension_schema_id]])
@@ -68,44 +86,85 @@ class WebhookGetter:
         v1_v2_webhooks.append(reduced_payload)
         return v1_v2_webhooks
 
+    def get_v3_webhooks(self):
+        """Makes GET request(s) to /webhook_subscriptions endpoint, loops over the
+        v3 webhooks returned and makes a key for each one with a combination of endpoint url,
+        description, and service id and adds that key to a hash map which the function returns
+        in order to later determine whether an about-to-be-created webhook subscription would 
+        be a duplicate."""
+        more = True
+        offset = 0
+        v3_webhooks = []
+        existing_v3_webhooks_map = {}
+
+        while more:
+            response = requests.get(self.subscription_url + f'?limit=100&offset={offset}', headers=self.headers).json()
+            v3_webhooks.extend(response.get('webhook_subscriptions', []))
+            if not response['more']:
+                more = False
+            offset = offset + 100
+
+        for webhook in v3_webhooks:
+            # All v1/v2 will be service-related, so a concat of the endpoint + the service id 
+            # + description will work for deduplication
+            key = webhook['delivery_method']['url'] + webhook['filter']['id'] + webhook['description']
+            existing_v3_webhooks_map[key] = True
+
+        # send back the map
+        return existing_v3_webhooks_map
+
 
 class WebhookCreator:
-    def __init__(self, args, webhook_list):
-        self.baseurl = 'https://api.pagerduty.com/webhook_subscriptions'
+    def __init__(self, args, v1_v2_webhook_list, v3_webhooks_map):
+        self.api = 'api.eu' if args.europe else 'api'
+        self.baseurl = f'https://{self.api}.pagerduty.com/webhook_subscriptions'
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/vnd.pagerduty+json;version=2",
             "Authorization": f"Token token={args.api_key}"
         }
-        self.webhooks = webhook_list
-        self.v3_payload = json.loads('''{"webhook_subscription": {
-        "delivery_method": {
-            "type": "http_delivery_method",
-            "url": ""
-        },
-        "description": "",
-        "events": [
-            "incident.acknowledged",
-            "incident.annotated",
-            "incident.delegated",
-            "incident.escalated",
-            "incident.priority_updated",
-            "incident.reassigned",
-            "incident.reopened",
-            "incident.resolved",
-            "incident.responder.added",
-            "incident.responder.replied",
-            "incident.status_update_published",
-            "incident.triggered",
-            "incident.unacknowledged"
-        ],
-        "filter": {
-            "id": "",
-            "type": "service_reference"
-        },
-        "type": "webhook_subscription"
-    }
-}''')
+        self.v1_v2_webhooks = v1_v2_webhook_list
+        self.existing_v3_webhooks = v3_webhooks_map
+        self.v3_payload = json.loads('''{
+            "webhook_subscription": {
+                "delivery_method": {
+                    "type": "http_delivery_method",
+                    "url": ""
+                },
+                "description": "",
+                "events": [
+                    "incident.acknowledged",
+                    "incident.annotated",
+                    "incident.delegated",
+                    "incident.escalated",
+                    "incident.priority_updated",
+                    "incident.reassigned",
+                    "incident.reopened",
+                    "incident.resolved",
+                    "incident.responder.added",
+                    "incident.responder.replied",
+                    "incident.status_update_published",
+                    "incident.triggered",
+                    "incident.unacknowledged"
+                ],
+                "filter": {
+                    "id": "",
+                    "type": "service_reference"
+                },
+                "type": "webhook_subscription"
+            }
+        }''')
+
+    def v3_webhook_already_exists(self, webhook_params):
+        key = webhook_params['url'] + webhook_params['filter_id'] + webhook_params['description']
+        if key in self.existing_v3_webhooks:
+            print("Not creating a new v3 webhook for\n"
+                  f"    endpoint: {webhook_params['url']}\n"
+                  f"    service id: {webhook_params['filter_id']}\n"
+                  f"    description: {webhook_params['description']}\n"
+                  "  as it would be a duplicate of an existing v3 webhook.")
+            return True
+        return False
 
     def create_v3_webhook(self, webhook_params):
         """Constructs a v3 webhook payload"""
@@ -117,7 +176,9 @@ class WebhookCreator:
 
     def create_webhooks(self):
         """Creates v3 webhooks"""
-        for webhook in self.webhooks:
+        for webhook in self.v1_v2_webhooks:
+            if self.v3_webhook_already_exists(webhook):
+                continue
             data = self.create_v3_webhook(webhook)
             response = requests.post(self.baseurl, headers=self.headers, data=data)
             if 200 <= response.status_code < 300:
@@ -131,7 +192,8 @@ class WebhookCreator:
 
 class WebhookDeleter:
     def __init__(self, args, webhook_list):
-        self.baseurl = 'https://api.pagerduty.com/extensions'
+        self.api = 'api.eu' if args.europe else 'api'
+        self.baseurl = f'https://{self.api}.pagerduty.com/extensions'
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/vnd.pagerduty+json;version=2",
@@ -169,13 +231,21 @@ def main():
     ap.add_argument('-a', '--action', default='copy', choices=['copy',
                                                                'delete'],
                     help="Action to take on v1/v2 webhooks en masse")
+    ap.add_argument('-e',
+                    '--europe',
+                    default=False,
+                    action='store_true',
+                    help='EU service region'
+                    )
     args = ap.parse_args()
     if args.action == 'copy':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
-        WebhookCreator(args, v1_v2_webhooks[1]).create_webhooks()
+        v3_webhooks = WebhookGetter(args).get_v3_webhooks()
+        WebhookCreator(args, v1_v2_webhooks[1], v3_webhooks).create_webhooks()
         WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
     elif args.action == 'delete':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
+        WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
         WebhookDeleter(args, v1_v2_webhooks[1]).delete_v1v2webhooks()
 
 
