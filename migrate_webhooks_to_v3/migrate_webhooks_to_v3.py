@@ -9,9 +9,8 @@ import json
 
 class WebhookGetter:
     def __init__(self, args):
-        self.api = 'api.eu' if args.europe else 'api'
-        self.extension_url = f'https://{self.api}.pagerduty.com/extensions'
-        self.subscription_url = f'https://{self.api}.pagerduty.com/webhook_subscriptions'
+        self.extension_url = f'https://api.pagerduty.com/extensions'
+        self.subscription_url = f'https://api.pagerduty.com/webhook_subscriptions'
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/vnd.pagerduty+json;version=2",
@@ -20,10 +19,12 @@ class WebhookGetter:
         self.csv_file = args.backup_file
         self.v1_extension_schema_id = 'PF9KMXH'
         self.v2_extension_schema_id = 'PJFWPEP'
+        self.webhook_version_list = [self.v1_extension_schema_id, self.v2_extension_schema_id] if args.version == 'all' \
+            else [self.v1_extension_schema_id]
 
     @staticmethod
     def extract_v1v2_fields(webhook_object):
-        """Extracts webhook url, filter id, description and other fields from v1/v2 
+        """Extracts webhook url, filter id, description and other fields from v1/v2
         webhook object to be copied to v3"""
         reduced_object = {'id': webhook_object['id'],
                           'extension_schema_id': webhook_object['extension_schema']['id'],
@@ -73,12 +74,14 @@ class WebhookGetter:
 
         while more:
             response = requests.get(self.extension_url + f'?limit=100&offset={offset}', headers=self.headers).json()
+            if len(response['extensions']) == 0:
+                print('Found no webhooks to copy or delete')
             reduced_payload.extend(
                 [self.extract_v1v2_fields(i) for i in response['extensions']
-                 if i['extension_schema']['id'] in [self.v1_extension_schema_id, self.v2_extension_schema_id]])
+                 if i['extension_schema']['id'] in self.webhook_version_list])
             full_payload.extend(
                 [i for i in response['extensions']
-                 if i['extension_schema']['id'] in [self.v1_extension_schema_id, self.v2_extension_schema_id]])
+                 if i['extension_schema']['id'] in self.webhook_version_list])
             if not response['more']:
                 more = False
             offset = offset + 100
@@ -90,7 +93,7 @@ class WebhookGetter:
         """Makes GET request(s) to /webhook_subscriptions endpoint, loops over the
         v3 webhooks returned and makes a key for each one with a combination of endpoint url,
         description, and service id and adds that key to a hash map which the function returns
-        in order to later determine whether an about-to-be-created webhook subscription would 
+        in order to later determine whether an about-to-be-created webhook subscription would
         be a duplicate."""
         more = True
         offset = 0
@@ -105,7 +108,7 @@ class WebhookGetter:
             offset = offset + 100
 
         for webhook in v3_webhooks:
-            # All v1/v2 will be service-related, so a concat of the endpoint + the service id 
+            # All v1/v2 will be service-related, so a concat of the endpoint + the service id
             # + description will work for deduplication
             key = webhook['delivery_method']['url'] + webhook['filter']['id'] + webhook['description']
             existing_v3_webhooks_map[key] = True
@@ -116,8 +119,7 @@ class WebhookGetter:
 
 class WebhookCreator:
     def __init__(self, args, v1_v2_webhook_list, v3_webhooks_map):
-        self.api = 'api.eu' if args.europe else 'api'
-        self.baseurl = f'https://{self.api}.pagerduty.com/webhook_subscriptions'
+        self.baseurl = f'https://api.pagerduty.com/webhook_subscriptions'
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/vnd.pagerduty+json;version=2",
@@ -125,14 +127,8 @@ class WebhookCreator:
         }
         self.v1_v2_webhooks = v1_v2_webhook_list
         self.existing_v3_webhooks = v3_webhooks_map
-        self.v3_payload = json.loads('''{
-            "webhook_subscription": {
-                "delivery_method": {
-                    "type": "http_delivery_method",
-                    "url": ""
-                },
-                "description": "",
-                "events": [
+        if args.event_types == 'all-new':
+            self.v3_events = json.loads('''{"events": [
                     "incident.acknowledged",
                     "incident.annotated",
                     "incident.delegated",
@@ -146,7 +142,25 @@ class WebhookCreator:
                     "incident.status_update_published",
                     "incident.triggered",
                     "incident.unacknowledged"
-                ],
+                ]}''')
+        else:
+            self.v3_events = json.loads('''{"events": [
+                                "incident.acknowledged",
+                                "incident.annotated",
+                                "incident.delegated",
+                                "incident.escalated",
+                                "incident.reassigned",
+                                "incident.resolved",
+                                "incident.triggered",
+                                "incident.unacknowledged"
+                            ]}''')
+        self.v3_payload = json.loads('''{
+            "webhook_subscription": {
+                "delivery_method": {
+                    "type": "http_delivery_method",
+                    "url": ""
+                },
+                "description": "",
                 "filter": {
                     "id": "",
                     "type": "service_reference"
@@ -154,6 +168,7 @@ class WebhookCreator:
                 "type": "webhook_subscription"
             }
         }''')
+        self.v3_payload["webhook_subscription"]["events"] = self.v3_events["events"]
 
     def v3_webhook_already_exists(self, webhook_params):
         key = webhook_params['url'] + webhook_params['filter_id'] + webhook_params['description']
@@ -192,8 +207,7 @@ class WebhookCreator:
 
 class WebhookDeleter:
     def __init__(self, args, webhook_list):
-        self.api = 'api.eu' if args.europe else 'api'
-        self.baseurl = f'https://{self.api}.pagerduty.com/extensions'
+        self.baseurl = f'https://api.pagerduty.com/extensions'
         self.headers = {
             "Content-Type": "application/json",
             "Accept": "application/vnd.pagerduty+json;version=2",
@@ -205,38 +219,45 @@ class WebhookDeleter:
         """Deletes v1/v2 webhooks"""
         for webhook in self.webhooks:
             response = requests.delete(self.baseurl + f"/{webhook['id']}", headers=self.headers)
-            print(response)
             if 200 <= response.status_code < 300:
-                print(f"""Deleted a v1/v2 webhook with {webhook['id']} ({webhook['description']})
+                print(f"""Deleted a webhook with {webhook['id']} ({webhook['description']})
                 on service {webhook['filter_id']}""")
             else:
-                print(f"""ERROR: a v1/v2 webhook with {webhook['id']} ({webhook['description']}) on service
+                print(f"""ERROR: a webhook with {webhook['id']} ({webhook['description']}) on service
                 {webhook['filter_id']} was not deleted\n"""
                       f"Received status code {response.status_code}\n")
 
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Migrate all v1 and v2 webhooks to v3"
+        description="Migrate all v1/v2 webhooks to v3"
     )
     ap.add_argument('-k',
                     '--api-key',
                     required=True,
                     help='REST API key'
                     )
+    ap.add_argument('-v', '--version',
+                    required=False,
+                    default='all',
+                    choices=['all', 'v1'],
+                    help="version(s) of the webhooks to copy or delete, 'all' is default")
+    ap.add_argument('-e',
+                    '--event_types',
+                    required=False,
+                    default='default',
+                    choices=['default', 'all-new'],
+                    help="'default' to create subscriptions to same types of events as previous versions of webhooks, or 'all-new' for all currently available types of events on Incident resource")
     ap.add_argument('-f',
                     '--backup_file',
-                    required=True,
-                    help='Filename to save information on retrieved v1/v2 webhooks')
-    ap.add_argument('-a', '--action', default='copy', choices=['copy',
-                                                               'delete'],
-                    help="Action to take on v1/v2 webhooks en masse")
-    ap.add_argument('-e',
-                    '--europe',
-                    default=False,
-                    action='store_true',
-                    help='EU service region'
-                    )
+                    required=False,
+                    default='v1_v2_webhooks.csv',
+                    help="filename to save information on retrieved v1/v2 webhooks, 'v1_v2_webhooks.csv' is default")
+    ap.add_argument('-a',
+                    '--action',
+                    default='copy',
+                    choices=['copy', 'delete'],
+                    help="action to take on v1/v2 webhooks en masse, 'copy' is default")
     args = ap.parse_args()
     if args.action == 'copy':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
