@@ -290,8 +290,7 @@ class DeleteUser(APISession):
                                    attribute='email')
         return self._user
 
-
-def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve, backup, resources):
+def delete_user(user_email, args, resources):
     """
     Deletes a PagerDuty user.
 
@@ -300,6 +299,14 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve, 
 
     :returns: integer 1 or 0 signifying whether the user was deleted
     """
+
+    access_token = args.access_token
+    from_email = args.from_email
+    prompt_del = args.prompt_del
+    auto_resolve = args.auto_resolve
+    backup = args.backup
+    no_delete = args.do_not_delete
+
     # Declare an instance of the DeleteUser class
     user_deleter = DeleteUser(access_token, user_email, from_email, backup)
     if user_deleter.user is None:
@@ -446,7 +453,10 @@ def delete_user(access_token, user_email, from_email, prompt_del, auto_resolve, 
                 '%s:%s/{id}%s' % (method, resource, suffix), 0
             ) for method in ('put', 'delete')
         ]))
-    if user_deleter.delete_user():
+    if no_delete:
+        log.info('User %s not removed; "Do not delete user" flag selcted.', user_email)
+        return 0
+    elif user_deleter.delete_user():
         log.info('User %s has been successfully removed!', user_email)
         return 1
     else:
@@ -497,8 +507,7 @@ def main(arguments):
     for email in email_list:
         if arguments.prompt_del and not input_yn("Proceed with deletion of user (%s)" % email):
             continue
-        count += delete_user(arguments.access_token, email, arguments.from_email,
-                             arguments.prompt_del, arguments.auto_resolve, arguments.backup, resources)
+        count += delete_user(email, arguments,resources)
 
     log.info("%d user(s) out of %d specified have been deleted." % (
         count, len(email_list)
@@ -545,6 +554,11 @@ if __name__ == '__main__':
              "updated, in a directory named 'backup' within the current working "
              "directory.",
         default=False, action='store_true'
+    )
+    parser.add_argument(
+        '--do-not-delete-users', '-n',
+        help="Do not delete user but preform all other actions",
+        dest='do_not_delete', action='store_true', default=False
     )
     parser.add_argument(
         '--verbose', '-v',
