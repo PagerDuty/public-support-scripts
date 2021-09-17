@@ -459,7 +459,7 @@ def delete_user(user_email, args, resources):
             ) for method in ('put', 'delete')
         ]))
     if no_delete:
-        log.info('User %s was not deleted; "Do not delete user" flag selceted.', user_email)
+        log.info('User %s was not deleted; "Do not delete user" flag selected.', user_email)
         return 0
     elif user_deleter.delete_user():
         log.info('User %s has been successfully deleted!', user_email)
