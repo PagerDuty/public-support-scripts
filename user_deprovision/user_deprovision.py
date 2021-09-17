@@ -315,8 +315,13 @@ def delete_user(user_email, args, resources):
         return 0
     # Get the user ID of the user to be deleted
     user_id = user_deleter.user_id
-    log.info('Deleting user: %(id)s (%(name)s <%(email)s>)',
-             user_deleter.user)
+
+    if no_delete:
+        log.info('Removing user from all associated resources: %(id)s (%(name)s <%(email)s>)',
+            user_deleter.user)
+    else:
+        log.info('Deleting user: %(id)s (%(name)s <%(email)s>)',
+            user_deleter.user)
 
     #############
     # Incidents #
@@ -454,10 +459,10 @@ def delete_user(user_email, args, resources):
             ) for method in ('put', 'delete')
         ]))
     if no_delete:
-        log.info('User %s not removed; "Do not delete user" flag selcted.', user_email)
+        log.info('User %s was not deleted; "Do not delete user" flag selceted.', user_email)
         return 0
     elif user_deleter.delete_user():
-        log.info('User %s has been successfully removed!', user_email)
+        log.info('User %s has been successfully deleted!', user_email)
         return 1
     else:
         log.info('User %s not removed; aborted, or API error.', user_email)
@@ -497,7 +502,11 @@ def main(arguments):
                 continue
             email_list.append(email)
 
-    print("{} users to be deleted".format(len(email_list)))
+    if arguments.do_not_delete is True:
+        print("{} users to be removed from schedules, teams, and escalation policies. Users will not be deleted."
+        .format(len(email_list)))
+    else:
+        print("{} users to be deleted".format(len(email_list)))
 
     # Initialize logging:
     setup_logging(arguments.verbose)
@@ -505,13 +514,18 @@ def main(arguments):
     # Do the deed:
     count = 0
     for email in email_list:
-        if arguments.prompt_del and not input_yn("Proceed with deletion of user (%s)" % email):
+        if arguments.prompt_del and arguments.do_not_delete:
+            if not input_yn("Proceed with removal of user (%s) from all associated resources?" % email):
+                continue
+        elif arguments.prompt_del and not input_yn("Proceed with deletion of user (%s)?" % email):
             continue
-        count += delete_user(email, arguments,resources)
+        count += delete_user(email, arguments, resources)
 
     log.info("%d user(s) out of %d specified have been deleted." % (
         count, len(email_list)
     ))
+
+    print("Script complete.\n")
 
 
 if __name__ == '__main__':
@@ -557,7 +571,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--do-not-delete-users', '-n',
-        help="Do not delete user but preform all other actions",
+        help="Do not delete user but perform all other actions",
         dest='do_not_delete', action='store_true', default=False
     )
     parser.add_argument(
