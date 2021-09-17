@@ -15,9 +15,9 @@ import pdpyras
 PARAMETERS = {
     'is_overview': 'true',
     # 'with_suppressed' : 'true', #Uncomment to included Trigger (Suppressed) incidents
-    # 'since': '', 
+    # 'since': '',
     # 'until': '',
-    # 'time_zone': `UTC` 
+    # 'time_zone': `UTC`
 }
 
 def mass_update_incidents(args):
@@ -55,7 +55,8 @@ def mass_update_incidents(args):
             print("* Incident {}: {}".format(incident['id'], args.action))
             if args.dry_run:
                 continue
-            session.rput(incident['self'], json={
+            self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
+            session.rput(self_url, json={
                 'type': 'incident_reference',
                 'id': incident['id'],
                 'status': '{0}d'.format(args.action), # acknowledged or resolved
@@ -63,7 +64,7 @@ def mass_update_incidents(args):
     except pdpyras.PDClientError as e:
         if e.response is not None:
             print(e.response.text)
-        raise e        
+        raise e
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
