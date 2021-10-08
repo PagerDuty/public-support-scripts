@@ -110,9 +110,11 @@ class WebhookGetter:
         for webhook in v3_webhooks:
             # All v1/v2 will be service-related, so a concat of the endpoint + the service id
             # + description will work for deduplication
-            key = webhook['delivery_method']['url'] + webhook['filter']['id'] + webhook['description']
-            existing_v3_webhooks_map[key] = True
-
+            try:
+                key = webhook['delivery_method']['url'] + webhook['filter']['id'] + webhook['description']
+                existing_v3_webhooks_map[key] = True
+            except TypeError:
+                continue
         # send back the map
         return existing_v3_webhooks_map
 
