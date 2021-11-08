@@ -11,6 +11,6 @@ layers in the correct order for a PUT or POST request.
 
 ### Usage
 
-`python3 schedule_layer_reorganizer.py -k {API-KEY} -i {ID}`
+`python3 schedule_layer_reorganizer.py -k {API-KEY} -i {Schedule ID 1} {Schedule ID 2}`
 
 The script can be run on multiple schedules at once.
