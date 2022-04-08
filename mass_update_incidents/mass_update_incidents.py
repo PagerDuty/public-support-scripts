@@ -56,11 +56,15 @@ def mass_update_incidents(args):
             if args.dry_run:
                 continue
             self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
-            session.rput(self_url, json={
-                'type': 'incident_reference',
-                'id': incident['id'],
-                'status': '{0}d'.format(args.action), # acknowledged or resolved
-            })
+            try:
+                session.rput(self_url, json={
+                    'type': 'incident_reference',
+                    'id': incident['id'],
+                    'status': '{0}d'.format(args.action), # acknowledged or resolved
+                })
+            except pdpyras.PDClientError as e:
+                print(e.response.text)
+                pass 
     except pdpyras.PDClientError as e:
         if e.response is not None:
             print(e.response.text)
