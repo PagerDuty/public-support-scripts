@@ -140,7 +140,7 @@ get_alerts_csv.py
 ```
 https://gist.github.com/lfepp/69a2288d898248800752d38e593323c1
 
-A sample script to programatically access and download the alerts for an
+A sample script to programmatically access and download the alerts for an
 incident as a CSV file.
 
 #### Alert Volume/Pain for On-Call Users
