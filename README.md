@@ -11,10 +11,10 @@ organized.
 
 ## Contents
 
-* [Enable all extensions](enable_all_extensions):enable all disabled extensions.
-* [Get info on all users](get_info_on_all_users):get various information on users 
+* [Enable all extensions](enable_all_extensions): enable all disabled extensions.
+* [Get info on all users](get_info_on_all_users): get various information on users 
   in your account.
-* [Import users](import_users):add users to your PagerDuty account from a CSV file.
+* [Import users](import_users): add users to your PagerDuty account from a CSV file.
 * [Maintenance window bulk operations](maintenance_windows_bulk_operations):
   schedule series of recurring maintenance windows, and bulk-delete future
   maintenance windows.
@@ -35,7 +35,7 @@ organized.
 * [Update user emails](update_user_emails): perform account-wide modifications
   to login email addresses of users based on search and replace patterns,
   including with regular expressions
-* [De-provision users](user_deprovision): Automate the off-boarding process for
+* [De-provision users](user_deprovision): automate the off-boarding process for
   PagerDuty users by removing them from schedules and escalation policies, and
   resolving all incidents that they are assigned.
 
@@ -210,12 +210,6 @@ https://github.com/ryanhoskin/pagerduty_incident_functions
 
 Trigger/acknowledge/resolve PagerDuty incidents
 
-#### Snooze a PagerDuty incident
-
-http://jsfiddle.net/jorts/dckwt4nu/
-
-JSFiddle to snooze an incident within your account
-
 ### Incident Log Entries
 
 #### Get Log Entry Details
@@ -254,12 +248,6 @@ https://gist.github.com/lfepp/280893d1a1007f871022a0c6a5f77dc1
 
 Retrieve information about a specific schedule
 
-#### List Schedules by Name
-
-http://jsfiddle.net/jorts/yrm1qbg4/
-
-JSFiddle to list all PagerDuty schedules by name
-
 #### List On-Call Shifts for a PagerDuty Schedule
 
 http://jsfiddle.net/jorts/wmnfkg0L/
@@ -267,12 +255,6 @@ http://jsfiddle.net/jorts/wmnfkg0L/
 JSFiddle to list on-call shifts for a particular schedule
 
 ### Services
-
-#### Update Settings on All PagerDuty Services
-
-http://jsfiddle.net/jorts/e6y93y6r/
-
-JSFiddle to update acknowledgement_timeout and auto_resolve_timeout parameters on all PagerDuty services
 
 #### Schedule Recurring Maintenance Windows
 
@@ -303,19 +285,7 @@ https://gist.github.com/lfepp/c77421fb909f2a03114585cd19d35ad8
 
 Get the latest activity for all users within a PagerDuty account.
 
-#### List PagerDuty Users who Don't Have a Minute 0 Phone Notification
-
-http://jsfiddle.net/jorts/vLhdL7ew/
-
-#### List users who have a small # of Notification Rules
-
-http://jsfiddle.net/jorts/5uw7bdkw/
-
 #### List On-Call Users
-
-http://jsfiddle.net/jorts/uvgv57kw/
-
-Also: same as above, but with
 
 https://github.com/ryanhoskin/pagerduty_oncall_dashboard
 
@@ -352,15 +322,7 @@ import_users_from_ad.ps1
 ```
 https://gist.github.com/lfepp/ec388dbeb2c2ad301313143f44844fa5
 
-#### List PagerDuty Users with Contact Information
-
-http://jsfiddle.net/jorts/ve1sbyfw/
-
 ### Webhooks
-
-#### Add webhooks to every PagerDuty service
-
-http://jsfiddle.net/jorts/2n6a0rvv/
 
 #### Replace Webhook URL on All PagerDuty Services
 
