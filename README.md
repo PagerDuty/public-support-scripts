@@ -6,27 +6,35 @@ limited-scope tasks through the REST API that cannot (as of the time that they
 are written) be performed through the PagerDuty UI.
 
 This README shall serve as both a set of instructions on the usage of these
-scripts as well as a description of how this repository is to be maintained and
+scripts and a description of how this repository is to be maintained and
 organized.
 
 ## Contents
 
-* [Import users](import_users)
+* [Enable all extensions](enable_all_extensions):enable all disabled extensions.
+* [Get info on all users](get_info_on_all_users):get various information on users 
+  in your account.
+* [Import users](import_users):add users to your PagerDuty account from a CSV file.
 * [Maintenance window bulk operations](maintenance_windows_bulk_operations):
   schedule series of recurring maintenance windows, and bulk-delete future
   maintenance windows.
-* [Mass update incidents](mass_update_incidents): Update or resolve many
+* [Mass update incidents](mass_update_incidents): update or resolve many
   incidents in an automated fashion
-* [Notifications team report](notifications_team_report): Generate a report of
+* [Migrate webhooks to v3](migrate_webhooks_to_v3): migrate all your v1/v2 extensions 
+  to v3.
+* [Notifications team report](notifications_team_report): generate a report of
   notification counts scoped to one or more specific teams
-* [Overrides bulk operations](overrides_bulk_operations): Schedule vacation
+* [Overrides bulk operations](overrides_bulk_operations): schedule vacation
   overrides for a given user, list overrides, or mass-delete a list of
   overrides.
-* [Remove SMS contact methods](remove_sms_contact_methods): Delete SMS-type
+* [Remove SMS contact methods](remove_sms_contact_methods): delete SMS-type
   contact methods and notification rules for all users in a PagerDuty account
+* [Rerole users](rerole_users): give users new roles.
+* [Schedule layer reorganizer](schedule_layer_reorganizer): transform response of 
+  GET request to /schedules endpoint to format required for subsequent PUT/POST requests.
 * [Update user emails](update_user_emails): perform account-wide modifications
   to login email addresses of users based on search and replace patterns,
-  including with with regular expressions
+  including with regular expressions
 * [De-provision users](user_deprovision): Automate the off-boarding process for
   PagerDuty users by removing them from schedules and escalation policies, and
   resolving all incidents that they are assigned.
@@ -44,7 +52,7 @@ Each script can be run as a standalone program, i.e.:
 ./name-of-script.lang <options>
 ``` 
 
-As opposed to requring it to be run as follows, although it is also an option:
+As opposed to requiring it to be run as follows, although it is also an option:
 
 ```
 <interpreter> name-of-script.lang <options>
@@ -83,7 +91,7 @@ More information on requirements files can be found in the pip documentation, at
 ### Ruby Scripts
 
 If the script is written in Ruby, the directory shall include a file `Gemfile`
-specifiying gem dependencies, that can be used to install them using the
+specifying gem dependencies that can be used to install them using the
 `bundle` command.
 
 [Rubygems](https://rubygems.org/pages/download) will need to installed in the
@@ -96,15 +104,15 @@ More information on gemfiles and Bundle can be found here:
 ## Contributing
 
 In addition to following each of the above conventions, i.e. residing in its
-own directory, each script shall begin with with a "shebang" line as follows:
+own directory, each script shall begin with a "shebang" line as follows:
 
 ```
 #!/usr/bin/env <interpreter>
 ```
 
-Where `<interpreter>` is the language command (i.e. `ruby`, `python`, `perl`
+where `<interpreter>` is the language command (i.e. `ruby`, `python`, `perl`
 etc.). Specific versions of interpreters (i.e. Python 2.7 or Python 3) shall be
-specified in the name of the exectuable. If the generic name is used (i.e.
+specified in the name of the executable. If the generic name is used (i.e.
 `python`), the script should be written such that it is compatible with the
 widest possible range of versions that might be available on any given
 operating system.
@@ -328,7 +336,7 @@ Jane Doe,jane.doe@example.com,user,5555555554,sms
 
 Creates each user, creates a default contact method and immediate notification rule for email, and creates a contact method and immediate notification rule for SMS or phone.
 
-**Note:** Phone address must be a valide 10-digit phone number
+**Note:** Phone address must be a valid 10-digit phone number
 **Note:** Address type must be one of ```sms``` or ```phone```
 
 #### Import Users from Active Directory
