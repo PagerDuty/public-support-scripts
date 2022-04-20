@@ -4,8 +4,8 @@ import argparse
 import sys
 import pdpyras
 
-def no_sms(token):
-    session = pdpyras.APISession(token)
+def no_sms(args):
+    session = pdpyras.APISession(args.api_key)
     users = session.iter_all(
         'users',
         params={'include[]':['contact_methods', 'notification_rules']}
@@ -26,10 +26,13 @@ def no_sms(token):
                 }))
                 session.delete(method['self'])
 
-if __name__=='__main__':
+def main(argv=None):
     ap=argparse.ArgumentParser(description="Sweeps through an account and "
         "deletes all of the user contact methods and notification rules that "
         "are SMS-based.")
-    ap.add_argument("api_key", help="REST API key")
+    ap.add_argument('-k', '--api-key', required=True, help="REST API key")
     args = ap.parse_args()
-    no_sms(args.api_key)
+    no_sms(args)
+
+if __name__=='__main__':
+        sys.exit(main())
