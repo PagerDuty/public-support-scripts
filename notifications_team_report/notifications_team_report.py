@@ -39,8 +39,8 @@ def main():
     ap.add_argument('-r', '--resume-file', dest='resume_file', default=False,
         type=argparse.FileType('rb'), help="Read previous ILE data from this\
         file instead of retrieving it from the API.")
-    ap.add_argument('-v', dest='verbosity', action='count', default=0,
-        help="Logging verbosity (default: INFO-level messages).")
+    ap.add_argument('-v','--verbose', help="Verbose command line output (show progress)",
+        default=False, action='store_true'     )
     ap.add_argument('-w', '--write-file', dest='write_file', default=False,
         type=argparse.FileType('wb'), help="A cache file to use for saving ILE\
         data that can be resumed from, before generating the reports. Useful\
@@ -52,9 +52,14 @@ def main():
     loglevs = ['info', 'critical', 'error', 'warning', 'info', 'debug']
     loglev = min(args.verbosity, 5)
     logging.basicConfig(
-        level=[getattr(logging, l.upper()) for l in loglevs][loglev],
-        stream=sys.stdout
-    )
+            level='DEBUG',
+            stream=sys.stdout
+        )
+    else: 
+        logging.basicConfig(
+            level='INFO',
+            stream=sys.stdout
+        )  
 
     now_s = int(time.time())
     if args.resume_file:
