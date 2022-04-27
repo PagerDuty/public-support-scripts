@@ -50,10 +50,11 @@ def main():
         dest='api_key', help="REST API key")
     args = ap.parse_args()  
    
-    if args.verbose:
-        logging.basicConfig(level='DEBUG',stream=sys.stdout)
-    else: 
-        logging.basicConfig(level='INFO',stream=sys.stdout)
+    loglev = 'DEBUG' if args.verbose else 'INFO'
+    logging.basicConfig(
+        level=loglev,
+        stream=sys.stdout
+    )
 
     now_s = int(time.time())
     if args.resume_file:
