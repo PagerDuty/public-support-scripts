@@ -19,7 +19,7 @@ def print_progress(result, i, n):
     new_percent = int(100.*i/n)
     prev_percent = int(100.*(i-1.)/n)
     if new_percent != prev_percent:
-        logging.info("Getting data: %d%% (%d of %d)", new_percent, i, n)
+        logging.debug("Getting data: %d%% (%d of %d)", new_percent, i, n)
 
 def main():
     # Memoizing dictionaries
@@ -48,10 +48,9 @@ def main():
             safeguard in case something goes wrong in the reporting part.")
     ap.add_argument('-k', '--api-key', type=str, required=True, 
         dest='api_key', help="REST API key")
-    args = ap.parse_args()
-    loglevs = ['info', 'critical', 'error', 'warning', 'info', 'debug']
-    loglev = min(args.verbosity, 5)
-    logging.basicConfig(
+    args = ap.parse_args()  
+    if args.verbose:
+        logging.basicConfig(
             level='DEBUG',
             stream=sys.stdout
         )
