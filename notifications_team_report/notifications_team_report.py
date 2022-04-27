@@ -49,16 +49,11 @@ def main():
     ap.add_argument('-k', '--api-key', type=str, required=True, 
         dest='api_key', help="REST API key")
     args = ap.parse_args()  
+   
     if args.verbose:
-        logging.basicConfig(
-            level='DEBUG',
-            stream=sys.stdout
-        )
+        logging.basicConfig(level='DEBUG',stream=sys.stdout)
     else: 
-        logging.basicConfig(
-            level='INFO',
-            stream=sys.stdout
-        )  
+        logging.basicConfig(level='INFO',stream=sys.stdout)
 
     now_s = int(time.time())
     if args.resume_file:
