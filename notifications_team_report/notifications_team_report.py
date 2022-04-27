@@ -46,8 +46,8 @@ def main():
         data that can be resumed from, before generating the reports. Useful\
         for if there's a massive quantity of ILE data to be saved, as a\
             safeguard in case something goes wrong in the reporting part.")
-    ap.add_argument('-t', '--token', type=str, help="A v2 REST API key to use\
-        for accessing notifications. A read-only key should suffice.")
+    ap.add_argument('-k', '--api-key', type=str, required=True, 
+        dest='api_key', help="REST API key")
     args = ap.parse_args()
     loglevs = ['info', 'critical', 'error', 'warning', 'info', 'debug']
     loglev = min(args.verbosity, 5)
@@ -60,7 +60,7 @@ def main():
     if args.resume_file:
         notifs, teams = pickle.load(args.resume_file)
     else:
-        api = pdpyras.APISession(args.token)
+        api = pdpyras.APISession(args.api_key)
 
         if 'teams' not in api.rget('/abilities'):
             logging.error("This account doesn't have the \"teams\" \ ability! "\
