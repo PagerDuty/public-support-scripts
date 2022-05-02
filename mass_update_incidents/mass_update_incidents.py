@@ -10,6 +10,7 @@ from datetime import date
 import pprint
 
 import pdpyras
+import time
 
 # Default parameters:
 PARAMETERS = {
@@ -55,6 +56,7 @@ def mass_update_incidents(args):
             print("* Incident {}: {}".format(incident['id'], args.action))
             if args.dry_run:
                 continue
+            time.sleep(0.25)
             self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
             session.rput(self_url, json={
                 'type': 'incident_reference',
