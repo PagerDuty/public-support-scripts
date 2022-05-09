@@ -40,6 +40,8 @@ class WebhookGetter:
         for n, item in enumerate(webhooks[1]):
             fields_to_be_mapped = webhooks[1][n]
             full_webhook_object = webhooks[0][n]
+            if 'headers' in full_webhook_object['config'].keys() and full_webhook_object['config']['headers'] is not None:
+                print(f"WARNING: Webhook {full_webhook_object['name']} with ID {full_webhook_object['id']} on service {full_webhook_object['extension_objects'][0]['id']} has custom headers - these will not be migrated")
             webhook_version = 'Generic Webhook V1' if item['extension_schema_id'] == self.v1_extension_schema_id \
                 else 'Generic Webhook V2'
             with open(self.csv_file, 'a+') as file:
@@ -264,8 +266,8 @@ def main():
     if args.action == 'copy':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
         v3_webhooks = WebhookGetter(args).get_v3_webhooks()
-        WebhookCreator(args, v1_v2_webhooks[1], v3_webhooks).create_webhooks()
         WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
+        WebhookCreator(args, v1_v2_webhooks[1], v3_webhooks).create_webhooks()
     elif args.action == 'delete':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
         WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
