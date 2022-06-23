@@ -4,9 +4,12 @@ import argparse
 import pdpyras
 import sys
 
+# Disables noisy warning logging from pdpyras
+import logging
+logging.disable(logging.WARNING)
+
 # Get all users' contact methods.
-# Originally by Ryan Hoskin:
-# https://github.com/ryanhoskin/pagerduty_get_all_contact_methods
+# Originally by Ryan Hoskin
 
 def get_users(session):
     sys.stdout.write("Listing All Users' Contact Methods:\n")

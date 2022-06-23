@@ -19,7 +19,7 @@ def print_progress(result, i, n):
     new_percent = int(100.*i/n)
     prev_percent = int(100.*(i-1.)/n)
     if new_percent != prev_percent:
-        logging.info("Getting data: %d%% (%d of %d)", new_percent, i, n)
+        logging.debug("Getting data: %d%% (%d of %d)", new_percent, i, n)
 
 def main():
     # Memoizing dictionaries
@@ -39,20 +39,20 @@ def main():
     ap.add_argument('-r', '--resume-file', dest='resume_file', default=False,
         type=argparse.FileType('rb'), help="Read previous ILE data from this\
         file instead of retrieving it from the API.")
-    ap.add_argument('-v', dest='verbosity', action='count', default=0,
-        help="Logging verbosity (default: INFO-level messages).")
+    ap.add_argument('-v','--verbose', help="Verbose command line output (show progress)",
+        default=False, action='store_true'     )
     ap.add_argument('-w', '--write-file', dest='write_file', default=False,
         type=argparse.FileType('wb'), help="A cache file to use for saving ILE\
         data that can be resumed from, before generating the reports. Useful\
         for if there's a massive quantity of ILE data to be saved, as a\
             safeguard in case something goes wrong in the reporting part.")
-    ap.add_argument('-t', '--token', type=str, help="A v2 REST API key to use\
-        for accessing notifications. A read-only key should suffice.")
-    args = ap.parse_args()
-    loglevs = ['info', 'critical', 'error', 'warning', 'info', 'debug']
-    loglev = min(args.verbosity, 5)
+    ap.add_argument('-k', '--api-key', type=str, required=True, 
+        dest='api_key', help="REST API key")
+    args = ap.parse_args()  
+   
+    loglev = 'DEBUG' if args.verbose else 'INFO'
     logging.basicConfig(
-        level=[getattr(logging, l.upper()) for l in loglevs][loglev],
+        level=loglev,
         stream=sys.stdout
     )
 
@@ -60,7 +60,7 @@ def main():
     if args.resume_file:
         notifs, teams = pickle.load(args.resume_file)
     else:
-        api = pdpyras.APISession(args.token)
+        api = pdpyras.APISession(args.api_key)
 
         if 'teams' not in api.rget('/abilities'):
             logging.error("This account doesn't have the \"teams\" \ ability! "\

@@ -25,7 +25,8 @@ class WebhookGetter:
     @staticmethod
     def extract_v1v2_fields(webhook_object):
         """Extracts webhook url, filter id, description and other fields from v1/v2
-        webhook object to be copied to v3"""
+        webhook object to be copied to v3
+        """
         reduced_object = {'id': webhook_object['id'],
                           'extension_schema_id': webhook_object['extension_schema']['id'],
                           'url': webhook_object['endpoint_url'],
@@ -36,10 +37,15 @@ class WebhookGetter:
 
     def write_json_to_csv(self, webhooks):
         """Creates a csv with webhook type, fields used for v3 webhook creation
-        and full JSON payload of v1/v2 webhook"""
+        and full JSON payload of v1/v2 webhook
+        """
         for n, item in enumerate(webhooks[1]):
             fields_to_be_mapped = webhooks[1][n]
             full_webhook_object = webhooks[0][n]
+            if 'headers' in full_webhook_object['config'].keys() and \
+                    full_webhook_object['config']['headers'] is not None:
+                print(f"WARNING: Webhook {full_webhook_object['name']} with ID {full_webhook_object['id']} on service {full_webhook_object['extension_objects'][0]['id']} \n"
+                    "   has custom headers - these will not be migrated")
             webhook_version = 'Generic Webhook V1' if item['extension_schema_id'] == self.v1_extension_schema_id \
                 else 'Generic Webhook V2'
             with open(self.csv_file, 'a+') as file:
@@ -63,7 +69,8 @@ class WebhookGetter:
     def get_v1v2_webhooks(self):
         """Makes a GET request to /extensions endpoint, filters out generic v1/v2 webhooks
         and saves them in a nested list, with first item being a list of full webhook payloads and
-        second item being a list of objects with fields to be used for webhook v3 creation"""
+        second item being a list of objects with fields to be used for webhook v3 creation
+        """
         self.test_connection()
 
         more = True
@@ -94,7 +101,8 @@ class WebhookGetter:
         v3 webhooks returned and makes a key for each one with a combination of endpoint url,
         description, and service id and adds that key to a hash map which the function returns
         in order to later determine whether an about-to-be-created webhook subscription would
-        be a duplicate."""
+        be a duplicate.
+        """
         more = True
         offset = 0
         v3_webhooks = []
@@ -175,7 +183,7 @@ class WebhookCreator:
     def v3_webhook_already_exists(self, webhook_params):
         key = webhook_params['url'] + webhook_params['filter_id'] + webhook_params['description']
         if key in self.existing_v3_webhooks:
-            print("Not creating a new v3 webhook for\n"
+            print("WARNING: Not creating a new v3 webhook for\n"
                   f"    endpoint: {webhook_params['url']}\n"
                   f"    service id: {webhook_params['filter_id']}\n"
                   f"    description: {webhook_params['description']}\n"
@@ -232,7 +240,7 @@ class WebhookDeleter:
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Migrate all v1/v2 webhooks to v3"
+        description='Migrate all v1/v2 webhooks to v3'
     )
     ap.add_argument('-k',
                     '--api-key',
@@ -264,13 +272,13 @@ def main():
     if args.action == 'copy':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
         v3_webhooks = WebhookGetter(args).get_v3_webhooks()
-        WebhookCreator(args, v1_v2_webhooks[1], v3_webhooks).create_webhooks()
         WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
+        WebhookCreator(args, v1_v2_webhooks[1], v3_webhooks).create_webhooks()
     elif args.action == 'delete':
         v1_v2_webhooks = WebhookGetter(args).get_v1v2_webhooks()
         WebhookGetter(args).write_json_to_csv(v1_v2_webhooks)
         WebhookDeleter(args, v1_v2_webhooks[1]).delete_v1v2webhooks()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main())
