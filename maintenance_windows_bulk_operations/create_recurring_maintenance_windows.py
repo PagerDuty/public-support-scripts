@@ -19,23 +19,22 @@ def create_recurring_maintenance_windows(args):
     for iter in range(args.num_repetitions):
         print("Creating a %d-minute maintenance window starting %s."%(
             args.duration_minutes, start_date))
-        if args.dry_run:
-            continue
-        try:
-            mw = session.rpost('maintenance_windows', json={
-                'type': 'maintenance_window',
-                'start_time':start_date.isoformat(),
-                'end_time':end_date.isoformat(),
-                'description':args.description,
-                'services':[sref(s_id) for s_id in args.service_ids]
-            })
-            start_date = start_date + timedelta(hours=args.period_hours)
-            end_date = end_date + timedelta(hours=args.period_hours)
-        except pdpyras.PDClientError as e:
-            msg = "API Error: "
-            if e.response is not None:
-                msg += "HTTP %d: %s"%(e.response.status_code, e.response.text)
-            print(msg)
+        if not args.dry_run:
+            try:
+                mw = session.rpost('maintenance_windows', json={
+                    'type': 'maintenance_window',
+                    'start_time':start_date.isoformat(),
+                    'end_time':end_date.isoformat(),
+                    'description':args.description,
+                    'services':[sref(s_id) for s_id in args.service_ids]
+                })
+            except pdpyras.PDClientError as e:
+                msg = "API Error: "
+                if e.response is not None:
+                    msg += "HTTP %d: %s"%(e.response.status_code, e.response.text)
+                print(msg)
+        start_date = start_date + timedelta(hours=args.period_hours)
+        end_date = end_date + timedelta(hours=args.period_hours)
     if args.dry_run:
         print("(Note: no maintenance windows actually created because -n/--dry-run "
             "was given)")
