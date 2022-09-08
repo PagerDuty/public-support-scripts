@@ -33,6 +33,10 @@ def mass_update_incidents(args):
         PARAMETERS['service_ids[]'] = args.service_id.split(',')
         print("Acting on incidents corresponding to service ID(s): " +
             args.service_id)
+    if args.incident_id:
+        PARAMETERS['incident_ids[]'] = args.incident_id.split(',')
+        print("Acting on incident corresponding to incident ID(s)" +
+            args.incident_id)
     if args.action == 'resolve':
         PARAMETERS['statuses[]'] = ['triggered', 'acknowledged']
         print("Resolving incidents")
@@ -85,6 +89,8 @@ def main(argv=None):
     ap.add_argument('-k', '--api-key', required=True, help="REST API key")
     ap.add_argument('-n', '--dry-run', default=False, action='store_true',
         help="Do not perform the actions but show what will happen.")
+    ap.add_argument('-i', '--incident-id', default=None, help="Id of the "
+        "incident, or comma separated list of incidents to be updated")
     ap.add_argument('-s', '--service-id', default=None, help="ID of the "
         "service, or comma-separated list of services, for which incidents "
         "should be updated; leave blank to match all services.")

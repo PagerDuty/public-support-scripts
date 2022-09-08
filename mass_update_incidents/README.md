@@ -20,6 +20,8 @@ Below are the arguments for the script.
 
 `-s` : ID of the service, or comma-separated list of services, for which incidents should be updated; leave blank to match all services.
 
+`-i` : ID of the incident, or comma-separated list of incidents, for which incidents should be updated
+
 `-u` : ID of user, or comma-separated list of users, whose assigned incidents should be included in the action. Leave blank to match incidents for all users.
 
 `-a` : default=`resolve`, Action to take on incidents (acknowledge/resolve)
@@ -44,6 +46,13 @@ The below example will resolve all incidents that belongs to a service.
 ```
 python3 mass_update_incidents.py -k API-KEY_HERE -s SERVICE-ID -a resolve -e YOUR-EMAIL
 ```
+
+The below example will resolve all incidents with the associated incident ID(s) 
+
+```
+python3 mass_update_incidents.py -k API-KEY_HERE -i INCIDENT-ID -a resolve -e YOUR-EMAIL
+```
+
 
 The below example will resolve all incidents assigned to both user1 and user2.
 
