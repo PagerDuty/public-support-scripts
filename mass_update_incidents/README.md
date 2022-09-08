@@ -53,6 +53,7 @@ The below example will resolve all incidents with the associated incident ID(s)
 python3 mass_update_incidents.py -k API-KEY_HERE -i INCIDENT-ID -a resolve -e YOUR-EMAIL
 ```
 
+
 The below example will resolve all incidents assigned to both user1 and user2.
 
 ```

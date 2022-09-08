@@ -34,7 +34,10 @@ def update_email(user, new_email):
     """
     global session
     try:
-        session.rput(user['self'], json={'type':'user', 'email':new_email})
+        self_url =  f"https://api.pagerduty.com/users/{user['id']}"
+        session.rput(self_url, json={
+        'type':'user', 'email':new_email
+        })
     except pdpyras.PDClientError as e:
         if e.response is not None:
             print("Failed to update user; HTTP %d: %s"%(
@@ -43,7 +46,7 @@ def update_email(user, new_email):
         else:
             raise e
 
-def update_contact_method(cm, new_email):
+def update_contact_method(user, cm, new_email):
     """
     Updates an email contact method.
 
@@ -51,7 +54,8 @@ def update_contact_method(cm, new_email):
     :param new_email: New email address of the contact method
     """
     try:
-        session.rput(cm['self'], json={
+        self_url =  f"https://api.pagerduty.com/users/{user['id']}/contact_methods/{cm['id']}"
+        session.rput(self_url, json={
             'type': 'email_contact_method', 'address': new_email
         })
     except pdpyras.PDClientError as e:
@@ -64,7 +68,7 @@ def update_contact_method(cm, new_email):
 def get_user_email_changes(args):
     """
     Retrieves users to be updated.
-    
+
     :param args: Arguments namespace
     :yields: A 2-tuple containing a dictionary representation of the user
         dictionary object in position 0 and the new email address in position 1.
@@ -122,7 +126,7 @@ def replace_emails(args):
                     elif not args.csv_file:
                         # Use the globally applicable find/replace logic
                         new_cm_address = apply_replacement_logic(
-                            args, 
+                            args,
                             cm['address']
                         )
                     else:
@@ -135,7 +139,7 @@ def replace_emails(args):
                             cm['id'], cm['address'], new_email
                         ))
                         if not args.dry_run:
-                            update_contact_method(cm, new_cm_address)
+                            update_contact_method(user, cm, new_cm_address)
 
 def main():
     global session
@@ -144,7 +148,7 @@ def main():
     ap.add_argument('-k', '--api-key', required=True, help="API key")
     # "CSV",
     # description="CSV-based update: users to update and how to make the "
-    # "update is specified in a CSV file", 
+    # "update is specified in a CSV file",
     # "Query",
     # description="Query-based update: users to update given by a query and "
     # "replacement pattern"
@@ -187,4 +191,3 @@ def main():
 
 if __name__=='__main__':
     main()
-
