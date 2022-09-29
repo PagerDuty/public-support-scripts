@@ -128,7 +128,8 @@ class CSVImporter
     puts "#{tags} added"
     $log.info("#{tags} added")
     else
-      puts "No user found with the #{record.email}!"
+      puts "No user found with email #{record.email}!"
+      $log.error("No user found with email #{record.email}!")
     end
 
   rescue Exception => e
