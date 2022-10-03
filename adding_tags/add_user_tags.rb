@@ -29,7 +29,7 @@ class PagerDutyAgent
     while decision.chomp != "y"
       decision = gets
       if decision.chomp == "n"
-        abort "Discontinuing user import"
+        abort "Discontinuing adding tags to user import"
       end
     end
       #logger defined as a global variable accessible to all classes in the script
@@ -107,7 +107,7 @@ class CSVImporter
     @csv_file = csv_file
   end
 
-  def import_user(record)
+  def import_user_tags(record)
     $log.info("Attempting to find existing user by email #{record.email}.")
     # Try to find an existing user
     users = agent.find_user_by_email(record.email)
@@ -139,7 +139,7 @@ class CSVImporter
   def import
     CSV.foreach(csv_file).with_index(1) do |row, index|
       next if index == 1
-      import_user(row_to_record(row))
+      import_user_tags(row_to_record(row))
     end
   end
 
@@ -151,7 +151,7 @@ end
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: import_users.rb [options]"
+  opts.banner = "Usage: add_user_tags.rb [options]"
   opts.on('-a', '--access-token [String]', 'Access Token') do |a|
     options[:access_token] = a
   end
