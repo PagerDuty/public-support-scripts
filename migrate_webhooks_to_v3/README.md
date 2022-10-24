@@ -10,3 +10,11 @@ including the newly added ones. You can choose to delete the old versions of the
 (this is controlled by `-a` or `--action` parameter). 
 
 Note that webhooks' custom headers will not be migrated.
+
+### Usage
+
+To migrate generic v1/v2 webhooks to v3:
+
+1. Migrate v1 webhooks: `migrate_webhooks_to_v3.py -k {API-KEY} -v v1` OR migrate v1 and v2 webhooks: `migrate_webhooks_to_v3.py -v all -k {API-KEY}`
+2. Confirm the migration was successful via the UI or REST API
+3. Delete the v1 webhooks: `migrate_webhooks_to_v3.py -k {API-KEY} -v v1 -a delete` OR delete the v1 and v2 webhooks: `migrate_webhooks_to_v3.py -k {API-KEY} -v all -a delete`
