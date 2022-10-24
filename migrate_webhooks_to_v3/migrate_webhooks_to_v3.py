@@ -248,10 +248,9 @@ def main():
                     help='REST API key'
                     )
     ap.add_argument('-v', '--version',
-                    required=False,
-                    default='all',
+                    required=True,
                     choices=['all', 'v1'],
-                    help="version(s) of the webhooks to copy or delete, 'all' is default")
+                    help="version(s) of the webhooks to copy or delete.")
     ap.add_argument('-e',
                     '--event_types',
                     required=False,
