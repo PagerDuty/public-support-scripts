@@ -10,6 +10,7 @@ from datetime import date
 import pprint
 
 import pdpyras
+from tqdm import tqdm
 import time
 
 # Default parameters:
@@ -55,24 +56,39 @@ def mass_update_incidents(args):
         PARAMETERS['date_range'] = 'all'
         print("Getting incidents of all time")
     print("Parameters: "+str(PARAMETERS))
-    try:
-        print("Please be patient as this can take a while for large volumes "
-            "of incidents.")
-        for incident in session.list_all('incidents', params=PARAMETERS):
-            print("* Incident {}: {}".format(incident['id'], args.action))
-            if args.dry_run:
-                continue
+    print("Please be patient as this can take a while for large volumes "
+        "of incidents.")
+
+    incidents = session.list_all('incidents', params=PARAMETERS)
+    jsonPayload = []
+    for incident in incidents:
+        jsonPayload.append({
+            'type': 'incident_reference',
+            'id': incident['id'],
+            'status': '{0}d'.format(args.action), # acknowledged or resolved
+        })
+
+    if args.dry_run:
+        print(jsonPayload)
+    else:
+        update(session, jsonPayload)
+
+
+def update(session, jsonPayload, batchSize=100):
+    url =  "https://api.pagerduty.com/incidents"
+    chunks=[jsonPayload[i:i + batchSize] for i in range(0, len(jsonPayload), batchSize)]
+    for chunk in tqdm(chunks):
+        try:
+            session.rput(url, json=chunk)
             time.sleep(0.25)
-            self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
-            session.rput(self_url, json={
-                'type': 'incident_reference',
-                'id': incident['id'],
-                'status': '{0}d'.format(args.action), # acknowledged or resolved
-            })
-    except pdpyras.PDClientError as e:
-        if e.response is not None:
-            print(e.response.text)
-        raise e
+        except Exception as e:
+            if (batchSize == 1):
+                print("fail update following item")
+                print(chunk)
+                raise e
+            else:
+                print("Current chunk failed, trying smaller batch size")
+                update(session, chunk, batchSize/10)
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
