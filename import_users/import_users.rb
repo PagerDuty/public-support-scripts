@@ -25,6 +25,9 @@ class PagerDutyAgent
     #making an initial call to /users to extract subdomain corresponding to the API key
     initial = connection.get("/users", query = {}, { 'Authorization' => "Token token=#{token}",
           'Accept' => 'application/vnd.pagerduty+json;version=2'})
+    if !initial.success?
+        raise "Error: #{initial.status} Unauthorized"
+    end
     users = JSON.parse(initial.body)['users']
     subdomain = users[0]['html_url'][/https:\/\/(.*)\.pagerduty\.com.*/, 1]
     puts("About to perform user import for #{subdomain}, proceed? (y/n)")
