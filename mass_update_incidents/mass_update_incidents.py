@@ -23,7 +23,7 @@ PARAMETERS = {
 def mass_update_incidents(args):
     session = pdpyras.APISession(args.api_key,
                                  default_from=args.requester_email)
-    session.headers.update({"X-SOURCE-SCRIPT": "pupblic-support-scripts/mass_update_incidents"})
+    session.headers.update({"X-SOURCE-SCRIPT": "public-support-scripts/mass_update_incidents"})
 
     if args.user_id:
         PARAMETERS['user_ids[]'] = args.user_id.split(',')
