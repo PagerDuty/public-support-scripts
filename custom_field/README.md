@@ -18,6 +18,13 @@ In this format:
 Allowed values: `single_value`, `single_value_fixed`, `multi_value`, `multi_value_fixed`
 - `field_options` The fixed list of value options that may be stored in this field.
 
+## Understanding the field types
+`single_value_fixed` = Single Select in the UI
+`multi_value_fixed` = Multiple Select in the UI
+`single_value` = Text (data type is string), Checkbox (data type is boolean), URL (data type is url), Datetime (data type is datetime), Decimal (data type is decimal),
+`multi_value` = tag (data type is string), integer (data type is integer)
+
+
 ## Input Format
 
 To execute the script, run:
