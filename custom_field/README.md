@@ -34,3 +34,7 @@ ruby import_custom_fields.rb -k API_KEY_HERE -f PATH_TO_CSV_FILE_HERE
 ## Errors
 
 Errors are printed to the terminal as they happen, and are also recorded in a log file named after the requester_email. The log file will tell you the HTTP status, the response body, and the attempted payload or query.
+
+## Reference
+
+The script utilises the PagerDuty REST API for creating [custom fields](https://developer.pagerduty.com/api-reference/2131f556073c4-create-a-field) and [options for custom fields](https://developer.pagerduty.com/api-reference/4d93407098d46-create-a-field-option)
