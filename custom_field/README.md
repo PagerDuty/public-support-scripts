@@ -18,6 +18,13 @@ In this format:
 Allowed values: `single_value`, `single_value_fixed`, `multi_value`, `multi_value_fixed`
 - `field_options` The fixed list of value options that may be stored in this field.
 
+The `field_options` values MUST be separated by semicolon `;` see CSV example below for multiple field options.
+
+```
+data_type,name,display_name,description,field_type,field_options
+string,test cusomt field,test custom field,test,multi_value_fixed,option1;option2;option3
+```
+
 ## Understanding the field types
 - `single_value_fixed` = Single Select in the UI
 - `multi_value_fixed` = Multiple Select in the UI
