@@ -10,12 +10,12 @@ data_type,name,display_name,description,field_type,field_options
 
 In this format:
 
-- `data_type` Allowed values: boolean, integer, float, string, datetime, url
+- `data_type` Allowed values: `boolean`, `integer`, `float`, `string`, `datetime`, `url`
 - `name` The name of the field. May include ASCII characters, specifically lowercase letters, digits. The name field will be converted into a snake case. The name for a Field must be unique.
 - `display_name` The human-readable name of the field. This must be unique across an account.
 - `description` A description of the data this field contains.
 - `field_type` The type of data this field contains. In combination with the data_type field.
-Allowed values: single_value, single_value_fixed, multi_value, multi_value_fixed
+Allowed values: `single_value`, `single_value_fixed`, `multi_value`, `multi_value_fixed`
 - `field_options` The fixed list of value options that may be stored in this field.
 
 ## Input Format
