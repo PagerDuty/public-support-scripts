@@ -21,8 +21,8 @@ Allowed values: `single_value`, `single_value_fixed`, `multi_value`, `multi_valu
 ## Understanding the field types
 - `single_value_fixed` = Single Select in the UI
 - `multi_value_fixed` = Multiple Select in the UI
-- `single_value` = Text (data type is string), Checkbox (data type is boolean), URL (data type is url), Datetime (data type is datetime), Decimal (data type is decimal),
-- `multi_value` = tag (data type is string), integer (data type is integer)
+- `single_value` = Text (data type is string), Checkbox (data type is boolean), URL (data type is url), Datetime (data type is datetime), Decimal (data type is decimal), integer (data type is integer)
+- `multi_value` = tag (data type is string)
 
 
 ## Input Format
