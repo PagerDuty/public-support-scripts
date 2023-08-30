@@ -1,6 +1,6 @@
 # Adding custom fields for incidents
 
-Before running the script it is recommended that you read the PagerDuty doc about [custom fields](https://support.pagerduty.com/docs/custom-fields-on-incidents) and understand how they works.
+Before running the script it is recommended that you read the PagerDuty doc about [custom fields](https://support.pagerduty.com/docs/custom-fields-on-incidents) and understand how they work.
 
 ## Input Format
 
@@ -34,9 +34,30 @@ string,test cusomt field,test custom field,test,multi_value_fixed,option1;option
 - `multi_value` = tag (data type is string)
 
 
-## Input Format
+## Running the script
+
+1. Download the repo or save the files in a directory
+
+2. Now, in your terminal, navigate to the directory containing the files.
+
+3. Run the following command to install the required gems:
+
+```
+bundle install
+```
+
+This will install the specified gems and their dependencies.
+
 
 To execute the script, run:
+
+```
+bundle exec ruby import_custom_fields.rb -k API_KEY_HERE -f PATH_TO_CSV_FILE_HERE
+```
+
+Using `bundle exec` ensures that the script uses the gem and versions specified in the Gemfile.
+
+if you alreay have the specified gems installed you can simple run the script like shown below.
 
 ```
 ruby import_custom_fields.rb -k API_KEY_HERE -f PATH_TO_CSV_FILE_HERE
