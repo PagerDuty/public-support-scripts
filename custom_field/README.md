@@ -1,5 +1,7 @@
 # Adding custom fields for incidents
 
+Before running the script it is recommended that you read the PagerDuty doc about [custom fields](https://support.pagerduty.com/docs/custom-fields-on-incidents) and understand how they works.
+
 ## Input Format
 
 To use this script, you must first have a CSV file ready formatted with the following headings:
