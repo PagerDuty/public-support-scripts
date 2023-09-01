@@ -6,7 +6,7 @@ require 'logger'
 
 # Create logger object
 logger = Logger.new('application.log')
-logger.info "Starting application"
+logger.info 'Starting application'
 
 # Class responsible for parsing CSV files and returning an array of custom fields.
 class CSVtoCustomFieldParser
@@ -50,7 +50,7 @@ class CSVtoCustomFieldParser
   # @param values [String] A string containing the options, separated by semicolons.
   # @return [Array<Hash>] An array of hashes, each hash representing an option.
   def generate_field_options(values)
-    @logger.info "Generating Field Options"
+    @logger.info 'Generating Field Options'
     values.split(';').map do |value|
       {
         'data' => {
