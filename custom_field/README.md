@@ -33,6 +33,17 @@ string,test cusomt field,test custom field,test,multi_value_fixed,option1;option
 - `single_value` = Text (data type is string), Checkbox (data type is boolean), URL (data type is url), Datetime (data type is datetime), Decimal (data type is float), integer (data type is integer)
 - `multi_value` = tag (data type is string)
 
+## CSV example
+
+Below is a CSV example that will create a text field, a datetime field, a URL field and a multiple select field with three options.
+
+```
+data_type,name,display_name,description,field_type,field_options
+string,text field,test custom field,testing,single_value,
+datetime,incident triggere time,incident triggered time,test,single_value,
+url,incident url,incident URL,incident URL,single_value,
+string,incident options,Incident options,incident options,multi_value_fixed,option1;option2;option3
+```
 
 ## Running the script
 
@@ -70,7 +81,7 @@ ruby import_custom_fields.rb -k API_KEY_HERE -f PATH_TO_CSV_FILE_HERE
 
 ## Errors
 
-Errors are printed to the terminal as they happen, and are also recorded in a log file named after the requester_email. The log file will tell you the HTTP status, the response body, and the attempted payload or query.
+Errors are printed to the terminal as they happen. The script will continue to create custom fields and print errors for the failed ones. 
 
 ## Reference
 
