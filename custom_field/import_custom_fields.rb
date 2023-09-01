@@ -2,13 +2,19 @@ require 'httparty'
 require 'csv'
 require 'json'
 require 'optparse'
+require 'logger'
 
+# Create logger object
+logger = Logger.new('application.log')
+logger.info "Starting application"
 
 # Class responsible for parsing CSV files and returning an array of custom fields.
 class CSVtoCustomFieldParser
   # @param file [String] The path to the CSV file.
-  def initialize(csv_file)
+  # @param logger [Logger] The logger object
+  def initialize(csv_file, logger)
     @csv_file = csv_file
+    @logger = logger
   end
 
   # Parse the CSV file and return an array of custom fields.
@@ -17,6 +23,7 @@ class CSVtoCustomFieldParser
   def parse
     fields = []
     CSV.foreach(@csv_file, headers: true) do |row|
+      @logger.info "Parsing row: #{row}"
       field_options = if row['field_type'] == 'multi_value_fixed' || row['field_type'] == 'single_value_fixed'
                         generate_field_options(row['field_options'])
                       else
@@ -43,6 +50,7 @@ class CSVtoCustomFieldParser
   # @param values [String] A string containing the options, separated by semicolons.
   # @return [Array<Hash>] An array of hashes, each hash representing an option.
   def generate_field_options(values)
+    @logger.info "Generating Field Options"
     values.split(';').map do |value|
       {
         'data' => {
@@ -62,7 +70,9 @@ class CSVtoCustomFieldParser
   # @param input [String] The string to convert.
   # @return [String] The converted string.
   def convert_to_snake_case(input)
-    input.gsub(' ', '_').downcase
+    result = input.gsub(' ', '_').downcase
+    @logger.info "Converted #{input} to snake_case: #{result}"
+    result
   end
 end
 
@@ -76,8 +86,10 @@ class PagerDutyCustomFieldCreator
   attr_reader :api_token
 
   # @param api_token [String] The PagerDuty API token.
-  def initialize(api_token)
+  # @param logger [Logger] The logger object
+  def initialize(api_token, logger)
     @api_token = api_token
+    @logger = logger
   end
 
   # Create a custom field in PagerDuty.
@@ -93,19 +105,27 @@ class PagerDutyCustomFieldCreator
       headers: { 'Authorization' => "Token token=#{api_token}" }
     }
 
+    @logger.info "Sending POST request to #{endpoint} with body: #{options[:body]}"
+
     response = self.class.post(endpoint, options)
     parsed_response = JSON.parse(response.body)
 
     if response.success?
+      @logger.info "Successfully created custom field. Response: #{parsed_response}"
       parsed_response
     else
-      puts "#{parsed_response['error']['code']}: Error message  #{parsed_response['error']['errors']}"
+      error_message = "#{parsed_response['error']['code']}: Error message  #{parsed_response['error']['errors']}"
+      @logger.error error_message
+      puts error_message
       nil
     end
   rescue HTTParty::Error => e
-    puts "Error creating custom field: #{e}"
+    error_message = "Error creating custom field: #{e}"
+    @logger.error error_message
+    puts error_message
     nil
   end
+end
 
 
 # #################################################################################### #
@@ -132,16 +152,26 @@ unless options[:api_key] && options[:file]
 end
 
 # Generate parser and extract usable custom_fields
-parser = CSVtoCustomFieldParser.new(options[:file])
+logger.info 'Parsing CSV file'
+parser = CSVtoCustomFieldParser.new(options[:file], logger)
 fields = parser.parse
+logger.info "Finished parsing CSV file. Fields: #{fields}"
 
 # Generate field-creator and make consecutive api calls
-creator = PagerDutyCustomFieldCreator.new(options[:api_key])
+logger.info 'Creating custom fields'
+creator = PagerDutyCustomFieldCreator.new(options[:api_key], logger)
 fields.each do |field|
   result = creator.create_custom_field(field)
   if result
-    puts "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
+    message =  "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
+    logger.info message
+    puts message
   else
-    puts "Failed to create custom field with name: #{field[:name]}"
+    message = "Failed to create custom field with name: #{field[:name]}"
+    logger.error message
+    puts message
   end
 end
+puts 'You can inspect custom fields present on your acount at:'
+puts 'https://<your_domain>.pagerduty.com/customfields/'
+logger.info 'Finished creating custom fields'
