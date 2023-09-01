@@ -76,7 +76,6 @@ class CSVtoCustomFieldParser
   end
 end
 
-
 # Class responsible for making API calls to create custom fields
 class PagerDutyCustomFieldCreator
   include HTTParty
@@ -127,51 +126,54 @@ class PagerDutyCustomFieldCreator
   end
 end
 
-
 # #################################################################################### #
 # Usage:
 # #################################################################################### #
 
-# CLI Argument/Option handling
-options = {}
-OptionParser.new do |opts|
-  opts.banner = 'Usage: ruby PD_custom_field_CSV_import.rb [options]'
+# Run the following only if this file is run directly (vs, for example, from a tester)
+if __FILE__ == $0
 
-  opts.on('-k', '--api-key API_KEY', 'PagerDuty API key') do |api_key|
-    options[:api_key] = api_key
+  # CLI Argument/Option handling
+  options = {}
+  OptionParser.new do |opts|
+    opts.banner = 'Usage: ruby PD_custom_field_CSV_import.rb [options]'
+
+    opts.on('-k', '--api-key API_KEY', 'PagerDuty API key') do |api_key|
+      options[:api_key] = api_key
+    end
+
+    opts.on('-f', '--file FILE', 'CSV file path') do |file|
+      options[:file] = file
+    end
+  end.parse!
+
+  unless options[:api_key] && options[:file]
+    puts 'Both API key and CSV file path are required.'
+    exit
   end
 
-  opts.on('-f', '--file FILE', 'CSV file path') do |file|
-    options[:file] = file
-  end
-end.parse!
+  # Generate parser and extract usable custom_fields
+  logger.info 'Parsing CSV file'
+  parser = CSVtoCustomFieldParser.new(options[:file], logger)
+  fields = parser.parse
+  logger.info "Finished parsing CSV file. Fields: #{fields}"
 
-unless options[:api_key] && options[:file]
-  puts 'Both API key and CSV file path are required.'
-  exit
+  # Generate field-creator and make consecutive api calls
+  logger.info 'Creating custom fields'
+  creator = PagerDutyCustomFieldCreator.new(options[:api_key], logger)
+  fields.each do |field|
+    result = creator.create_custom_field(field)
+    if result
+      message = "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
+      logger.info message
+      puts message
+    else
+      message = "Failed to create custom field with name: #{field[:name]}"
+      logger.error message
+      puts message
+    end
+  end
+  puts 'You can inspect custom fields present on your acount at:'
+  puts 'https://<your_domain>.pagerduty.com/customfields/'
+  logger.info 'Finished creating custom fields'
 end
-
-# Generate parser and extract usable custom_fields
-logger.info 'Parsing CSV file'
-parser = CSVtoCustomFieldParser.new(options[:file], logger)
-fields = parser.parse
-logger.info "Finished parsing CSV file. Fields: #{fields}"
-
-# Generate field-creator and make consecutive api calls
-logger.info 'Creating custom fields'
-creator = PagerDutyCustomFieldCreator.new(options[:api_key], logger)
-fields.each do |field|
-  result = creator.create_custom_field(field)
-  if result
-    message =  "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
-    logger.info message
-    puts message
-  else
-    message = "Failed to create custom field with name: #{field[:name]}"
-    logger.error message
-    puts message
-  end
-end
-puts 'You can inspect custom fields present on your acount at:'
-puts 'https://<your_domain>.pagerduty.com/customfields/'
-logger.info 'Finished creating custom fields'
