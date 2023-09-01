@@ -79,7 +79,7 @@ class PagerDutyCustomFieldImporter
 
   # convert the name into snake case e.g. "test custom field 1" => test_custom_field_1
   def convert_to_snake_case(input)
-    input.gsub(' ', '_')
+    input.gsub(' ', '_').downcase
   end
 end
 
