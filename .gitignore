@@ -1,11 +1,23 @@
+## General
 .env
-*.pyc
-*.DS_Store
-*.csv
-!test.csv
-*.log
-.ruby-version
-.idea
-backup/
 logs/
+*.log
+*.csv
+backup/
+
+!test.csv
+
+## Ruby
+.bundle/
+vendor/
+.ruby-version
+
+## Python
+*.pyc
 Pipfile*
+
+## OS
+*.DS_Store
+
+## Dev Apps
+.idea
