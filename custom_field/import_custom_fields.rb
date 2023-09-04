@@ -111,7 +111,6 @@ class PagerDutyCustomFieldCreator
       @logger.info "Skipping attempt to create #{params[:name]}: already exists."
       puts "Skipping creation of #{params[:name]}"
       puts "     a custom field by that name alread exists on this api-key's account."
-      # return 'skipped'
       return { 'status' => 'skipped' }
     end
 
