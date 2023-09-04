@@ -91,6 +91,7 @@ class PagerDutyCustomFieldCreator
   def initialize(api_token, logger)
     @api_token = api_token
     @logger = logger
+    @existing_fields = fetch_existing_custom_fields
   end
 
   # Sends an API request to PagerDuty to create a custom field.
@@ -105,7 +106,13 @@ class PagerDutyCustomFieldCreator
       headers: { 'Authorization' => "Token token=#{@api_token}" }
     }
 
-    @logger.info "Sending POST request to #{endpoint} with body: #{options[:body]}"
+    @logger.debug 'Calling private function to determine if custom field exists'
+    if check_existing_custom_field(params[:name])
+      @logger.info "Skipping attempt to create #{params[:name]}: already exists."
+      puts "Skipping creation of #{params[:name]}"
+      puts "     a custom field by that name alread exists on this api-key's account."
+      return 'skipped'
+    end
 
     @logger.info "Sending POST request to #{endpoint} with body: #{options[:body]}"
     response = self.class.post(endpoint, options)
@@ -118,10 +125,68 @@ class PagerDutyCustomFieldCreator
       handle_api_error(parsed_response)
     end
   rescue HTTParty::Error => e
-    error_message = "Error creating custom field: #{e}"
+    handle_connection_error(e)
+  end
+
+  private
+
+  # Fetches existing custom fields from PagerDuty.
+  #
+  # @return [Array, false] List of existing fields or false if request failed.
+  def fetch_existing_custom_fields
+    endpoint = '/incidents/custom_fields'
+    options = {
+      headers: {
+        'Authorization' => "Token token=#{@api_token}",
+        'Content-Type' => 'application/json'
+      }
+    }
+    @logger.info "Making call to get existing field names from #{endpoint}"
+    response = self.class.get(endpoint, options)
+    @logger.info "The following response was received: #{response}"
+    if response.success?
+      json = JSON.parse(response.body)
+      @logger.info "The following parsing is being stored: #{json}"
+      json
+    else
+      handle_api_error(JSON.parse(response.body))
+    end
+  rescue HTTParty::Error => e
+    handle_connection_error(e)
+  end
+
+  # Checks if a custom field with the provided name already exists.
+  #
+  # @param field_name [String] The name of the custom field to check for.
+  # @return [Boolean] Returns true if the custom field with the given name exists,
+  # otherwise returns false (including if it is unabel to determine the result).
+  def check_existing_custom_field(field_name)
+    return false unless @existing_fields
+
+    existing_field = @existing_fields['fields'].find { |field| field['name'] == field_name }
+
+    # Log and bool-report whether field was found
+    if existing_field
+      @logger.warn "Found existing custom field with name '#{field_name}'."
+      true
+    else
+      @logger.info "No existing custom field found with name '#{field_name}'."
+      false
+    end
+  end
+
+  # Handles API errors by logging and displaying them.
+  #
+  # @param response [Hash] The parsed API response.
+  def handle_api_error(response)
+    error_message = if response['error']
+                      "#{response['error']['code']}: #{response['error']['errors'].join(', ')}"
+                    else
+                      "Unexpected error: #{response}"
+                    end
     @logger.error error_message
     puts error_message
-    nil
+    false
   end
 
   # Handles HTTParty connection errors by logging and displaying them.
@@ -200,9 +265,12 @@ if __FILE__ == $0
   fields.each do |field|
     result = creator.create_custom_field(field)
     if result
-      message = "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
-      logger.info message
-      puts message
+      if result == 'skipped'
+      else
+        message = "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
+        logger.info message
+        puts message
+      end
     else
       message = "Failed to create custom field with name: #{field[:name]}"
       logger.error message
