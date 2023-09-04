@@ -5,7 +5,6 @@
 !test.csv
 *.log
 .ruby-version
-Gemfile.lock
 .idea
 backup/
 logs/
