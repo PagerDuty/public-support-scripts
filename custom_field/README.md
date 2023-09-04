@@ -1,6 +1,6 @@
 # Adding custom fields for incidents
 
-Before running the script it is recommended that you read the PagerDuty doc about [custom fields](https://support.pagerduty.com/docs/custom-fields-on-incidents) and understand how they work.
+Before running the script it is recommended that you read the PagerDuty doc about [custom fields](https://support.pagerduty.com/docs/custom-fields-on-incidents) to understand how they work.
 
 ## Input Format
 
@@ -45,43 +45,53 @@ url,incident url,incident URL,incident URL,single_value,
 string,incident options,Incident options,incident options,multi_value_fixed,option1;option2;option3
 ```
 
+## API-Key Usage
+- The script and tests take the key as an environment variable.  You can pass that in two ways:
+  - Directly, prepended to your command as:
+    - `PAGERDUTY_API_KEY='#######'`
+    - e.g. `PAGERDUTY_API_KEY='#######'`
+  - Via a local `.env` file. An example file is provided for you to copy and edit.
+    - `cp fake.env .env; vim .env`
+
 ## Running the script
 
 1. Download the repo or save the files in a directory
 
 2. Now, in your terminal, navigate to the directory containing the files.
 
-3. Run the following command to install the required gems:
+3. Run the following command to install the required gems locally:
 
-```
-bundle install
+```sh
+bundle install --path vendor/bundle
 ```
 
 This will install the specified gems and their dependencies.
 
 
-To execute the script, run:
-
+If you set up your api key in a `.env` file then you can execute the script as follows:
+```sh
+bundle exec ruby import_custom_fields.rb --file your_csv_name.csv
 ```
-bundle exec ruby import_custom_fields.rb -k API_KEY_HERE -f PATH_TO_CSV_FILE_HERE
-```
 
-Using `bundle exec` ensures that the script uses the gem and versions specified in the Gemfile.
-
-if you alreay have the specified gems installed you can simple run the script like shown below.
-
-```
-ruby import_custom_fields.rb -k API_KEY_HERE -f PATH_TO_CSV_FILE_HERE
+If you would like to provide your api-key directly you can instead execute the script as below:
+```sh
+PAGERDUTY_API_KEY='#######' bundle exec ruby import_custom_fields.rb --file your_csv_name.csv
 ```
 
 ## Options
 
-- `-k`/`--api-key`: _(required)_ REST API key (must be a global key)
 - `-f`/`--file-path`: _(required)_ path to the CSV file
 
 ## Errors
 
-Errors are printed to the terminal as they happen. The script will continue to create custom fields and print errors for the failed ones. 
+Errors are printed to the terminal as they happen and logging info is written locally to `application.log`.
+The most common sources of errors are:
+1. Misconfigured csv.
+2. Attempting to add a custom field that is already present.
+3. Attempting to write a custom field with a forbidden character. (e.g. `(` )
+
+You can reach out to PagerDuty support at support@pagerduty.com if you're having issues.
+(PRs on this repo are also welcome.)
 
 ## Reference
 
