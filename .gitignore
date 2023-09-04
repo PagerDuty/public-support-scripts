@@ -1,6 +1,8 @@
+.env
 *.pyc
 *.DS_Store
 *.csv
+!test.csv
 *.log
 .ruby-version
 .idea
