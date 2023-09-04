@@ -49,7 +49,6 @@ string,incident options,Incident options,incident options,multi_value_fixed,opti
 - The script and tests take the key as an environment variable.  You can pass that in two ways:
   - Directly, prepended to your command as:
     - `PAGERDUTY_API_KEY='#######'`
-    - e.g. `PAGERDUTY_API_KEY='#######'`
   - Via a local `.env` file. An example file is provided for you to copy and edit.
     - `cp fake.env .env; vim .env`
 
@@ -68,15 +67,15 @@ bundle install --path vendor/bundle
 This will install the specified gems and their dependencies.
 
 
-If you set up your api key in a `.env` file then you can execute the script as follows:
-```sh
-bundle exec ruby import_custom_fields.rb --file your_csv_name.csv
-```
+- If you set up your api key in a `.env` file then you can execute the script as follows:
+  - ```sh
+    bundle exec ruby import_custom_fields.rb --file your_csv_name.csv
+    ```
 
-If you would like to provide your api-key directly you can instead execute the script as below:
-```sh
-PAGERDUTY_API_KEY='#######' bundle exec ruby import_custom_fields.rb --file your_csv_name.csv
-```
+- If you would like to provide your api-key directly you can instead execute the script as below:
+  - ```sh
+    PAGERDUTY_API_KEY='#######' bundle exec ruby import_custom_fields.rb --file your_csv_name.csv
+     ```
 
 ## Options
 
