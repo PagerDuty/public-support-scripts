@@ -5,7 +5,8 @@ logs/
 *.csv
 backup/
 
-!test.csv
+!*test.csv
+!*example.csv
 
 ## Ruby
 .bundle/
