@@ -110,7 +110,11 @@ class PagerDutyCustomFieldCreator
       @logger.info "Successfully created custom field. Response: #{parsed_response}"
       parsed_response
     else
-      error_message = "#{parsed_response['error']['code']}: Error message  #{parsed_response['error']['errors']}"
+      error_message = if parsed_response['error']
+                        "#{parsed_response['error']['code']}: Error message  #{parsed_response['error']['errors']}"
+                      else
+                        "Unexpected error: #{parsed_response}"
+                      end
       @logger.error error_message
       puts error_message
       nil
