@@ -5,10 +5,6 @@ require 'json'
 require 'optparse'
 require 'logger'
 
-# Create logger object
-logger = Logger.new('application.log')
-logger.info 'Starting application'
-
 # Class responsible for parsing CSV files and returning an array of custom fields.
 class CSVtoCustomFieldParser
   # @param file [String] The path to the CSV file.
@@ -133,6 +129,10 @@ end
 
 # Run the following only if this file is run directly (vs, for example, from a tester)
 if __FILE__ == $0
+
+  # Create logger object
+  logger.info 'Starting application'
+  logger = Logger.new('application.log')
 
   # load any local .env files
   Dotenv.load
