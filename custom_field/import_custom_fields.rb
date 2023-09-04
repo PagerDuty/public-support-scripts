@@ -7,8 +7,10 @@ require 'logger'
 
 # Class responsible for parsing CSV files and returning an array of custom fields.
 class CSVtoCustomFieldParser
-  # @param file [String] The path to the CSV file.
-  # @param logger [Logger] The logger object
+  # Initializes a new instance of CSVtoCustomFieldParser.
+  #
+  # @param csv_file [String] The path to the CSV file.
+  # @param logger [Logger] The logger instance for logging information and errors.
   def initialize(csv_file, logger)
     @csv_file = csv_file
     @logger = logger
@@ -73,36 +75,39 @@ class CSVtoCustomFieldParser
   end
 end
 
+########################################################################################
+########################################################################################
+
 # Class responsible for making API calls to create custom fields
 class PagerDutyCustomFieldCreator
   include HTTParty
   base_uri 'https://api.pagerduty.com'
   headers 'Content-Type' => 'application/json'
 
-  attr_reader :api_token
-
+  # Initializes a new instance of PagerDutyCustomFieldCreator.
+  #
   # @param api_token [String] The PagerDuty API token.
-  # @param logger [Logger] The logger object
+  # @param logger [Logger] The logger instance for logging information and errors.
   def initialize(api_token, logger)
     @api_token = api_token
     @logger = logger
   end
 
-  # Create a custom field in PagerDuty.
+  # Sends an API request to PagerDuty to create a custom field.
   #
   # @param params [Hash] A hash containing the custom field parameters.
   # @return [Hash, nil] A hash containing the response from the API, or nil if the request was unsuccessful.
   # @see {PagerDuty API Documentation}[https://developer.pagerduty.com/api-reference/0f6094f852517-update-custom-field-values]
   def create_custom_field(params)
     endpoint = '/incidents/custom_fields'
-
     options = {
       body: { 'field': params }.to_json,
-      headers: { 'Authorization' => "Token token=#{api_token}" }
+      headers: { 'Authorization' => "Token token=#{@api_token}" }
     }
 
     @logger.info "Sending POST request to #{endpoint} with body: #{options[:body]}"
 
+    @logger.info "Sending POST request to #{endpoint} with body: #{options[:body]}"
     response = self.class.post(endpoint, options)
     parsed_response = JSON.parse(response.body)
 
@@ -110,14 +115,7 @@ class PagerDutyCustomFieldCreator
       @logger.info "Successfully created custom field. Response: #{parsed_response}"
       parsed_response
     else
-      error_message = if parsed_response['error']
-                        "#{parsed_response['error']['code']}: Error message  #{parsed_response['error']['errors']}"
-                      else
-                        "Unexpected error: #{parsed_response}"
-                      end
-      @logger.error error_message
-      puts error_message
-      nil
+      handle_api_error(parsed_response)
     end
   rescue HTTParty::Error => e
     error_message = "Error creating custom field: #{e}"
@@ -125,6 +123,34 @@ class PagerDutyCustomFieldCreator
     puts error_message
     nil
   end
+
+  # Handles HTTParty connection errors by logging and displaying them.
+  #
+  # @param error [HTTParty::Error] The raised error.
+  def handle_connection_error(error)
+    error_message = "Connection error: #{error.message}"
+    @logger.error error_message
+    puts error_message
+    false
+  end
+end
+
+########################################################################################
+########################################################################################
+
+# Validates the existence of the API key.
+#
+# @param api_key [String] The API key.
+def check_api_key(api_key)
+  return unless api_key.nil? || api_key.empty?
+
+  logger.info 'ERROR: `PAGERDUTY_API_KEY` not found.'
+  puts "PAGERDUTY_API_KEY not found. Please ensure it's set in your .env file or environment variables."
+  puts "If you'd like to add it in a local file and you are in this script's root directory just run:"
+  puts '        cp fake.env .env; nano .env'
+  puts "Alternately: you can pass the key directly by prepending `PAGERDUTY_API_KEY='#####' to this script's call."
+  puts "e.g.:   PAGERDUTY_API_KEY='#####' bundle exec ruby import_custom_fields.rb --file my_custom_fields.csv"
+  exit(1) # Exit the script with an error code.
 end
 
 # #################################################################################### #
@@ -135,23 +161,15 @@ end
 if __FILE__ == $0
 
   # Create logger object
-  logger.info 'Starting application'
   logger = Logger.new('application.log')
+  logger.info 'Starting application'
 
-  # load any local .env files
+  # load env (including `.env` file values)
   Dotenv.load
-  env_api_key = ENV['PAGERDUTY_API_KEY']
 
-  # Check if the API key was not found and notify the user if so.
-  if env_api_key.nil? || env_api_key.empty?
-    logger.info 'ERROR: `PAGERDUTY_API_KEY` not found.'
-    puts "PAGERDUTY_API_KEY not found. Please ensure it's set in your .env file or environment variables."
-    puts "If you'd like to add it in a local file and you are in this script's root directory just run:"
-    puts "        cp fake.env .env; nano .env"
-    puts "Alternately: you can pass the key directly by prepending `PAGERDUTY_API_KEY='#####' to this script's call."
-    puts "e.g.:   PAGERDUTY_API_KEY='#####' bundle exec ruby import_custom_fields.rb --file my_custom_fields.csv"
-    exit(1) # Exit the script with an error code.
-  end
+  # Ensure presence of API key
+  env_api_key = ENV['PAGERDUTY_API_KEY']
+  check_api_key(env_api_key)
 
   # CLI Argument/Option handling
   options = {}
