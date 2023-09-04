@@ -1,5 +1,6 @@
 require 'httparty'
 require 'csv'
+require 'dotenv'
 require 'json'
 require 'optparse'
 require 'logger'
@@ -133,23 +134,36 @@ end
 # Run the following only if this file is run directly (vs, for example, from a tester)
 if __FILE__ == $0
 
+  # load any local .env files
+  Dotenv.load
+  env_api_key = ENV['PAGERDUTY_API_KEY']
+
+  # Check if the API key was not found and notify the user if so.
+  if env_api_key.nil? || env_api_key.empty?
+    logger.info 'ERROR: `PAGERDUTY_API_KEY` not found.'
+    puts "PAGERDUTY_API_KEY not found. Please ensure it's set in your .env file or environment variables."
+    puts "If you'd like to add it in a local file and you are in this script's root directory just run:"
+    puts "        cp fake.env .env; nano .env"
+    puts "Alternately: you can pass the key directly by prepending `PAGERDUTY_API_KEY='#####' to this script's call."
+    puts "e.g.:   PAGERDUTY_API_KEY='#####' bundle exec ruby import_custom_fields.rb --file my_custom_fields.csv"
+    exit(1) # Exit the script with an error code.
+  end
+
   # CLI Argument/Option handling
   options = {}
   OptionParser.new do |opts|
     opts.banner = 'Usage: ruby PD_custom_field_CSV_import.rb [options]'
-
-    opts.on('-k', '--api-key API_KEY', 'PagerDuty API key') do |api_key|
-      options[:api_key] = api_key
-    end
-
     opts.on('-f', '--file FILE', 'CSV file path') do |file|
       options[:file] = file
     end
   end.parse!
 
-  unless options[:api_key] && options[:file]
-    puts 'Both API key and CSV file path are required.'
-    exit
+  unless options[:file]
+    logger.info 'ERROR: csv file path argument not received'
+    puts 'A CSV file path is required.'
+    puts 'example: `... --file my_custom_fields.csv`'
+    puts 'That would tell the script to use the "my_custom_fields" csv file in the current directory'
+    exit(1)
   end
 
   # Generate parser and extract usable custom_fields
@@ -160,7 +174,7 @@ if __FILE__ == $0
 
   # Generate field-creator and make consecutive api calls
   logger.info 'Creating custom fields'
-  creator = PagerDutyCustomFieldCreator.new(options[:api_key], logger)
+  creator = PagerDutyCustomFieldCreator.new(env_api_key, logger)
   fields.each do |field|
     result = creator.create_custom_field(field)
     if result
