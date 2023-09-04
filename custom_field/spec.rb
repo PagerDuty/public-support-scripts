@@ -14,11 +14,21 @@ require_relative 'import_custom_fields'
 
 # load any local .env files
 Dotenv.load
-api_key = ENV['TEST_PAGERDUTY_API_KEY']
+api_key = ENV['TEST_RSPEC_PAGERDUTY_API_KEY']
+
+# Check if the API key was not found and notify the user if so.
+if api_key.nil? || api_key.empty?
+  puts "TEST_RSPEC_PAGERDUTY_API_KEY not found. Please ensure it's set in your .env file or environment variables."
+  puts "If you'd like to add it in a local file and you are in this script's root directory just run:"
+  puts "        cp fake.env .env; nano .env"
+  puts "Alternately: you can pass the key directly by prepending `TEST_RSPEC_PAGERDUTY_API_KEY='#####' to this script's call."
+  puts "e.g.:   TEST_RSPEC_PAGERDUTY_API_KEY='#####' bundle exec rspec spec.rb"
+  exit(1) # Exit the script with an error code.
+end
 
 describe CSVtoCustomFieldParser do
   let(:logger) { Logger.new(STDOUT) }
-  let(:csv_file) { 'test.csv' }
+  let(:csv_file) { 'rspec_test.csv' }
   let(:parser) { CSVtoCustomFieldParser.new(csv_file, logger) }
 
   describe '#parse' do
@@ -39,9 +49,9 @@ describe PagerDutyCustomFieldCreator do
     let(:params) do
       {
         'data_type': 'string',
-        'name': 'test_name',
-        'display_name': 'Test Name',
-        'description': 'Test Description',
+        'name': 'test_name_rspec',
+        'display_name': 'Test Name RSpec',
+        'description': 'Test Description RSpec',
         'field_type': 'single_value_fixed',
         'field_options': [
           {
