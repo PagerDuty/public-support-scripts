@@ -111,7 +111,8 @@ class PagerDutyCustomFieldCreator
       @logger.info "Skipping attempt to create #{params[:name]}: already exists."
       puts "Skipping creation of #{params[:name]}"
       puts "     a custom field by that name alread exists on this api-key's account."
-      return 'skipped'
+      # return 'skipped'
+      return { 'status' => 'skipped' }
     end
 
     @logger.info "Sending POST request to #{endpoint} with body: #{options[:body]}"
@@ -265,7 +266,8 @@ if __FILE__ == $0
   fields.each do |field|
     result = creator.create_custom_field(field)
     if result
-      if result == 'skipped'
+      if result['status'] == 'skipped'
+        # skip
       else
         message = "Custom field created: #{field[:name]} with ID: #{result['field']['id']}"
         logger.info message
