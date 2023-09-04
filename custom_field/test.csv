@@ -1,5 +1,0 @@
-data_type,name,display_name,description,field_type,field_options
-string,text field,test custom field,testing,single_value,
-datetime,incident triggere time,incident triggered time,test,single_value,
-url,incident url,incident URL,incident URL,single_value,
-string,incident options,Incident options,incident options,multi_value_fixed,option1;option2;option3

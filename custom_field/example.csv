@@ -1,0 +1,5 @@
+data_type,name,display_name,description,field_type,field_options
+string,EXAMPLE text field ruby test EXAMPLE,EXAMPLE #rubytest test custom field EXAMPLE,testing,single_value,
+datetime,EXAMPLE incident triggered time ruby test EXAMPLE,EXAMPLE incident triggered time EXAMPLE,test,single_value,
+url,EXAMPLE incident url ruby test EXAMPLE,EXAMPLE ruby-test incident URL EXAMPLE,incident URL,single_value,
+string,EXAMPLE incident options ruby test EXAMPLE,EXAMPLE RuByTe$T Incident options EXAMPLE,incident options,multi_value_fixed,option1;option2;option3

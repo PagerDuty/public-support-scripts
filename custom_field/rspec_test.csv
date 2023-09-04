@@ -1,0 +1,5 @@
+data_type,name,display_name,description,field_type,field_options
+string,text field rspec_test,test custom field rspec_test,testing,single_value,
+datetime,incident trigger time rspec_test,incident triggered time rspec_test,test,single_value,
+url,incident url rspec_test,incident URL rspec_test,incident URL,single_value,
+string,incident options rspec_test,Incident options rspec_test,incident options,multi_value_fixed,option1;option2;option3
