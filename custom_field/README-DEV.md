@@ -1,5 +1,25 @@
 # Additional Dev. Notes
 
+## Ruby Versioning
+- [asdf](https://asdf-vm.com/guide/getting-started.html) is a recommended tool for dealing with ruby version mgmt
+  - (getting an installed ruby version to gain precedence over the default mac version can be frustrating)
+- If you haven't used asdf at all before you can :
+  - `brew install asdf`
+  - `source /opt/homebrew/opt/asdf/libexec/asdf.sh`
+    - ^ you can add that to your `.zshrc` or just do it manually in a terminal session; it slows down new shell opens otherwise
+- Once you've got asdf setup:
+  - check current version of ruby specified in `Gemfile` or `Gemfile.lock`
+    - you can just use [ripgrep](https://github.com/BurntSushi/ripgrep): `rg ruby --glob 'Gemfile*'`
+    - or grep: `grep "ruby " Gemfile*`
+  - ```sd
+    source /opt/homebrew/opt/asdf/libexec/asdf.sh
+    asdf plugin add ruby
+    asdf install ruby <version>
+    asdf local install ruby <version>
+    ```
+- then check `ruby --version` to make sure ya got it
+  - please feel free to ask questions of your fellower T2ers -- environment setup is much easier in collaboration! :)
+
 ## API-Key Usage
 - The script and tests take the key as an environment variable.  You can pass that in two ways:
   - Directly, prepended to your command as:
