@@ -58,7 +58,11 @@ string,incident options,Incident options,incident options,multi_value_fixed,opti
 
 2. Now, in your terminal, navigate to the directory containing the files.
 
-3. Run the following command to install the required gems locally:
+3. Check that your version of Ruby matches that required by script.
+  - `ruby --version` vs `grep "ruby " Gemfile`
+  - A tool like [asdf](https://asdf-vm.com/guide/getting-started.html) can assist you with both installing and managing versions.
+
+4. Run the following command to install the required gems locally:
 
 ```sh
 bundle install --path vendor/bundle
@@ -88,6 +92,7 @@ The most common sources of errors are:
 1. Misconfigured csv.
 2. Attempting to add a custom field that is already present.
 3. Attempting to write a custom field with a forbidden character. (e.g. `(` )
+4. Incompatible ruby version.
 
 You can reach out to PagerDuty support at support@pagerduty.com if you're having issues.
 (PRs on this repo are also welcome.)
