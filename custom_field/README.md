@@ -37,13 +37,24 @@ string,test cusomt field,test custom field,test,multi_value_fixed,option1;option
 
 Below is a CSV example that will create a text field, a datetime field, a URL field and a multiple select field with three options.
 
-```
-data_type,name,display_name,description,field_type,field_options
+|`data_type`|`name`|`display_name`|`description`|`field_type`|`field_options`|
+| :--- | :---: | :---: | :---: | :---: | :---: |
+|string|text field|test custom field|testing|single_value|
+|datetime|incident trigger time|incident triggered time|test|single_value|
+|url|incident url|incident URL|incident URL|single_value|
+|string|incident options|Incident options|incident options|multi_value_fixed|option1;option2;option3
+
+<details> 
+  <summary>Raw syntax example of the above CSV data</summary>
+
+```csv
+data_type,name,display_name,description,field_type,field_options,
 string,text field,test custom field,testing,single_value,
-datetime,incident triggere time,incident triggered time,test,single_value,
+datetime,incident trigger time,incident triggered time,test,single_value,
 url,incident url,incident URL,incident URL,single_value,
 string,incident options,Incident options,incident options,multi_value_fixed,option1;option2;option3
 ```
+ </details>
 
 ## API-Key Usage
 - The script and tests take the key as an environment variable.  You can pass that in two ways:
