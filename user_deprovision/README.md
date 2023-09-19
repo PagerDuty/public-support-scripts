@@ -29,6 +29,8 @@ large data sets.
 ask if you'd like to resolve those incidents. If you do not resolve all incidents associated with a user, the user will
 not be successfully deleted. 
 
+`-n`, `--do-not-delete-users`: Remove selected users from schedules, escalation policies, and teams, but do not delete them from the account.
+
 ## Notes and Caveats
 
 **If you do not resolve all incidents associated with a user, the user will not be successfully deleted.**
