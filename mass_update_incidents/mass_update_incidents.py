@@ -10,18 +10,22 @@ from datetime import date
 import pprint
 
 import pdpyras
+import time
 
 # Default parameters:
 PARAMETERS = {
     'is_overview': 'true',
-    # 'since': '', 
+    # 'with_suppressed' : 'true', #Uncomment to included Trigger (Suppressed) incidents
+    # 'since': '',
     # 'until': '',
-    # 'time_zone': `UTC` 
+    # 'time_zone': `UTC`
 }
 
 def mass_update_incidents(args):
     session = pdpyras.APISession(args.api_key,
         default_from=args.requester_email)
+    session.headers.update({"X-SOURCE-SCRIPT": "pupblic-support-scripts/mass_update_incidents"})
+
     if args.user_id:
         PARAMETERS['user_ids[]'] = args.user_id.split(',')
         print("Acting on incidents assigned to user(s): "+args.user_id)
@@ -29,6 +33,10 @@ def mass_update_incidents(args):
         PARAMETERS['service_ids[]'] = args.service_id.split(',')
         print("Acting on incidents corresponding to service ID(s): " +
             args.service_id)
+    if args.incident_id:
+        PARAMETERS['incident_ids[]'] = args.incident_id.split(',')
+        print("Acting on incident corresponding to incident ID(s)" +
+            args.incident_id)
     if args.action == 'resolve':
         PARAMETERS['statuses[]'] = ['triggered', 'acknowledged']
         print("Resolving incidents")
@@ -54,7 +62,9 @@ def mass_update_incidents(args):
             print("* Incident {}: {}".format(incident['id'], args.action))
             if args.dry_run:
                 continue
-            session.rput(incident['self'], json={
+            time.sleep(0.25)
+            self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
+            session.rput(self_url, json={
                 'type': 'incident_reference',
                 'id': incident['id'],
                 'status': '{0}d'.format(args.action), # acknowledged or resolved
@@ -62,7 +72,7 @@ def mass_update_incidents(args):
     except pdpyras.PDClientError as e:
         if e.response is not None:
             print(e.response.text)
-        raise e        
+        raise e
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Mass ack or resolve incidents "
@@ -79,6 +89,8 @@ def main(argv=None):
     ap.add_argument('-k', '--api-key', required=True, help="REST API key")
     ap.add_argument('-n', '--dry-run', default=False, action='store_true',
         help="Do not perform the actions but show what will happen.")
+    ap.add_argument('-i', '--incident-id', default=None, help="Id of the "
+        "incident, or comma separated list of incidents to be updated")
     ap.add_argument('-s', '--service-id', default=None, help="ID of the "
         "service, or comma-separated list of services, for which incidents "
         "should be updated; leave blank to match all services.")
