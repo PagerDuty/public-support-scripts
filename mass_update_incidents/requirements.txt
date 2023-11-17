@@ -1,1 +1,2 @@
-pdpyras >= 2.0.0
+pdpyras >= 2.1.0
+tqdm >= 4.64.0
