@@ -58,17 +58,26 @@ def mass_update_incidents(args):
     try:
         print("Please be patient as this can take a while for large volumes "
             "of incidents.")
-        for incident in session.list_all('incidents', params=PARAMETERS):
+        incidents = session.list_all('incidents', params=PARAMETERS)
+        i = 0
+        incident_body = []
+        for count,incident in enumerate(incidents):
+            i += 1
             print("* Incident {}: {}".format(incident['id'], args.action))
             if args.dry_run:
                 continue
             time.sleep(0.25)
-            self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
-            session.rput(self_url, json={
-                'type': 'incident_reference',
+            if i < 250 and count < len(incidents):
+                incident_body.append({'type': 'incident_reference',
                 'id': incident['id'],
-                'status': '{0}d'.format(args.action), # acknowledged or resolved
+                'status': '{0}d'.format(args.action)}) # acknowledged or resolved)
+            if i == 249 or count == len(incidents) - 1:
+                self_url =  f"https://api.pagerduty.com/incidents"
+                session.rput(self_url, json={ 'incidents': incident_body
             })
+                print(f"posting: {incident_body}")
+                incident_body = []
+                i = 0
     except pdpyras.PDClientError as e:
         if e.response is not None:
             print(e.response.text)
