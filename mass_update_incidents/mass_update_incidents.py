@@ -61,21 +61,25 @@ def mass_update_incidents(args):
         incidents = session.list_all('incidents', params=PARAMETERS)
         i = 0
         incident_body = []
+        posts = 0
         for count,incident in enumerate(incidents):
             i += 1
             print("* Incident {}: {}".format(incident['id'], args.action))
             if args.dry_run:
                 continue
-            time.sleep(0.25)
-            if i < 250 and count < len(incidents):
+            if posts % 400 == 0: # 400 is a conservative estimate. to do: add check for rate limit response
+                print("pausing for rate limit... ")
+                time.sleep(60)
+            if i <= 250 and count < len(incidents):
                 incident_body.append({'type': 'incident_reference',
                 'id': incident['id'],
                 'status': '{0}d'.format(args.action)}) # acknowledged or resolved)
-            if i == 249 or count == len(incidents) - 1:
+            if i == 250 or count == len(incidents) - 1:
                 self_url =  f"https://api.pagerduty.com/incidents"
                 session.rput(self_url, json={ 'incidents': incident_body
             })
-                print(f"posting: {incident_body}")
+                print(f"Updating Incidents: {incident_body}")
+                posts += 1
                 incident_body = []
                 i = 0
     except pdpyras.PDClientError as e:
