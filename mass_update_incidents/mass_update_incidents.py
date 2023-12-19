@@ -24,7 +24,7 @@ PARAMETERS = {
 def mass_update_incidents(args):
     session = pdpyras.APISession(args.api_key,
         default_from=args.requester_email)
-    session.headers.update({"X-SOURCE-SCRIPT": "pupblic-support-scripts/mass_update_incidents"})
+    session.headers.update({"X-SOURCE-SCRIPT": "public-support-scripts/mass_update_incidents"})
 
     if args.user_id:
         PARAMETERS['user_ids[]'] = args.user_id.split(',')
@@ -33,10 +33,6 @@ def mass_update_incidents(args):
         PARAMETERS['service_ids[]'] = args.service_id.split(',')
         print("Acting on incidents corresponding to service ID(s): " +
             args.service_id)
-    if args.incident_id:
-        PARAMETERS['incident_ids[]'] = args.incident_id.split(',')
-        print("Acting on incident corresponding to incident ID(s)" +
-            args.incident_id)
     if args.action == 'resolve':
         PARAMETERS['statuses[]'] = ['triggered', 'acknowledged']
         print("Resolving incidents")
@@ -55,10 +51,21 @@ def mass_update_incidents(args):
         PARAMETERS['date_range'] = 'all'
         print("Getting incidents of all time")
     print("Parameters: "+str(PARAMETERS))
+    if args.incident_id:
+        PARAMETERS['incident_ids[]'] = args.incident_id.split(',')
     try:
-        print("Please be patient as this can take a while for large volumes "
+        if args.incident_id:
+            raw_incidents = args.incident_id.split(',')
+            incidents = []
+            for raw_incident in raw_incidents:
+                incidents.append({"id": raw_incident})
+            print("Acting on incidents corresponding to incident ID(s): " +
+            args.incident_id)
+        else:
+            print("Please be patient as this can take a while for large volumes "
             "of incidents.")
-        for incident in session.list_all('incidents', params=PARAMETERS):
+            incidents = session.list_all('incidents', params=PARAMETERS)
+        for incident in incidents:
             print("* Incident {}: {}".format(incident['id'], args.action))
             if args.dry_run:
                 continue
@@ -66,7 +73,6 @@ def mass_update_incidents(args):
             self_url =  f"https://api.pagerduty.com/incidents/{incident['id']}"
             session.rput(self_url, json={
                 'type': 'incident_reference',
-                'id': incident['id'],
                 'status': '{0}d'.format(args.action), # acknowledged or resolved
             })
     except pdpyras.PDClientError as e:
