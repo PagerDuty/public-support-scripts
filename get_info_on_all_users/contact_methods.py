@@ -32,7 +32,7 @@ def print_contact_methods(user, session, csv):
         'email': None,
         'push': None,
     }
-    for contact_method in session.iter_all('users/%s/contact_methods'%user['id']):
+    for contact_method in session.rget('users/%s/contact_methods'%user['id']):
         if 'phone' in contact_method['type']:
             contacts['phone'] = '%s %s'%(contact_method['country_code'], contact_method['address'])
         elif 'sms' in contact_method['type']:
