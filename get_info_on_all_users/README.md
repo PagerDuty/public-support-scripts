@@ -69,9 +69,9 @@ You can also optionally turn on comma-separated formatting in the console with t
 
 ## Get User Role Changes
 
-This script retrieves user role changes for all users in a PgerDuty account. By default the script will output
-a text formatted table to the console for user role changes in the past 24 hours. The script can be configured
-to get role tier changes, can filter by a particular user ID, and can filter by different date ranges.
+This script retrieves user role changes for all users in a PagerDuty account. By default the script will output
+a text formatted table to the console for user role changes in the past 24 hours. The script can optionally be configured to get role tier changes, can filter by a particular user ID, can filter by different date ranges,
+and can write results to a CSV file.
 
 The following fields are returned by the script:
 - Date: ISO datetime string when the role change occurred
@@ -81,7 +81,7 @@ The following fields are returned by the script:
 - Role/Tier After: The role/tier of the user after the change occurred
 - Actor ID: The ID of the most specific actor that made the role change
 - Actor Type: The type of the most specific actor that made the role change
-- Actor Summary (not required): The display name of the most specific after that made the role change.
+- Actor Summary (not required): The display name of the most specific after that made the role change
 
 ### Usage
 
