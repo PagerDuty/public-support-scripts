@@ -178,11 +178,11 @@ def main(since, until, user_id, audit_tier_changes, filename, session):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='Prints all user role or tier changes between the given dates')
     ap.add_argument('-k', '--api-key', required=True, help='REST API key')
-    ap.add_argument('-s', '--since', required=False, help='start date')
-    ap.add_argument('-u', '--until', required=False, help='end date')
+    ap.add_argument('-s', '--since', required=False, help='Start of date range to search')
+    ap.add_argument('-u', '--until', required=False, help='End of date range to search')
     ap.add_argument('-i', '--user-id', required=False, help='Filter results to a single user ID')
-    ap.add_argument('-t', '--audit-tier-changes', action='store_true', help='Audit user role tier changes')
-    ap.add_argument('-f', '--filename', required=False, help='Output file name')
+    ap.add_argument('-t', '--tier-changes', action='store_true', help='Get user role tier changes')
+    ap.add_argument('-f', '--filename', required=False, help='Write results to a CSV file')
     args = ap.parse_args()
     session = pdpyras.APISession(args.api_key)
 
