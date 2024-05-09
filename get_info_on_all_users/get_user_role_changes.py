@@ -59,7 +59,7 @@ def print_changes(changes, tier_changes):
 
 def write_changes_to_csv(changes, tier_changes, filename):
     header = header_row(tier_changes)
-    with open(filename, 'w', newline='') as csvfile:
+    with open(filename, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=header[0].keys())
         writer.writerows(header + changes)
 
