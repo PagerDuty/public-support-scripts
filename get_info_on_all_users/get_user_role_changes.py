@@ -10,11 +10,6 @@ from datetime import datetime, timezone
 from dateutil import parser, relativedelta
 from tabulate import tabulate
 
-user_tiers = {
-    'full_user': 'Full User',
-    'stakeholder': 'Stakeholer'
-}
-
 user_roles = {
     'owner': 'Owner',
     'admin': 'Global Admin',
@@ -27,14 +22,14 @@ user_roles = {
 }
 
 user_role_to_tier = {
-    user_roles['owner']: 'full_user',
-    user_roles['admin']: 'full_user',
-    user_roles['user']: 'full_user',
-    user_roles['limited_user']: 'full_user',
-    user_roles['observer']: 'full_user',
-    user_roles['restricted_access']: 'full_user',
-    user_roles['read_only_limited_user']: 'stakeholder',
-    user_roles['read_only_user']: 'stakeholder'
+    user_roles['owner']: 'Full User',
+    user_roles['admin']: 'Full User',
+    user_roles['user']: 'Full User',
+    user_roles['limited_user']: 'Full User',
+    user_roles['observer']: 'Full User',
+    user_roles['restricted_access']: 'Full User',
+    user_roles['read_only_limited_user']: 'Stakeholder',
+    user_roles['read_only_user']: 'Stakeholder'
 }
 
 actor_types = {
