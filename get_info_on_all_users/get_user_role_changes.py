@@ -35,6 +35,12 @@ user_role_to_tier = {
     'read_only_user': 'stakeholder'
 }
 
+actor_types = {
+    'user_reference': 'User',
+    'app_reference': 'App',
+    'api_key_reference': 'API Key',
+}
+
 def get_api_path(user_id):
     return f'users/{user_id}/audit/records' if user_id else 'audit/records'
 
@@ -46,8 +52,8 @@ def get_api_params(since, until, user_id):
     return params
 
 def print_changes(changes, audit_tier_changes):
-    format_string = '%(date)-30s %(id)-10s %(summary)-30.30s %(before_value)-30s %(value)-30s'
-    table_max_width = 130
+    format_string = '%(date)-25s %(id)-10s %(summary)-20.20s %(before_value)-20s %(value)-20s %(actor_id)-10s %(actor_type)-10s %(actor_summary)-20.20s'
+    table_max_width = 145
 
     # Print the header row before sorting the actual changes
     print(format_string % changes[0])
@@ -74,13 +80,32 @@ def header_row(audit_tier_changes):
             'id': 'User ID',
             'summary': 'User Name',
             'before_value': 'Role Before',
-            'value': 'Role After'
+            'value': 'Role After',
+            'actor_id': 'Actor ID',
+            'actor_type': 'Actor Type',
+            'actor_summary': 'Actor Summary'
         }
 
     if audit_tier_changes:
         header.update({'before_value': 'Role Tier Before', 'value': 'Role Tier After'})
 
     return [header]
+
+def get_record_actor(record):
+    actors = record.get('actors', [])
+    if not len(actors):
+        return {
+            'actor_type': '',
+            'actor_id': '',
+            'actor_summary': ''
+        }
+
+    actor = actors[0]
+    return {
+        'actor_type': actor_types[actor['type']],
+        'actor_id': actor['id'],
+        'actor_summary': actor['summary'] if 'summary' in actor else ''
+    }
 
 def get_role_changes(record):
     # The user specific audit endpoint will sometimes send us `create` records, discard them.
@@ -93,6 +118,7 @@ def get_role_changes(record):
 
     def hydarate_role_change(role_change):
         role_change.update(record['root_resource'])
+        role_change.update(get_record_actor(record))
         role_change['date'] = record['execution_time']
         return role_change
 
