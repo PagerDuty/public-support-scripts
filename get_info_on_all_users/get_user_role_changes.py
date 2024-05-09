@@ -53,17 +53,17 @@ def get_api_params(since, until, user_id):
         params['actions[]'] = 'update'
     return params
 
-def print_changes(changes, audit_tier_changes):
-    header = header_row(audit_tier_changes)
+def print_changes(changes, tier_changes):
+    header = header_row(tier_changes)
     print(tabulate(header + changes, tablefmt='grid'))
 
-def write_changes_to_csv(changes, audit_tier_changes, filename):
-    header = header_row(audit_tier_changes)
+def write_changes_to_csv(changes, tier_changes, filename):
+    header = header_row(tier_changes)
     with open(filename, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=header[0].keys())
         writer.writerows(header + changes)
 
-def header_row(audit_tier_changes):
+def header_row(tier_changes):
     header = {
             'date': 'Date',
             'id': 'User ID',
@@ -75,7 +75,7 @@ def header_row(audit_tier_changes):
             'actor_summary': 'Actor Summary'
         }
 
-    if audit_tier_changes:
+    if tier_changes:
         header.update({'before_value': 'Role Tier Before', 'value': 'Role Tier After'})
 
     return [header]
@@ -153,7 +153,7 @@ def chunk_date_range(since, until):
             yield (datetime.isoformat(since), datetime.isoformat(until))
             return
 
-def main(since, until, user_id, audit_tier_changes, filename, session):
+def main(since, until, user_id, tier_changes, filename, session):
     try:
         role_changes = []
         chunked_date_range = chunk_date_range(since, until)
@@ -162,14 +162,14 @@ def main(since, until, user_id, audit_tier_changes, filename, session):
                 record_role_changes = get_role_changes(record)
                 role_changes += record_role_changes
 
-        changes = get_role_tier_changes(role_changes) if audit_tier_changes else role_changes
+        changes = get_role_tier_changes(role_changes) if tier_changes else role_changes
         if len(changes):
             changes = sorted(changes, key=lambda rc: rc['date'])
-            print_changes(changes, audit_tier_changes)
+            print_changes(changes, tier_changes)
             if filename:
-                write_changes_to_csv(changes, audit_tier_changes, filename)
+                write_changes_to_csv(changes, tier_changes, filename)
         else:
-            print(f'No {"tier" if audit_tier_changes else "role"} changes found.')
+            print(f'No {"tier" if tier_changes else "role"} changes found.')
 
     except pdpyras.PDClientError as e:
         print('Could not get user role change audit records')
@@ -190,7 +190,7 @@ if __name__ == '__main__':
         args.since,
         args.until,
         args.user_id,
-        args.audit_tier_changes,
+        args.tier_changes,
         args.filename,
         session
     )
