@@ -81,7 +81,7 @@ The following fields are returned by the script:
 - Role/Tier After: The role/tier of the user after the change occurred
 - Actor ID: The ID of the most specific actor that made the role change
 - Actor Type: The type of the most specific actor that made the role change
-- Actor Summary (not required): The display name of the most specific after that made the role change
+- Actor Summary (not required): The display name of the most specific actor that made the role change
 
 ### Usage
 
