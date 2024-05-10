@@ -120,7 +120,7 @@ Instead of getting all role changes, get all role tier changes in table format.
 #### Show all user change audit records
 
 In some cases you may want to see all user changes or the complete role change audit record.
-This option provides a basic implementation to print the reocrds in JSON format.
+This option provides a basic implementation to print the records in JSON format.
 
 ```
 ./get_user_role_changes.py -k API-KEY-HERE --show-all
