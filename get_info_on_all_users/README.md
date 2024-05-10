@@ -117,6 +117,15 @@ Instead of getting all role changes, get all role tier changes in table format.
 ./get_user_role_changes.py -k API-KEY-HERE --filename user_role_changes.csv
 ```
 
+#### Show all user change audit records
+
+In some cases you may want to see all user changes or the complete role change audit record.
+This option provides a basic implementation to print the reocrds in JSON format.
+
+```
+./get_user_role_changes.py -k API-KEY-HERE --show-all
+```
+
 ### Options
 
 To view all of the options available run the script with the help flag:
@@ -129,5 +138,6 @@ To view all of the options available run the script with the help flag:
   -u UNTIL, --until UNTIL             End of date range to search
   -i USER_ID, --user-id USER_ID       Filter results to a single user ID
   -t, --tier-changes                  Get user role tier changes
+  -a, --show-all                      Prints all fetched user records in JSON format
   -f FILENAME, --filename FILENAME    Write results to a CSV file
 ```

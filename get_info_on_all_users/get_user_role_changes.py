@@ -5,6 +5,7 @@
 
 import argparse
 import csv
+import json
 import pdpyras
 from datetime import datetime, timezone
 from dateutil import parser, relativedelta
@@ -18,7 +19,8 @@ user_roles = {
     'observer': 'Observer',
     'restricted_access': 'Restricted Access',
     'read_only_limited_user': 'Limited Stakeholder',
-    'read_only_user': 'Stakeholder'
+    'read_only_user': 'Stakeholder',
+    'none': 'None'
 }
 
 user_role_to_tier = {
@@ -29,7 +31,8 @@ user_role_to_tier = {
     user_roles['observer']: 'Full User',
     user_roles['restricted_access']: 'Full User',
     user_roles['read_only_limited_user']: 'Stakeholder',
-    user_roles['read_only_user']: 'Stakeholder'
+    user_roles['read_only_user']: 'Stakeholder',
+    user_roles['none']: 'None'
 }
 
 actor_types = {
@@ -45,7 +48,6 @@ def get_api_params(since, until, user_id):
     params={'since': since, 'until': until}
     if not user_id:
         params['root_resource_types[]'] = 'users'
-        params['actions[]'] = 'update'
     return params
 
 def print_changes(changes, tier_changes):
@@ -92,10 +94,6 @@ def get_record_actor(record):
     }
 
 def get_role_changes(record):
-    # The user specific audit endpoint will sometimes send us `create` records, discard them.
-    if record['action'] != 'update':
-        return []
-
     # `details` and `fields` can both be null according to the API docs.
     field_changes = record.get('details', {}).get('fields', [])
     role_changes = filter(lambda fc: fc['name'] == 'role', field_changes)
@@ -104,8 +102,8 @@ def get_role_changes(record):
         role_change = {
             'id': record['root_resource']['id'],
             'summary': record['root_resource'].get('summary', ''),
-            'value': user_roles[role_change['value']],
-            'before_value': user_roles[role_change['before_value']],
+            'value': user_roles[role_change.get('value', 'none')],
+            'before_value': user_roles[role_change.get('before_value', 'none')],
             'date': record['execution_time']
         }
         role_change.update(get_record_actor(record))
@@ -123,8 +121,9 @@ def get_role_tier_changes(role_changes):
 
     return tier_changes
 
-def chunk_date_range(since, until):
+def chunk_date_range(args):
     # Mirror the default of the audit APIs, get records for the last 24 hours
+    since, until = args.since, args.until
     if not since or not until:
         now = datetime.now(timezone.utc)
         yesterday = now - relativedelta.relativedelta(hours=+24)
@@ -148,12 +147,15 @@ def chunk_date_range(since, until):
             yield (datetime.isoformat(since), datetime.isoformat(until))
             return
 
-def main(since, until, user_id, tier_changes, filename, session):
+def main(args, session):
+    user_id, tier_changes = args.user_id, args.tier_changes
     try:
         role_changes = []
-        chunked_date_range = chunk_date_range(since, until)
+        chunked_date_range = chunk_date_range(args)
         for since, until in chunked_date_range:
             for record in session.iter_cursor(get_api_path(user_id), params=get_api_params(since, until, user_id)):
+                if args.show_all:
+                    print(json.dumps(record))
                 record_role_changes = get_role_changes(record)
                 role_changes += record_role_changes
 
@@ -161,8 +163,8 @@ def main(since, until, user_id, tier_changes, filename, session):
         if len(changes):
             changes = sorted(changes, key=lambda rc: rc['date'])
             print_changes(changes, tier_changes)
-            if filename:
-                write_changes_to_csv(changes, tier_changes, filename)
+            if args.filename:
+                write_changes_to_csv(changes, tier_changes, args.filename)
         else:
             print(f'No {"tier" if tier_changes else "role"} changes found.')
 
@@ -177,15 +179,9 @@ if __name__ == '__main__':
     ap.add_argument('-u', '--until', required=False, help='End of date range to search')
     ap.add_argument('-i', '--user-id', required=False, help='Filter results to a single user ID')
     ap.add_argument('-t', '--tier-changes', action='store_true', help='Get user role tier changes')
+    ap.add_argument('-a', '--show-all', action='store_true', help='Prints all fetched user records in JSON format')
     ap.add_argument('-f', '--filename', required=False, help='Write results to a CSV file')
     args = ap.parse_args()
     session = pdpyras.APISession(args.api_key)
 
-    main(
-        args.since,
-        args.until,
-        args.user_id,
-        args.tier_changes,
-        args.filename,
-        session
-    )
+    main(args, session)
