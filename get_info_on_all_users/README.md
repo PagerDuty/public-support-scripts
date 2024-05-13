@@ -103,6 +103,16 @@ Running the script requires one argument: a global REST API key
 ./get_user_role_changes.py -k API-KEY-HERE --user-id PABC123
 ```
 
+#### Exclude user create and deletes
+
+By default when a user is create this script will include role changes from user creates and deletes,
+(None -> New Role, Old Role -> None). To exlucde these from reported results use the `--only-updates`
+options.
+
+```
+./get_user_role_changes.py -k API-KEY-HERE --only-updates
+```
+
 #### Role Tier Changes
 
 Instead of getting all role changes, get all role tier changes in table format.
@@ -137,6 +147,7 @@ To view all of the options available run the script with the help flag:
   -s SINCE, --since SINCE             Start of date range to search
   -u UNTIL, --until UNTIL             End of date range to search
   -i USER_ID, --user-id USER_ID       Filter results to a single user ID
+  -o, --only-updates                  Exclude user creates and deletes from role change results
   -t, --tier-changes                  Get user role tier changes
   -a, --show-all                      Prints all fetched user records in JSON format
   -f FILENAME, --filename FILENAME    Write results to a CSV file

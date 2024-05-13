@@ -93,7 +93,10 @@ def get_record_actor(record):
         'actor_summary': actor.get('summary', '')
     }
 
-def get_role_changes(record):
+def get_role_changes(record, only_updates):
+    if only_updates and record['action'] != 'update':
+        return []
+
     # `details` and `fields` can both be null according to the API docs.
     field_changes = record.get('details', {}).get('fields', [])
     role_changes = filter(lambda fc: fc['name'] == 'role', field_changes)
@@ -156,7 +159,7 @@ def main(args, session):
             for record in session.iter_cursor(get_api_path(user_id), params=get_api_params(since, until, user_id)):
                 if args.show_all:
                     print(json.dumps(record))
-                record_role_changes = get_role_changes(record)
+                record_role_changes = get_role_changes(record, args.only_updates)
                 role_changes += record_role_changes
 
         changes = get_role_tier_changes(role_changes) if tier_changes else role_changes
@@ -178,6 +181,7 @@ if __name__ == '__main__':
     ap.add_argument('-s', '--since', required=False, help='Start of date range to search')
     ap.add_argument('-u', '--until', required=False, help='End of date range to search')
     ap.add_argument('-i', '--user-id', required=False, help='Filter results to a single user ID')
+    ap.add_argument('-o', '--only-updates', action='store_true', help='Exclude user creates and deletes from role change results')
     ap.add_argument('-t', '--tier-changes', action='store_true', help='Get user role tier changes')
     ap.add_argument('-a', '--show-all', action='store_true', help='Prints all fetched user records in JSON format')
     ap.add_argument('-f', '--filename', required=False, help='Write results to a CSV file')
