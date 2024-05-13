@@ -105,7 +105,7 @@ Running the script requires one argument: a global REST API key
 
 #### Exclude user create and deletes
 
-By default when a user is create this script will include role changes from user creates and deletes,
+By default this script will include role changes from user creates and deletes
 (None -> New Role, Old Role -> None). To exlucde these from reported results use the `--only-updates`
 options.
 
