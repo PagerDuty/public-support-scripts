@@ -10,9 +10,9 @@ role_types_count = {}
 allowed_roles=['admin','read_only_user','read_only_limited_user','user','limited_user','observer','restricted_access','owner']
 team_managers=[]
 
-def write_rows(column1, column2, column3):
+def write_rows(column1, column2, column3, mode='a+'):
 # one function for writing to csv
-  with open(filename, 'a+') as csvfile:
+  with open(filename, mode) as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow([column1, column2, column3])
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     filename = args.filename + '.csv'
   else:
     filename = args.filename
-  write_rows('Name','Role', 'Email')  
+  write_rows('Name','Role', 'Email', mode='w')  
   for role in roles:
     if role == "team_managers":
       get_teams(session)
