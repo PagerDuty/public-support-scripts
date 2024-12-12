@@ -4,6 +4,12 @@ Generic webhook v3 subscriptions can either be active or inactive. This script c
 If any inactive webhooks are found, they will be displayed in the terminal, and you will be prompted to enable them.
 Additionally, a CSV file containing all inactive webhooks will be downloaded for your reference.
 
+## Install the required gems
+
+```bash
+bundle install --path vendor/bundle
+```
+
 ## How to Run the Script
 
 There are two methods to enable the webhooks using this script.
@@ -21,6 +27,7 @@ ruby webhook_subscription.rb -a {api-token}
 ### Method 2: Enable Webhooks Using a CSV File
 
 If you already have a CSV file containing inactive webhook IDs, you can supply its path and use an additional option to enable them.
+If you selected "no" in the terminal you can use the generated CSV file called "inactive_subscriptions.csv" to enable them
 Run the following command in your terminal:
 
 ```bash
@@ -28,6 +35,15 @@ ruby webhook_subscription.rb -a {api-token-here} -f {path/to/csv file} -e activa
 ```
 
 This command reads the webhook IDs from the CSV file and activates the corresponding webhook subscriptions.
+
+### CSV example
+
+```bash
+subscription_id,description
+PEIY75J,""
+PEDY7HY,""
+```
+The description is optional. The auto generated CSV file will fetch the description.
 
 ### Notes
 
