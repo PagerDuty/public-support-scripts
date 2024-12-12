@@ -24,6 +24,12 @@ Run the following command in your terminal:
 ruby webhook_subscription.rb -a {api-token}
 ```
 
+This command will:
+
+- Check for inactive webhook subscriptions in your PagerDuty account.
+- Display the inactive webhooks in the terminal.
+- Prompt you to enable the inactive webhooks.
+
 ### Method 2: Enable Webhooks Using a CSV File
 
 If you already have a CSV file containing inactive webhook IDs, you can supply its path and use an additional option to enable them.
