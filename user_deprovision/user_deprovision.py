@@ -36,7 +36,7 @@ import csv
 from datetime import datetime
 
 from six.moves import input
-from pdpyras import APISession, PDClientError
+from pagerduty import RestApiV2Client, Error
 
 log = logging.getLogger('user_deprovision')
 
@@ -45,7 +45,7 @@ class Resources:
     def __init__(self, access_token, from_email):
         self.schedules = None
         self.teams = None
-        self.session = APISession(access_token, default_from=from_email)
+        self.session = RestApiV2Client(access_token, default_from=from_email)
 
     def get_schedules(self):
         if self.schedules is None:
@@ -97,10 +97,10 @@ def input_yn(message):
         return input_yn(message)
 
 
-class DeleteUser(APISession):
+class DeleteUser(RestApiV2Client):
     """Class to handle all user deletion logic.
     
-    REST API access methods are inherited from pdpyras.APISession.
+    REST API access methods are inherited from pagerduty.RestApiV2Client.
     """
 
     def __init__(self, access_token, email, from_email, backup):
@@ -183,7 +183,7 @@ class DeleteUser(APISession):
             try:
                 self.rput(incident['self'],
                           json={'type': 'incident_reference', 'status': 'resolved'})
-            except PDClientError as e:
+            except Error as e:
                 handle_exception(e)
                 log.error("Could not resolve incident %s.", incident['id'])
 
@@ -265,7 +265,7 @@ class DeleteUser(APISession):
         try:
             self.rdelete('/teams/{team_id}/users/{user_id}'.format(
                 team_id=team_id, user_id=self.user_id))
-        except PDClientError as e:
+        except Error as e:
             handle_exception(e)
 
     def team_has_user(self, team_users):
@@ -373,7 +373,7 @@ def delete_user(user_email, args, resources):
                 # Delete description in case it is null
                 del (ep['description'])
                 user_deleter.rput(ep['self'], json=ep)
-            except PDClientError as e:
+            except Error as e:
                 handle_exception(e)
         else:
             # Attempt to delete the empty EP otherwise:
@@ -412,7 +412,7 @@ def delete_user(user_email, args, resources):
                         try:
                             log.info("Updating escalation policy " + ep['id'])
                             user_deleter.rput(ep['self'], json=ep)
-                        except PDClientError as e:
+                        except Error as e:
                             handle_exception(e)
                     elif not prompt_del or input_yn((
                                                             "Escalation policy (ID=%s, name=%s) will be empty"
