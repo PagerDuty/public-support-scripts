@@ -8,7 +8,7 @@ import pprint
 import re
 import sys
 
-import pdpyras
+import pagerduty
 
 session = None
 
@@ -39,7 +39,7 @@ def update_email(user, new_email):
     try:
         self_url = f"https://api.pagerduty.com/users/{user['id']}"
         session.rput(self_url, json={"type": "user", "email": new_email})
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         if e.response is not None:
             print(
                 "Failed to update user; HTTP %d: %s"
@@ -63,7 +63,7 @@ def update_contact_method(user, cm, new_email):
         session.rput(
             self_url, json={"type": "email_contact_method", "address": new_email}
         )
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         if e.response:
             print(
                 "\tCouldn't update contact method; HTTP %d: %s"
@@ -235,7 +235,7 @@ def main():
             "--replace"
         )
         return
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     replace_emails(args)
 
 
