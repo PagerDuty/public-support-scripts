@@ -1,0 +1,4 @@
+name,description,escalation policy,notification urgency,acknowledgement timeout,auto resolution,incident behavior
+test service 1,test,EP-lisa test,low,10,10,create alerts and incidents
+test service 2,test,EP-lisa test,low,10,10,create alerts and incidents
+test service 3,test,EP-lisa test,low,10,10,create alerts and incidents
