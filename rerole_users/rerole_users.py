@@ -4,7 +4,7 @@
 
 import argparse
 import csv
-import pdpyras
+import pagerduty
 import sys
 from six.moves import input
 
@@ -156,7 +156,7 @@ def find_team(name):
             else:
                 teams[name] = team
         return teams[name]
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         handle_exception(e)
 
 def find_user(email):
@@ -179,7 +179,7 @@ def find_user(email):
         else:
             users[email] = user
         return users[email]
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         handle_exception(e)
 
 def get_team(team_id):
@@ -439,7 +439,7 @@ def set_base_role(user_id, new_base_role, prev_base_role):
         user = session.rput('users/'+user_id, json={"user":{"role": new_base_role}})
         if user:
             print("Successfully changed role for %s"%(user_id))
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         print("Failed to set role for user: "+user_id)
         handle_exception(e)
 
@@ -624,7 +624,7 @@ def main():
             print("Aborted.")
             return
 
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     rerole_users(args)
 
 if __name__=='__main__':

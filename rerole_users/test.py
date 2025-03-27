@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import pdpyras
+import pagerduty
 import unittest
 import sys
 from unittest.mock import MagicMock, patch
@@ -77,7 +77,7 @@ class ReroleUsersTest(unittest.TestCase):
             return
         rbf = lambda i: 'rollback_%d.csv'%i
         rbtrf = lambda i: 'rollback_teams_%d.csv'%i
-        rerole_users.session = pdpyras.APISession(api_key)
+        rerole_users.session = pagerduty.RestApiV2Client(api_key)
         args = MagicMock()
         args.assume_yes = True
         args.skip_roles = ['owner']
