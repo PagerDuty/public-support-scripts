@@ -3,7 +3,7 @@
 import argparse
 import csv
 import requests
-import pdpyras
+import pagerduty
 
 def main():
     ap = argparse.ArgumentParser(description="Gets all overrides in a "
@@ -22,7 +22,7 @@ def main():
         "all schedules will be included.")
 
     args = ap.parse_args()
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     window = {'since':args.start, 'until':args.end}
     writer = csv.writer(args.csv_file)
     schedules = args.schedules
@@ -31,7 +31,7 @@ def main():
         schedules = [s['id'] for s in session.iter_all('schedules')]
 
     for sid in schedules:
-        for override in session.iter_all('/schedules/%s/overrides'%sid, 
+        for override in session.rget('/schedules/%s/overrides'%sid, 
                 params=window):
             idtag = "%s: %s to %s"%(override['user']['summary'], 
                 override['start'], override['end'])

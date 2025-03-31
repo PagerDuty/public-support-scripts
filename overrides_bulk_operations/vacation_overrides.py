@@ -3,7 +3,7 @@ import argparse
 import json
 import requests
 import sys
-import pdpyras
+import pagerduty
 
 def find_shifts(session, vacationing_user, start, end, schedule_ids):
     """Find all on-call shifts on the specified schedules 
@@ -43,7 +43,7 @@ def create_overrides():
         "all schedules will be included.")
 
     args = ap.parse_args()
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     vacationing_user = session.find('users', args.vacationer, attribute='email')
     replacement_user = session.find('users', args.substitute, attribute='email')
     if None in (vacationing_user, replacement_user):
