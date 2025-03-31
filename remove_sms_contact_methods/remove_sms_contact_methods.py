@@ -2,10 +2,10 @@
 
 import argparse
 import sys
-import pdpyras
+import pagerduty
 
 def no_sms(args):
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     users = session.iter_all(
         'users',
         params={'include[]':['contact_methods', 'notification_rules']}
