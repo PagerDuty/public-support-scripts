@@ -3,7 +3,7 @@
 import argparse
 import csv
 import requests
-import pdpyras
+import pagerduty
 
 def main():
     parser = argparse.ArgumentParser(description="Deletes overrides listed "\
@@ -17,7 +17,7 @@ def main():
         "the very first row; no column names.")
     args = parser.parse_args()
 
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     for row in csv.reader(args.csv_file):
         schedule_id, override_id = row[:2]
         try:
@@ -25,7 +25,7 @@ def main():
                 schedule_id, override_id
             ))
             print("Deleted override "+override_id)
-        except pdpyras.PDClientError as e:
+        except pagerduty.Error as e:
             error = 'Network error'
             if e.response is not None:
                 error = e.response.text
