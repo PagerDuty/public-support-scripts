@@ -9,7 +9,7 @@ import json
 from datetime import date
 import pprint
 
-import pdpyras
+import pagerduty
 import time
 
 # Default parameters:
@@ -22,7 +22,7 @@ PARAMETERS = {
 }
 
 def mass_update_incidents(args):
-    session = pdpyras.APISession(args.api_key,
+    session = pagerduty.RestApiV2Client(args.api_key,
         default_from=args.requester_email)
     session.headers.update({"X-SOURCE-SCRIPT": "public-support-scripts/mass_update_incidents"})
 
@@ -75,7 +75,7 @@ def mass_update_incidents(args):
                 'type': 'incident_reference',
                 'status': '{0}d'.format(args.action), # acknowledged or resolved
             })
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         if e.response is not None:
             print(e.response.text)
         raise e
