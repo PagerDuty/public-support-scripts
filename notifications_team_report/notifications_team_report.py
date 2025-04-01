@@ -10,7 +10,7 @@ import pickle
 import sys
 import time
 
-import pdpyras
+import pagerduty
 
 def ascii_keys(data):
     return dict((k.encode('ascii'), v) for (k, v) in data.items())
@@ -60,7 +60,7 @@ def main():
     if args.resume_file:
         notifs, teams = pickle.load(args.resume_file)
     else:
-        api = pdpyras.APISession(args.api_key)
+        api = pagerduty.RestApiV2Client(args.api_key)
 
         if 'teams' not in api.rget('/abilities'):
             logging.error("This account doesn't have the \"teams\" \ ability! "\
@@ -154,7 +154,7 @@ def main():
     if len(stats.values()):
         logging.info("Wrote stats to %s", stats_file)
     else:
-        logging.warn("No data written; no team-specific notifications.")
+        logging.warning("No data written; no team-specific notifications.")
 
 if __name__ == '__main__':
     main() 
