@@ -3,7 +3,7 @@
 # Python script to create recurring maintenance windows in PagerDuty
 
 import argparse
-import pdpyras
+import pagerduty
 import sys
 import json
 from dateutil import parser as dateparser
@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 def create_recurring_maintenance_windows(args):
     sref = lambda s: {'type': 'service_reference', 'id':s}
-    session = pdpyras.APISession(args.api_key, default_from=args.requester)
+    session = pagerduty.RestApiV2Client(args.api_key, default_from=args.requester)
     start_date = dateparser.parse(args.first_maint_window_date)
     end_date = dateparser.parse(args.first_maint_window_date) + \
         timedelta(minutes=args.duration_minutes)
@@ -28,7 +28,7 @@ def create_recurring_maintenance_windows(args):
                     'description':args.description,
                     'services':[sref(s_id) for s_id in args.service_ids]
                 })
-            except pdpyras.PDClientError as e:
+            except pagerduty.Error as e:
                 msg = "API Error: "
                 if e.response is not None:
                     msg += "HTTP %d: %s"%(e.response.status_code, e.response.text)
