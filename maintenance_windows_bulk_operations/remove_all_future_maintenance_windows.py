@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import argparse
-import pdpyras
+import pagerduty
 
 
 def remove_all_future_maintenance_windows(args):
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     progress_printer = lambda o, i, n: (print("Deleting %d/%d: %s"%(
         i, n, o['summary']
     )))
@@ -19,7 +19,7 @@ def remove_all_future_maintenance_windows(args):
             continue
         try:
             session.delete(mw['self'])
-        except PDClientError as e:
+        except Error as e:
             message = "API Error: %s"%e
             if e.response is not None:
                 message += " HTTP %d: %s"%(e.response.status_code,
