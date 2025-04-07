@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import pdpyras
+import pagerduty
 import sys
 import csv
 import re
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     ap.add_argument('-k', '--api-key', required=True, help="REST API key")
     ap.add_argument('-o', '--csv-file', required=False, help="Output CSV File")
     args = ap.parse_args()
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
 
     output = open(args.csv_file, 'w', newline='') if args.csv_file else sys.stdout
     with output as csvfile:
