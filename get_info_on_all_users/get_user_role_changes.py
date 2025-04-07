@@ -6,7 +6,7 @@
 import argparse
 import csv
 import json
-import pdpyras
+import pagerduty
 from datetime import datetime, timezone
 from dateutil import parser, relativedelta
 from tabulate import tabulate
@@ -171,7 +171,7 @@ def main(args, session):
         else:
             print(f'No {"tier" if tier_changes else "role"} changes found.')
 
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         print('Could not get user role change audit records')
         raise e
 
@@ -186,6 +186,6 @@ if __name__ == '__main__':
     ap.add_argument('-a', '--show-all', action='store_true', help='Prints all fetched user records in JSON format')
     ap.add_argument('-f', '--filename', required=False, help='Write results to a CSV file')
     args = ap.parse_args()
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
 
     main(args, session)

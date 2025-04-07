@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-import pdpyras
+import pagerduty
 
 def get_teams(session, comma_separated):
     if comma_separated:
@@ -10,7 +10,7 @@ def get_teams(session, comma_separated):
     try:
         for team in session.iter_all('teams'):
             get_team_members(team['id'], team['name'], session, comma_separated)
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         raise e
 
 def get_team_members(team_id, team_name, session, comma_separated):
@@ -25,7 +25,7 @@ def get_team_members(team_id, team_name, session, comma_separated):
                 sys.stdout.write("User name: {}\n".format(member['user']['summary']))
                 sys.stdout.write("Team role: {}\n".format(member['role']))
                 sys.stdout.write("-----\n")
-    except pdpyras.PDClientError as e:
+    except pagerduty.Error as e:
         print("Could not get team members for team {} {}".format(team_name, team_id))
         raise e
 
@@ -37,5 +37,5 @@ if __name__ == '__main__':
     ap.add_argument('-k', '--api-key', required=True, help="REST API key")
     ap.add_argument('-c', '--comma-separated', required=False, default=False, action='store_true', help="Format output separated by commas")
     args = ap.parse_args()
-    session = pdpyras.APISession(args.api_key)
+    session = pagerduty.RestApiV2Client(args.api_key)
     get_teams(session, args.comma_separated)
