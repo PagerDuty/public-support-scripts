@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-from pdpyras import APISession, PDClientError
+from pagerduty import RestApiV2Client, Error
 import csv
 
-# Disables noisy warning logging from pdpyras
+# Disables noisy warning logging from pagerduty
 import logging
 logging.disable(logging.WARNING)
 
@@ -22,7 +22,7 @@ def get_users(session, args):
     try:
         for user in session.iter_all('users'):
             print_contact_methods(user, session, tf)
-    except PDClientError as e:
+    except Error as e:
         raise e
 
 def print_contact_methods(user, session, csv):
@@ -59,5 +59,5 @@ if __name__ == '__main__':
     ap.add_argument('-f', '--csv-file', required=False,
         default=False, type=argparse.FileType('w'), help="Output to a csv file")
     args = ap.parse_args()
-    session = APISession(args.api_key)
+    session = RestApiV2Client(args.api_key)
     get_users(session, args)

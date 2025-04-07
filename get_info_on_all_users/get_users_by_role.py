@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import pdpyras
+import pagerduty
 import sys
 import csv
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
   ap.add_argument('-f', '--filename', required=True, help="filename for csv", dest='filename')
   ap.add_argument('-v', '--logging', default=False, dest='logging', help="verbose logging", action='store_true')
   args = ap.parse_args()
-  session = pdpyras.APISession(args.api_key)
+  session = pagerduty.RestApiV2Client(args.api_key)
   roles = (args.roles).split(',')
   if args.filename[-4:] != '.csv':
     filename = args.filename + '.csv'
