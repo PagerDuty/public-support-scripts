@@ -15,22 +15,23 @@ The `pagerduty_zendesk_incidents.py` script sends a GET request to the incidents
 
 - Python 3.6+
 - PagerDuty API Access Token
-py
+
 ## Installation
 
 1. Clone this repository
    ```bash
    git clone https://github.com/shirleyilenechan/incident_mappings.git
    ```
+2. `cd` to the ZenDesk directory within `external_references`.
 
-2. Install required dependencies:
+3. Install required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
 ## Usage
 
-1. Create a `.env` file in the ZenDesk folder where you cloned the incident_mappings repository.
+1. Create a `.env` file in the ZenDesk directory.
 
 2. Update the `.env` file with your PagerDuty API key:
    ```
@@ -39,7 +40,7 @@ py
 
 3. Define your request parameters in the `request_parameters.py` file.
 
-4. Run the `pagerduty_zendesk_incidents.py` script from the command line, in the ZenDesk folder where you cloned the incident_mappings repository:
+4. Run the `pagerduty_zendesk_incidents.py` script in the ZenDesk directory:
    ```bash
    python3 pagerduty_zendesk_incidents.py
    ```
@@ -50,7 +51,7 @@ The `pagerduty_zendesk_incidents.py` script will:
 
 1. Send a GET request to the incidents endpoint to retrieve incident data
 2. Filter incidents to include only those with ZenDesk references
-3. Generate a CSV file named `pagerduty_incidents_mapped_to_zendesk.csv` in the ZenDesk folder where you cloned the incident_mappings repository.
+3. Generate a CSV file named `pagerduty_incidents_mapped_to_zendesk.csv` in the ZenDesk directory.
 
 ## Error Handling
 

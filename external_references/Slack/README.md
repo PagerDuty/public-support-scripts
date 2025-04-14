@@ -15,17 +15,19 @@ The `pagerduty_slack_incidents.py` script sends a GET request to the log_entries
 
 1. Clone this repository
    ```bash
-   git clone https://github.com/shirleyilenechan/incident_mappings.git
+   git clone https://github.com/PagerDuty/public-support-scripts.git
    ```
+   
+2. `cd` to the Slack directory within `external_references`.
 
-2. Install required dependencies:
+3. Install required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
 ## Usage
 
-1. Create a `.env` file in the Slack folder where you cloned the incident_mappings repository.
+1. Create a `.env` file in the Slack directory.
 
 2. Update the `.env` file with your PagerDuty API key:
    ```
@@ -34,7 +36,7 @@ The `pagerduty_slack_incidents.py` script sends a GET request to the log_entries
 
 3. Define your request parameters in the `request_parameters.py` file.
 
-4. Run the `pagerduty_slack_incidents.py` script from the command line, in the Slack folder where you cloned the incident_mappings repository:
+4. Run the `pagerduty_slack_incidents.py` script in the Slack directory:
    ```bash
    pagerduty_slack_incidents.py
    ```
@@ -45,7 +47,7 @@ The `pagerduty_slack_incidents.py` script will:
 
 1. Send a GET request to the log_entries endpoint to retrieve log entry data
 2. Filter log entries to include only those with a Slack incident post
-3. Generate a CSV file named `pagerduty_incidents_mapped_to_slack.csv` in the Slack folder where you cloned the incident_mappings repository.
+3. Generate a CSV file named `pagerduty_incidents_mapped_to_slack.csv` in the Slack directory.
 
 ## Error Handling
 

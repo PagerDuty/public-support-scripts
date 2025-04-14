@@ -20,17 +20,19 @@ The `pagerduty_jira_incidents.py` script sends a GET request to the incidents en
 
 1. Clone this repository
    ```bash
-   git clone https://github.com/shirleyilenechan/incident_mappings.git
+   git clone https://github.com/PagerDuty/public-support-scripts.git
    ```
 
-2. Install required dependencies:
+2. `cd` to the Jira directory within `external_references`.
+
+3. Install required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
 ## Usage
 
-1. Create a `.env` file in the Jira folder where you cloned the incident_mappings repository.
+1. Create a `.env` file in the Jira directory.
 
 2. Update the `.env` file with your PagerDuty API key:
    ```
@@ -39,7 +41,7 @@ The `pagerduty_jira_incidents.py` script sends a GET request to the incidents en
 
 3. Define your request parameters in the `request_parameters.py` file.
 
-4. Run the `pagerduty_jira_incidents.py` script from the command line, in the Jira folder where you cloned the incident_mappings repository:
+4. Run the `pagerduty_jira_incidents.py` script in the Jira directory:
    ```bash
    python3 pagerduty_jira_incidents.py
    ```
@@ -50,7 +52,7 @@ The `pagerduty_jira_incidents.py` script will:
 
 1. Send a GET request to the incidents endpoint to retrieve incident data
 2. Filter incidents to include only those with Jira external_references
-3. Generate a CSV file named `pagerduty_incidents_mapped_to_jira.csv` in the Jira folder where you cloned the incident_mappings repository.
+3. Generate a CSV file named `pagerduty_incidents_mapped_to_jira.csv` in the Jira directory.
 
 ## Error Handling
 

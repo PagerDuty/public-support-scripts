@@ -101,21 +101,20 @@ def generate_csv(filtered_incidents):
         for incident in filtered_incidents:
             for key, value in incident["metadata"].items():
                 if "servicenow" in key:
-                    servicenow_key = key
                     servicenow_value = json.loads(value)
                     external_name = servicenow_value.get("external_name", "")
                     external_url = servicenow_value.get("external_url", "")
-            writer.writerow({
-                "PagerDuty Incident Number": incident.get("incident_number", ""),
-                "Title": incident.get("title", ""),
-                "Description": incident.get("description", ""),
-                "Created At": incident.get("created_at", ""),
-                "Updated At": incident.get("updated_at", ""),
-                "Status": incident.get("status", ""),
-                "PagerDuty Incident URL": incident.get("html_url", ""),
-                "ServiceNow Incident ID": external_name,
-                "ServiceNow Incident URL": external_url
-            })
+                    writer.writerow({
+                        "PagerDuty Incident Number": incident.get("incident_number", ""),
+                        "Title": incident.get("title", ""),
+                        "Description": incident.get("description", ""),
+                        "Created At": incident.get("created_at", ""),
+                        "Updated At": incident.get("updated_at", ""),
+                        "Status": incident.get("status", ""),
+                        "PagerDuty Incident URL": incident.get("html_url", ""),
+                        "ServiceNow Incident ID": external_name,
+                        "ServiceNow Incident URL": external_url
+                    })
 
 def main():
     incidents = get_incidents()

@@ -67,11 +67,15 @@ def filter_incidents(incidents):
         list: incidents containing Jira external_reference.
     """
     incidents_with_jira_reference = []
+    jira_incidents_set = set()
+
     for incident in incidents["incidents"]:
         if incident["external_references"] != []:
             for reference in incident["external_references"]:
-                if "JIRA" in reference["summary"]:
-                    incidents_with_jira_reference.append(incident)
+                if "atlassian" in reference["external_url"] or "Jira issue" in reference["summary"]:
+                    if incident["id"] not in jira_incidents_set:
+                        incidents_with_jira_reference.append(incident)
+                        jira_incidents_set.add(incident["id"])
     
     if not incidents_with_jira_reference:
         raise SystemExit("No Jira external_reference found in any incidents")
@@ -99,17 +103,18 @@ def generate_csv(filtered_incidents):
         
         for incident in filtered_incidents:
             for reference in incident["external_references"]:
-                writer.writerow({
-                    "PagerDuty Incident Number": incident.get("incident_number", ""),
-                    "Title": incident.get("title", ""),
-                    "Description": incident.get("description", ""),
-                    "Created At": incident.get("created_at", ""),
-                    "Updated At": incident.get("updated_at", ""),
-                    "Status": incident.get("status", ""),
-                    "PagerDuty Incident URL": incident.get("html_url", ""),
-                    "Jira Ticket ID": reference["external_id"],
-                    "Jira Ticket URL": reference["external_url"],
-                })
+                if "atlassian" in reference["external_url"] or "Jira issue" in reference["summary"]:
+                    writer.writerow({
+                        "PagerDuty Incident Number": incident.get("incident_number", ""),
+                        "Title": incident.get("title", ""),
+                        "Description": incident.get("description", ""),
+                        "Created At": incident.get("created_at", ""),
+                        "Updated At": incident.get("updated_at", ""),
+                        "Status": incident.get("status", ""),
+                        "PagerDuty Incident URL": incident.get("html_url", ""),
+                        "Jira Ticket ID": reference["external_id"],
+                        "Jira Ticket URL": reference["external_url"],
+                    })
 
 
 def main():
