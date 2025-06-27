@@ -79,7 +79,7 @@ def main():
         }
         for ile in api.iter_all('log_entries', params=params, total=True,
                 item_hook=print_progress):
-            if 'notify_log_entry' in ile['type']:
+            if 'notify_log_entry' in ile['type'] or 'notification_log_entry' in ile['type']:
                 ile_teams = ile['teams']
                 index = len(notifs)
                 for team in ile_teams:
