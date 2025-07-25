@@ -17,6 +17,8 @@ PARAMETERS = {
     'exclude': ['escalation_policies', 'impacted_services', 'pending_actions', 'last_status_change_by', 'responders',
                 'alert_grouping', 'conference_bridges']
 }
+MAX_INCIDENTS = 10000  # Maximum number of incidents to retrieve in one request, based on Python-Pagerduty SDK limits.
+
 
 def mass_update_incidents(args):
     session = pagerduty.RestApiV2Client(args.api_key,
@@ -50,6 +52,9 @@ def mass_update_incidents(args):
     print("Parameters: "+str(PARAMETERS))
     if args.incident_id:
         PARAMETERS['incident_ids[]'] = args.incident_id.split(',')
+        if len(PARAMETERS['incident_ids[]']) > MAX_INCIDENTS:
+            raise ValueError(
+                f"You can only update a maximum of {MAX_INCIDENTS} incidents at a time. Received list of {len(PARAMETERS['incident_ids[]'])} incidents.")
     try:
         if args.incident_id:
             raw_incidents = args.incident_id.split(',')
