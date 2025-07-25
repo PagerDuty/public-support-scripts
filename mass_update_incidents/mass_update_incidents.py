@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # PagerDuty Support asset: mass_update_incidents
-
+from typing import Dict, Union, List
 import argparse
 import requests
 import sys
@@ -13,7 +13,7 @@ import pagerduty
 import time
 
 # Default parameters:
-PARAMETERS = {
+PARAMETERS: Dict[str, Union[str, List[str]]] = {
     'exclude': ['escalation_policies', 'impacted_services', 'pending_actions', 'last_status_change_by', 'responders',
                 'alert_grouping', 'conference_bridges']
 }
