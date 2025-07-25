@@ -52,12 +52,24 @@ def mass_update_incidents(args):
                 f"You can only update a maximum of {MAX_INCIDENTS} incidents at a time. Received list of {len(PARAMETERS['incident_ids[]'])} incidents.")
     try:
         if args.incident_id:
-            raw_incidents = args.incident_id.split(',')
-            incidents = []
-            for raw_incident in raw_incidents:
-                incidents.append({"id": raw_incident})
-            print("Acting on incidents corresponding to incident ID(s): " +
-                  args.incident_id)
+            if args.action == 'resolve':
+                # If resolving incidents, we need to fetch the incident details for the alert counts
+                # Fetch incident bodies in bulk using the bulk update endpoint
+                print(f"Fetching details for {len(PARAMETERS['incident_ids[]'])} incidents. Please be patient as this "
+                      "can take a while for large volumes...")
+                incident_references = []
+                for incident_id in PARAMETERS['incident_ids[]']:
+                    incident_references.append({"id": incident_id, "type": "incident_reference"})
+
+                # Make bulk request to get incident details
+                response = session.rput("/incidents", json={
+                    "incidents": incident_references
+                }, params=PARAMETERS)
+                incidents = response.get('incidents', [])
+                print(f"Successfully fetched {len(incidents)} incident details")
+            else:
+                # For acknowledging, we don't need to fetch incident details
+                incidents = [{'id': incident_id, 'type': 'incident_reference'} for incident_id in PARAMETERS['incident_ids[]']]
         else:
             print("Please be patient as this can take a while for large volumes "
                   "of incidents.")
