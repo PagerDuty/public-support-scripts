@@ -13,7 +13,10 @@ PARAMETERS: Dict[str, Union[str, List[str]]] = {
     'exclude': ['escalation_policies', 'impacted_services', 'pending_actions', 'last_status_change_by', 'responders',
                 'alert_grouping', 'conference_bridges']
 }
-MAX_INCIDENTS = 10000  # Maximum number of incidents to retrieve in one request, based on Python-Pagerduty SDK limits.
+MAX_INCIDENTS = 10000   # Maximum number of incidents to retrieve in one request, based on Python-Pagerduty SDK limits.
+BATCH_SIZE = 100        # Maximum number of incidents to update in one batch request.
+BASE_RATE = 100.0       # Base rate of alert processing (alerts per second)
+ALERT_THRESHOLD = 100   # Threshold above which we apply progressive rate limiting
 
 
 def mass_update_incidents(args):
@@ -74,19 +77,105 @@ def mass_update_incidents(args):
             print("Please be patient as this can take a while for large volumes "
                   "of incidents.")
             incidents = session.list_all('incidents', params=PARAMETERS)
-        for incident in incidents:
-            print("* Incident {}: {}".format(incident['id'], args.action))
-            if args.dry_run:
-                continue
-            time.sleep(0.25)
-            self_url = f"https://api.pagerduty.com/incidents/{incident['id']}"
-            session.rput(self_url, json={
-                'type': 'incident_reference',
-                'status': '{0}d'.format(args.action),  # acknowledged or resolved
-            })
+
+        total_incidents = len(incidents)
+        print(f"Processing {total_incidents} incidents in batches of {BATCH_SIZE}")
+        
+        if args.dry_run:
+            if args.action == 'acknowledge':
+                print(f"[DRY RUN] Would acknowledge {total_incidents} incidents")
+            else:
+                # Count total alerts in all incidents
+                total_triggered_alerts = sum(incident.get('alert_counts', {}).get('triggered', 0) for incident in incidents)
+                print(f"[DRY RUN] Would resolve {total_incidents} incidents with {total_triggered_alerts} total triggered alerts")
+            return
+        
+        # Calculate total number of batches
+        num_batches = (total_incidents + BATCH_SIZE - 1) // BATCH_SIZE
+        
+        # Process incidents in batches
+        for batch_num in range(num_batches):
+            start_idx = batch_num * BATCH_SIZE
+            end_idx = min(start_idx + BATCH_SIZE, total_incidents)
+            batch = incidents[start_idx:end_idx]
+            
+            # Process this batch
+            if args.action == 'acknowledge':
+                # For acknowledging, we can just do a bulk update
+                print(f"Batch {batch_num + 1}/{num_batches}: Acknowledging {len(batch)} incidents")
+                
+                incident_updates = list(map(lambda incident: {
+                    "id": incident['id'],
+                    "type": "incident_reference",
+                    "status": "acknowledged"
+                }, batch))
+                
+                # Send bulk update request
+                start_time = time.time()
+                session.rput("/incidents", json={
+                    "incidents": incident_updates
+                })
+                processing_time = time.time() - start_time
+
+                # Wait for 1 second between batches
+                wait_time = 1.0
+                print(f"  Batch completed in {processing_time:.2f}s, waiting {wait_time:.2f}s before next batch")
+                time.sleep(wait_time)
+                
+            else:
+                # For resolving, we need to calculate total alerts and adjust rate
+                batch_triggered_alerts = sum(incident.get('alert_counts', {}).get('triggered', 0) for incident in batch)
+                print(f"Batch {batch_num + 1}/{num_batches}: Resolving {len(batch)} incidents with {batch_triggered_alerts} total triggered alerts")
+                
+                # Prepare bulk update request for non-skipped incidents
+                incident_updates = list(map(lambda incident: {
+                    "id": incident['id'],
+                    "type": "incident_reference",
+                    "status": "resolved"
+                }, batch))
+                
+                # Send bulk update request and measure time
+                start_time = time.time()
+                session.rput("/incidents", json={
+                    "incidents": incident_updates
+                })
+                processing_time = time.time() - start_time
+                
+                # Calculate minimum time needed based on alert count and rate limit
+                min_time_needed = batch_triggered_alerts / 100.0
+                
+                # Calculate dynamic rate multiplier based on alert count
+                # For small numbers of alerts, use minimal multiplier
+                # For large numbers, apply progressively larger multiplier
+                if batch_triggered_alerts <= ALERT_THRESHOLD:
+                    # For small batches, use a small fixed multiplier (1.5x)
+                    dynamic_multiplier = 1.5
+                else:
+                    # For larger batches, scale up the multiplier based on alert count
+                    # Formula: 1.5 + (alerts - threshold) / threshold 
+                    # Examples: 
+                    # - At threshold of 200: 200 alerts → 1.5x, 400 alerts → 2.5x, 600 alerts → 3.5x
+                    excess_alerts = batch_triggered_alerts - ALERT_THRESHOLD
+                    dynamic_multiplier = 1.5 + (excess_alerts / ALERT_THRESHOLD)
+                    # Cap the multiplier at a reasonable maximum (5.0)
+                    dynamic_multiplier = min(dynamic_multiplier, 5.0)
+                
+                # Apply the dynamic multiplier to account for backend async work
+                adjusted_time_needed = min_time_needed * dynamic_multiplier
+                
+                # Calculate wait time (adjusted time minus the time already spent processing)
+                wait_time = max(1.0, (adjusted_time_needed - processing_time))
+                
+                print(f"  Batch completed in {processing_time:.2f}s, {batch_triggered_alerts} alerts")
+                print(f"  Dynamic rate multiplier: {dynamic_multiplier:.2f}x (based on alert count)")
+                print(f"  Rate limit: {adjusted_time_needed:.2f}s needed")
+                print(f"  Waiting {wait_time:.2f}s before next batch to maintain rate limit")
+                time.sleep(wait_time)
     except pagerduty.Error as e:
-        if e.response is not None:
-            print(e.response.text)
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Error: {str(e)}")
+            if hasattr(e.response, 'text'):
+                print(e.response.text)
         raise e
 
 
