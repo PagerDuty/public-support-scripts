@@ -3,11 +3,7 @@
 # PagerDuty Support asset: mass_update_incidents
 from typing import Dict, Union, List
 import argparse
-import requests
 import sys
-import json
-from datetime import date
-import pprint
 
 import pagerduty
 import time
