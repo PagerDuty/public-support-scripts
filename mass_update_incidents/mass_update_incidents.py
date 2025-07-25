@@ -14,11 +14,8 @@ import time
 
 # Default parameters:
 PARAMETERS = {
-    'is_overview': 'true',
-    # 'with_suppressed' : 'true', #Uncomment to included Trigger (Suppressed) incidents
-    # 'since': '',
-    # 'until': '',
-    # 'time_zone': `UTC`
+    'exclude': ['escalation_policies', 'impacted_services', 'pending_actions', 'last_status_change_by', 'responders',
+                'alert_grouping', 'conference_bridges']
 }
 
 def mass_update_incidents(args):
