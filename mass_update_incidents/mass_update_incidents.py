@@ -47,13 +47,16 @@ def mass_update_incidents(args):
     else:
         PARAMETERS['date_range'] = 'all'
         print("Getting incidents of all time")
-    print("Parameters: " + str(PARAMETERS))
+
     if args.incident_id:
         PARAMETERS['incident_ids[]'] = args.incident_id.split(',')
         if len(PARAMETERS['incident_ids[]']) > MAX_INCIDENTS:
             raise ValueError(
                 f"You can only update a maximum of {MAX_INCIDENTS} incidents at a time. Received list of {len(PARAMETERS['incident_ids[]'])} incidents.")
     try:
+        print("Parameters: " + str(PARAMETERS))
+        script_start_time = time.time()
+
         if args.incident_id:
             if args.action == 'resolve':
                 # If resolving incidents, we need to fetch the incident details for the alert counts
@@ -65,10 +68,19 @@ def mass_update_incidents(args):
                     incident_references.append({"id": incident_id, "type": "incident_reference"})
 
                 # Make bulk request to get incident details
-                response = session.rput("/incidents", json={
-                    "incidents": incident_references
-                }, params=PARAMETERS)
-                incidents = response.get('incidents', [])
+                incidents = session.rput(
+                    "/incidents",
+                    json={"incidents": incident_references},
+                    params=PARAMETERS,
+                )
+
+                if not isinstance(incidents, list):
+                    raise RuntimeError(
+                        "Expected a list of incidents in response, got: "
+                        + str(type(incidents))
+                        + " exiting script."
+                    )
+
                 print(f"Successfully fetched {len(incidents)} incident details")
             else:
                 # For acknowledging, we don't need to fetch incident details
