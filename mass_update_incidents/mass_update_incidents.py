@@ -13,6 +13,7 @@ from ratelimit import limits, sleep_and_retry
 # Default parameters:
 PARAMETERS = {
     'is_overview': 'true',
+    'limit': 9000,
     # 'with_suppressed' : 'true', #Uncomment to included Trigger (Suppressed) incidents
     # 'since': '',
     # 'until': '',
