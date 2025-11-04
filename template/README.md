@@ -18,7 +18,7 @@
 
 ## Configuration 
 
-(document all flags and parameters)
+(document all flags and parameters here)
 
 ## FAQ
 
