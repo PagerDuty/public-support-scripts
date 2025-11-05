@@ -58,26 +58,27 @@ def mass_update_incidents(args):
         PARAMETERS["date_range"] = "all"
         print("Getting incidents of all time")
 
+    incident_ids_split = []
     if args.incident_id:
-        PARAMETERS["incident_ids[]"] = args.incident_id.split(",")
-        if len(PARAMETERS["incident_ids[]"]) > MAX_INCIDENTS:
+        incident_ids_split = args.incident_id.split(",")
+        if len(incident_ids_split) > MAX_INCIDENTS:
             raise ValueError(
-                f"You can only update a maximum of {MAX_INCIDENTS} incidents at a time. Received list of {len(PARAMETERS['incident_ids[]'])} incidents."
+                f"You can only update a maximum of {MAX_INCIDENTS} incidents at a time. Received list of {len(incident_ids_split)} incidents."
             )
     try:
         print("Parameters: " + str(PARAMETERS))
         script_start_time = time.time()
 
-        if args.incident_id:
+        if incident_ids_split:
             if args.action == "resolve":
                 # If resolving incidents, we need to fetch the incident details for the alert counts
                 # Fetch incident bodies in bulk using the bulk update endpoint
                 print(
-                    f"Fetching details for {len(PARAMETERS['incident_ids[]'])} incidents. Please be patient as this "
+                    f"Fetching details for {len(incident_ids_split)} incidents. Please be patient as this "
                     "can take a while for large volumes..."
                 )
                 incident_references = []
-                for incident_id in PARAMETERS["incident_ids[]"]:
+                for incident_id in incident_ids_split:
                     incident_references.append(
                         {"id": incident_id, "type": "incident_reference"}
                     )
@@ -101,7 +102,7 @@ def mass_update_incidents(args):
                 # For acknowledging, we don't need to fetch incident details
                 incidents = [
                     {"id": incident_id, "type": "incident_reference"}
-                    for incident_id in PARAMETERS["incident_ids[]"]
+                    for incident_id in incident_ids_split
                 ]
         else:
             print(
