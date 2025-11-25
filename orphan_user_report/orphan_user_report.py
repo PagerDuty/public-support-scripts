@@ -107,15 +107,23 @@ class PagerDutyCache:
     def get_open_incidents(self):
         """Fetch and cache all open (triggered/acknowledged) incidents"""
         if self._open_incidents is None:
-            log.info("Fetching all open incidents...")
-            print("Fetching all open incidents. This may take a moment...")
-            self._open_incidents = list(self.session.iter_all(
+            log.info("Fetching open incidents (max 9,999)...")
+            print("Fetching open incidents (max 9,999). This may take a moment...")
+            incident_limit = 9999
+            incident_count = 0
+            self._open_incidents = []
+            for incident in self.session.iter_all(
                 'incidents',
                 params={
                     'statuses[]': ['triggered', 'acknowledged'],
                     'date_range': 'all'
                 }
-            ))
+            ):
+                self._open_incidents.append(incident)
+                incident_count += 1
+                if incident_count >= incident_limit:
+                    log.info("Reached incident limit of %d", incident_limit)
+                    break
             log.info("Found %d open incidents", len(self._open_incidents))
             self._build_user_incident_counts()
         return self._open_incidents
