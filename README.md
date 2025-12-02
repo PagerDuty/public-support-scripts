@@ -38,6 +38,9 @@ organized.
 * [De-provision users](user_deprovision): automate the off-boarding process for
   PagerDuty users by removing them from schedules and escalation policies, and
   resolving all incidents that they are assigned.
+* [Orphan user report](orphan_user_report): generate a report of users and their
+  associations with schedules, escalation policies, teams, and open incidents to
+  identify "orphan" users who are not associated with any operational resources.
 
 ## Howto
 
