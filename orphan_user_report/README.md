@@ -33,26 +33,23 @@ pip install -r requirements.txt
 ### Basic Usage (Console Output Only)
 
 ```bash
-python user_association_report.py \
-  --access-token YOUR_API_TOKEN \
-  --from-email your@email.com
+python orphan_user_report.py \
+  --access-token YOUR_API_TOKEN
 ```
 
 ### Generate CSV Report
 
 ```bash
-python user_association_report.py \
+python orphan_user_report.py \
   --access-token YOUR_API_TOKEN \
-  --from-email your@email.com \
   --csv
 ```
 
 ### Generate JSON Report
 
 ```bash
-python user_association_report.py \
+python orphan_user_report.py \
   --access-token YOUR_API_TOKEN \
-  --from-email your@email.com \
   --json
 ```
 
@@ -61,9 +58,8 @@ python user_association_report.py \
 By default, the script only reports orphan users. Use `--full-report` to include all users:
 
 ```bash
-python user_association_report.py \
+python orphan_user_report.py \
   --access-token YOUR_API_TOKEN \
-  --from-email your@email.com \
   --full-report \
   --csv
 ```
@@ -73,7 +69,6 @@ python user_association_report.py \
 | Option | Short | Description |
 |--------|-------|-------------|
 | `--access-token` | `-a` | PagerDuty REST API access token (required) |
-| `--from-email` | `-f` | Email address of the requesting user (required) |
 | `--csv` | `-c` | Generate CSV report |
 | `--json` | `-j` | Generate JSON report |
 | `--full-report` | `-r` | Include all users, not just orphans |
@@ -166,6 +161,11 @@ The script uses caching to minimize API calls when processing large accounts:
 * Open incidents are fetched once and indexed by assignee
 
 This makes the script efficient even for accounts with hundreds of users and schedules.
+
+## Changes from Previous Version
+
+* **Removed `--from-email` requirement** - This parameter is no longer needed as the script only performs GET requests
+* **Updated to use `pagerduty` package** - Migrated from deprecated `pdpyras` to the actively maintained `pagerduty` package
 
 ## Related Scripts
 

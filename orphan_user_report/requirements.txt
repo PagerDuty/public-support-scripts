@@ -1,2 +1,1 @@
-pdpyras>=5.0.0
-six >= 1.11.0
+pagerduty >= 1.0

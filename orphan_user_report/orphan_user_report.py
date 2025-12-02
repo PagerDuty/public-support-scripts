@@ -38,7 +38,7 @@ import logging
 import os
 from datetime import datetime
 
-from pdpyras import APISession
+from pagerduty import RestApiV2Client
 
 log = logging.getLogger('orphan_users_report')
 
@@ -49,8 +49,8 @@ class PagerDutyCache:
     Fetches users, schedules, escalation policies, teams, and open incidents once.
     """
 
-    def __init__(self, access_token, from_email):
-        self.session = APISession(access_token, default_from=from_email)
+    def __init__(self, access_token):
+        self.session = RestApiV2Client(access_token)
         self._users = None
         self._schedules = None
         self._escalation_policies = None
@@ -64,7 +64,7 @@ class PagerDutyCache:
         if self._users is None:
             log.info("Fetching all users...")
             print("Fetching all users. This may take a moment...")
-            self._users = list(self.session.iter_all('users'))
+            self._users = self.session.list_all('users')
             log.info("Found %d users", len(self._users))
         return self._users
 
@@ -73,7 +73,7 @@ class PagerDutyCache:
         if self._schedules is None:
             log.info("Fetching all schedules...")
             print("Fetching all schedules. This may take several minutes...")
-            self._schedules = list(self.session.iter_all('schedules'))
+            self._schedules = self.session.list_all('schedules')
             for schedule in self._schedules:
                 schedule['details'] = self.session.rget(schedule.get('self'))
             log.info("Found %d schedules", len(self._schedules))
@@ -84,7 +84,7 @@ class PagerDutyCache:
         if self._escalation_policies is None:
             log.info("Fetching all escalation policies...")
             print("Fetching all escalation policies. This may take a moment...")
-            self._escalation_policies = list(self.session.iter_all('escalation_policies'))
+            self._escalation_policies = self.session.list_all('escalation_policies')
             log.info("Found %d escalation policies", len(self._escalation_policies))
         return self._escalation_policies
 
@@ -93,14 +93,14 @@ class PagerDutyCache:
         if self._teams is None:
             log.info("Fetching all teams...")
             print("Fetching all teams. This may take a moment...")
-            self._teams = list(self.session.iter_all('teams'))
+            self._teams = self.session.list_all('teams')
             log.info("Found %d teams", len(self._teams))
         return self._teams
 
     def get_team_users(self, team_id):
         """Fetch and cache users for a specific team"""
         if team_id not in self._team_users:
-            users = list(self.session.iter_all('users', params={'team_ids[]': team_id}))
+            users = self.session.list_all('users', params={'team_ids[]': team_id})
             self._team_users[team_id] = [u['id'] for u in users]
         return self._team_users[team_id]
 
@@ -401,7 +401,7 @@ def main(args):
     setup_logging(args.verbose)
     log.info("Starting PagerDuty Orphan Users Report")
 
-    cache = PagerDutyCache(args.access_token, args.from_email)
+    cache = PagerDutyCache(args.access_token)
     finder = OrphanUsersFinder(cache)
 
     if args.full_report:
@@ -430,12 +430,6 @@ if __name__ == '__main__':
         '--access-token', '-a',
         help="PagerDuty REST API access token",
         dest='access_token',
-        required=True
-    )
-    parser.add_argument(
-        '--from-email', '-f',
-        help="Email address of the requesting user",
-        dest='from_email',
         required=True
     )
     parser.add_argument(
