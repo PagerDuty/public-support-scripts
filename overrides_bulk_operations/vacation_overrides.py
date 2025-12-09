@@ -73,7 +73,7 @@ def create_overrides():
             }}
         )
         if not create_response.ok:
-            message = "HTTP error: %d"%e.response.status_code
+            message = "HTTP error: %d" % create_response.status_code
             print("Error creating override; "+message)
             continue
         print("Success.")
