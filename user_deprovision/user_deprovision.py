@@ -150,7 +150,7 @@ class DeleteUser(RestApiV2Client):
     def delete_user(self):
         """Delete user from PagerDuty"""
         r = self.delete('users/' + self.user_id)
-        return r.ok
+        return r.is_success
 
     def list_open_incidents(self, additional_params=None):
         """
