@@ -1,0 +1,9 @@
+[project]
+name = "pd-inactive-users-audit"
+version = "0.1.0"
+description = "Scans a PagerDuty account for schedules and escalation policies that reference inactive (deleted) users"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pagerduty>=2.0.0",
+]
