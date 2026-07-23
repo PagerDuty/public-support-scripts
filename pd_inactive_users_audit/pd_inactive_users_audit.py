@@ -201,7 +201,7 @@ def list_v3_schedule_refs(client: "pagerduty.RestApiV2Client") -> List[Dict[str,
 
     while True:
         resp = client.get("/v3/schedules", params=params, headers=V3_SCHEDULE_HEADERS)
-        if not resp.ok:
+        if not resp.is_success:
             raise pagerduty.HttpError(
                 f"Error listing v3 schedules: HTTP {resp.status_code}: {resp.text}",
                 resp,
@@ -235,7 +235,7 @@ def scan_v3_schedules(client: "pagerduty.RestApiV2Client") -> List[Dict[str, Any
     for ref in refs:
         schedule_id = ref.get("id")
         resp = client.get(f"/v3/schedules/{schedule_id}", headers=V3_SCHEDULE_HEADERS)
-        if not resp.ok:
+        if not resp.is_success:
             sys.stderr.write(
                 f"Warning: could not fetch v3 schedule {schedule_id}: "
                 f"HTTP {resp.status_code}\n"
