@@ -5,6 +5,8 @@ pd_inactive_user_audit.py
 Scans a PagerDuty account for:
   1. Schedules whose schedule layers still reference inactive (deleted) users
   2. Escalation policies that directly target inactive (deleted) users
+  3. Shift-based (v3) schedules whose rotation events still assign inactive
+     (deleted) users
 
 "Inactive" here means the user object embedded in the response either:
   - has a "deleted_at" field present (regardless of value), or
@@ -12,6 +14,21 @@ Scans a PagerDuty account for:
 
 This happens when a user has been removed from PagerDuty but still shows up
 as a stale reference inside a schedule layer or escalation rule.
+
+Shift-based (v3) schedules don't expose their rotation/event/user data on the
+list endpoint (GET /v3/schedules only returns id/type/summary), so those must
+be scanned one at a time via GET /v3/schedules/{id}. Deleted users show up as
+a "deleted_at" field on the "user_member" entries under
+rotations[].events[].assignment_strategy.members[], e.g.:
+
+    {
+      "deleted_at": "2026-07-23T02:01:30Z",
+      "type": "user_member",
+      "user_id": "PXXXXXX"
+    }
+
+The v3 Schedules API is early access and requires the
+"X-Early-Access: flexible-schedules-early-access" header on every request.
 
 Requires the official `pagerduty` client library:
     pip install pagerduty
@@ -49,8 +66,8 @@ except ImportError:
 def is_inactive_user(user_obj: Optional[Dict[str, Any]]) -> bool:
     """
     A user reference is considered inactive/deleted if it carries a
-    'deleted_at' field, or if its 'self' link is null. Active users have
-    a populated 'self' URL and no 'deleted_at' field.
+    'deleted_at' field or additionally for v2 schedules if its 'self' link is null. 
+    Active users don't have a 'deleted_at' field.
     """
     if not user_obj:
         return False
@@ -164,6 +181,100 @@ def scan_escalation_policies(client: "pagerduty.RestApiV2Client") -> List[Dict[s
 
 
 # --------------------------------------------------------------------------
+# Shift-based (v3) Schedules
+# --------------------------------------------------------------------------
+
+V3_SCHEDULE_HEADERS = {
+    "Accept": "application/json",
+    "X-Early-Access": "flexible-schedules-early-access",
+}
+
+
+def list_v3_schedule_refs(client: "pagerduty.RestApiV2Client") -> List[Dict[str, Any]]:
+    """
+    GET /v3/schedules, paginated via limit/offset/more (classic pagination).
+    Each entry is just an id/type/summary reference - no rotation or user
+    data is included on the list endpoint.
+    """
+    refs: List[Dict[str, Any]] = []
+    params = {"limit": 100, "offset": 0}
+
+    while True:
+        resp = client.get("/v3/schedules", params=params, headers=V3_SCHEDULE_HEADERS)
+        if not resp.ok:
+            raise pagerduty.HttpError(
+                f"Error listing v3 schedules: HTTP {resp.status_code}: {resp.text}",
+                resp,
+            )
+        data = resp.json()
+        refs.extend(data.get("schedules", []) or [])
+        if not data.get("more"):
+            break
+        params["offset"] += params["limit"]
+
+    return refs
+
+
+def scan_v3_schedules(client: "pagerduty.RestApiV2Client") -> List[Dict[str, Any]]:
+    """
+    For each v3 schedule reference, GET /v3/schedules/{id} and look for
+    inactive (deleted) users among the "user_member" entries in each
+    rotation event's assignment_strategy.members.
+    """
+    findings = []
+
+    try:
+        refs = list_v3_schedule_refs(client)
+    except pagerduty.HttpError as e:
+        status = e.response.status_code if e.response is not None else None
+        if status in (404, 501):
+            # v3 (shift-based) schedules aren't available on this account.
+            return findings
+        raise
+
+    for ref in refs:
+        schedule_id = ref.get("id")
+        resp = client.get(f"/v3/schedules/{schedule_id}", headers=V3_SCHEDULE_HEADERS)
+        if not resp.ok:
+            sys.stderr.write(
+                f"Warning: could not fetch v3 schedule {schedule_id}: "
+                f"HTTP {resp.status_code}\n"
+            )
+            continue
+
+        schedule = resp.json().get("schedule", {}) or {}
+        schedule_name = schedule.get("name")
+        schedule_url = schedule.get("html_url")
+
+        for rotation in schedule.get("rotations", []) or []:
+            for event in rotation.get("events", []) or []:
+                event_name = event.get("name") or event.get("id") or "unnamed event"
+                strategy = event.get("assignment_strategy", {}) or {}
+
+                for member in strategy.get("members", []) or []:
+                    if member.get("type") != "user_member":
+                        continue
+                    # Unlike v2 user objects, v3 members never carry a "self"
+                    # link at all, so the presence of "deleted_at" is the only
+                    # reliable signal here (is_inactive_user()'s "self is None"
+                    # check would misfire on every member).
+                    if "deleted_at" not in member:
+                        continue
+                    findings.append({
+                        "resource_type": "schedule_v3",
+                        "resource_id": schedule_id,
+                        "resource_name": schedule_name,
+                        "resource_url": schedule_url,
+                        "context": f"rotation event: {event_name}",
+                        "user_id": member.get("user_id"),
+                        "user_name": None,
+                        "deleted_at": member.get("deleted_at"),
+                    })
+
+    return findings
+
+
+# --------------------------------------------------------------------------
 # Output
 # --------------------------------------------------------------------------
 
@@ -185,11 +296,19 @@ def print_report(findings: List[Dict[str, Any]]) -> None:
         return
 
     schedules = [f for f in findings if f["resource_type"] == "schedule"]
+    v3_schedules = [f for f in findings if f["resource_type"] == "schedule_v3"]
     policies = [f for f in findings if f["resource_type"] == "escalation_policy"]
 
     if schedules:
         print(f"\n=== Schedules with inactive users ({len(schedules)} findings) ===")
         for f in schedules:
+            print(f"  [{f['resource_id']}] {f['resource_name']}  ({f['context']})"
+                  f"  -> inactive user: {f['user_name'] or f['user_id']} "
+                  f"(deleted_at={f['deleted_at']})")
+
+    if v3_schedules:
+        print(f"\n=== Shift-based (v3) schedules with inactive users ({len(v3_schedules)} findings) ===")
+        for f in v3_schedules:
             print(f"  [{f['resource_id']}] {f['resource_name']}  ({f['context']})"
                   f"  -> inactive user: {f['user_name'] or f['user_id']} "
                   f"(deleted_at={f['deleted_at']})")
@@ -242,7 +361,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--schedules-only",
         action="store_true",
-        help="Only scan schedules, skip escalation policies.",
+        help="Only scan schedules (both classic and shift-based/v3), "
+             "skip escalation policies.",
     )
     parser.add_argument(
         "--policies-only",
@@ -271,6 +391,9 @@ def main() -> None:
         if not args.policies_only:
             print("Scanning schedules...")
             findings.extend(scan_schedules(client))
+
+            print("Scanning shift-based (v3) schedules...")
+            findings.extend(scan_v3_schedules(client))
 
         if not args.schedules_only:
             print("Scanning escalation policies...")
