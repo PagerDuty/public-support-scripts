@@ -5,5 +5,5 @@ description = "Scans a PagerDuty account for schedules and escalation policies t
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pagerduty>=2.0.0",
+    "pagerduty>=7.0",
 ]
