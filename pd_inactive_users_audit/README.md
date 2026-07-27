@@ -13,7 +13,7 @@ This script helps PagerDuty administrators:
 
 ## Requirements
 
-* Python 3.7+
+* Python 3.10+
 * PagerDuty REST API key with read access to:
   * Schedules
   * Escalation Policies
