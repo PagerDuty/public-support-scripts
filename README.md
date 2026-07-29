@@ -41,6 +41,9 @@ organized.
 * [Orphan user report](orphan_user_report): generate a report of users and their
   associations with schedules, escalation policies, teams, and open incidents to
   identify "orphan" users who are not associated with any operational resources.
+* [Inactive Users Audit](pd_inactive_users_audit): scans a PagerDuty account for schedules,
+  shift-based (v3) schedules, and escalation policies that still reference inactive (deleted)
+  users, so stale references can be cleaned up.
 
 ## Howto
 
